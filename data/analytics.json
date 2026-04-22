@@ -1,0 +1,13 @@
+{
+  "redirects": {
+    "total": 0,
+    "bySlug": {},
+    "byDay": {}
+  },
+  "quizCompletions": {
+    "total": 0,
+    "byCountry": {},
+    "byTopResult": {},
+    "byDay": {}
+  }
+}

@@ -1,26 +1,103 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 :root {
+  --ba-teal: #38b1ab;
+  --ba-teal-hover: #2e9a94;
+  --ba-teal-muted: rgba(56, 177, 171, 0.1);
+  --ba-teal-border: rgba(56, 177, 171, 0.35);
+
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0a0a0a;
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: #ffffff;
+  color: var(--foreground);
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
 }
 
 body {
-  background: var(--background);
+  min-height: 100vh;
+  background: #ffffff;
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), sans-serif;
+}
+
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── Quiz slide-in animations ── */
+.question-enter-forward {
+  animation: question-enter-forward 300ms cubic-bezier(0.22, 0.8, 0.22, 1) both;
+}
+
+.question-enter-back {
+  animation: question-enter-back 300ms cubic-bezier(0.22, 0.8, 0.22, 1) both;
+}
+
+@keyframes question-enter-forward {
+  from {
+    opacity: 0;
+    transform: translateX(28px) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
+  }
+}
+
+@keyframes question-enter-back {
+  from {
+    opacity: 0;
+    transform: translateX(-28px) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
+  }
+}
+
+/* ── Option selection confirm bounce ── */
+@keyframes option-confirm {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(0.972); }
+  70%  { transform: scale(1.012); }
+  100% { transform: scale(1); }
+}
+
+.option-confirming {
+  animation: option-confirm 260ms cubic-bezier(0.34, 1.4, 0.64, 1) both;
+}
+
+/* ── Results card staggered reveal ── */
+@keyframes card-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card-reveal {
+  animation: card-reveal 380ms cubic-bezier(0.22, 0.8, 0.22, 1) both;
 }
