@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import Script from 'next/script';
 import './globals.css';
 
 const geistSans = Geist({
@@ -22,6 +23,8 @@ export const metadata: Metadata = {
   icons: { icon: '/favicon.png' },
 };
 
+const GOOGLE_TAG_ID = 'G-KQSGY08M2W';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -29,7 +32,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body>{children}</body>
+      <body>
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_TAG_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GOOGLE_TAG_ID}');
+          `}
+        </Script>
+        {children}
+      </body>
     </html>
   );
 }
