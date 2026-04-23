@@ -1,5 +1,6 @@
 import SiteHeader from '@/components/SiteHeader';
 import { getAnalyticsStatus, readAnalytics } from '@/lib/analytics';
+import { resolveQuizCountry } from '@/lib/geolocation';
 import { links, type LinkSlug } from '@/lib/links';
 import { buildQuestions } from '@/lib/quiz';
 import { budgetRanges } from '@/lib/scoring';
@@ -7,7 +8,259 @@ import { trampolines } from '@/lib/trampolines';
 import CompareAffiliateToggle from '@/components/CompareAffiliateToggle';
 
 const questions = buildQuestions('AU');
+const usQuestions = buildQuestions('US');
 const priorityKeys = ['bounce', 'durability', 'value', 'assembly', 'warranty'] as const;
+
+const scoringSpec = {
+  sourceFiles: {
+    questionDefinitions: 'lib/quiz.ts',
+    scoringEngine: 'lib/scoring.ts',
+    modelPool: 'lib/trampolines.ts',
+    linkMap: 'lib/links.ts',
+    quizPage: 'app/quiz/page.tsx',
+    resultsPage: 'app/results/page.tsx',
+  },
+  answerSchema: {
+    country: ['AU', 'US', 'OTHER'],
+    resolvedCountryRule: 'resolveQuizCountry(country): US stays US; AU and OTHER resolve to AU.',
+    backyardSize: ['small', 'medium', 'large', 'long-narrow', 'not-sure'],
+    standards: ['yes', 'no'],
+    safetyFeatures: ['essential', 'nice-to-have', 'not-important'],
+    springType: ['traditional', 'springless', 'not-sure'],
+    budget: Object.keys(budgetRanges),
+    priorities: {
+      allowed: priorityKeys,
+      maxUsedByScoring: 2,
+    },
+  },
+  scoringFunctionsInOrder: [
+    {
+      name: 'scoreSize',
+      rules: [
+        'backyardSize=not-sure: +12 if fitsYard.medium, else +8 if fitsYard.small, else -20 if fitsYard.large, else -10 if fitsYard.longNarrow, else -20.',
+        'backyardSize=long-narrow: +40 for shape oval or rectangle, -10 for square, -20 for round.',
+        'backyardSize=small/medium/large: +30 if matching fitsYard flag is true, otherwise -100 hard exclusion.',
+      ],
+    },
+    {
+      name: 'scoreStandards',
+      rules: [
+        'standards=no: 0.',
+        'standards=yes and resolved country AU: +20 if meetsAUStandards true, otherwise -50.',
+        'standards=yes and resolved country US: +20 if meetsUSStandards true, otherwise -50.',
+      ],
+    },
+    {
+      name: 'scoreSafety',
+      rules: [
+        'safetyFeatures=essential: +30 if advancedSafety true, otherwise -30.',
+        'safetyFeatures=nice-to-have: +10 if advancedSafety true, otherwise 0.',
+        'safetyFeatures=not-important: 0.',
+      ],
+    },
+    {
+      name: 'scoreSpringType',
+      rules: [
+        'springType=not-sure: 0.',
+        'springType=traditional/springless: +40 if trampoline.springType matches, otherwise -100 hard exclusion.',
+      ],
+    },
+    {
+      name: 'scoreBudget',
+      rules: [
+        'budget=flexible: 0.',
+        'priceFrom within selected min/max budget range: +25.',
+        'priceFrom below selected budget range: 0. There is intentionally no below-budget bonus.',
+        'priceFrom above selected max but <= 1.5x selected max: -30.',
+        'priceFrom above 1.5x selected max: -100 hard exclusion.',
+      ],
+    },
+    {
+      name: 'scorePriorities',
+      rules: [
+        'Use only priorities.slice(0, 2).',
+        'For each selected priority add trampoline.metricScores[priority] * 2.',
+        'Safety is intentionally not a priority option; safety is scored only by safetyFeatures.',
+      ],
+    },
+  ],
+  hardExclusionRules: [
+    'A model is hard excluded before raw scoring if scoreSize <= -100.',
+    'A model is hard excluded before raw scoring if scoreSpringType <= -100.',
+    'A model is hard excluded before raw scoring if scoreBudget <= -100.',
+    'Standards failure is not a hard exclusion in the main scorer; it applies -50 and may still pass if the total remains > 0.',
+  ],
+  normalRanking: [
+    'Eligible models are models from getEligibleTrampolines(country), filtered by availableIn after resolving country.',
+    'rawScore = scoreSize + scoreStandards + scoreSafety + scoreSpringType + scoreBudget + scorePriorities.',
+    'After scoring, keep only models where rawScore > 0.',
+    'Sort by rawScore descending, then priceFrom ascending.',
+    'Return the top 3 after Vuly tiebreak logic.',
+  ],
+  lowSignalFallback: [
+    'If countSignals(answers) <= 1, bypass normal score ranking and use getDiverseRecommendations.',
+    'Signals counted: backyardSize is not not-sure; standards yes; safetyFeatures essential; springType not not-sure; budget not flexible; priorities length > 0.',
+    'Fallback pool removes hard exclusions, removes negative budget fit, removes standards failures when standards=yes.',
+    'Fallback sorts by baseMeritScore descending then priceFrom ascending.',
+    'baseMeritScore = bounce + durability + value + assembly + warranty + 3 if advancedSafety.',
+    'Fallback tries to pick one springless model, one traditional model from a new brand, and then another new-brand model before filling remaining slots.',
+  ],
+  vulyBias: [
+    'Vuly receives no score bonus.',
+    'After normal sorting only: find top Vuly and top non-Vuly.',
+    'If top Vuly rawScore exactly equals top non-Vuly rawScore, promote that Vuly model to #1.',
+    'If Vuly is already ahead, no change. If Vuly trails by any amount, no promotion.',
+    'Low-signal fallback does not call applyVulyBias.',
+  ],
+  recommendedSizeDisplay: [
+    'Single-size models return displaySize.',
+    'Multi-size models choose closest numeric size in trampoline.sizes to target feet.',
+    'Targets: small=8ft, medium=12ft, large=14ft, long-narrow=12ft, not-sure=12ft.',
+  ],
+  resultBehavior: [
+    'On final priorities answer, app/quiz/page.tsx computes recommendations.',
+    'If top result is Vuly and a link exists, it opens that affiliate link in a new tab synchronously, then navigates to /results with encoded answers.',
+    'Results page parses URL params with parseAnswers; invalid params fall back to a retake prompt.',
+    'Results page records one quiz completion through /api/analytics/quiz-completion.',
+    'Retake link points to /quiz/.',
+  ],
+  matchReasonSelection: [
+    'selectMatchReasons returns up to 4 reasons.',
+    'Order: spring type preference, backyard size fit, safety preference, standards compliance, budget fit, selected priorities.',
+    'Priority reason keys map value -> valueForMoney; other priorities map directly where available.',
+  ],
+};
+
+function summarizeQuestions(sourceQuestions: typeof questions) {
+  return sourceQuestions.map((question, index) => ({
+    step: index + 1,
+    id: question.id,
+    type: question.type,
+    maxSelect: question.maxSelect ?? null,
+    title: question.title,
+    subtitle: question.subtitle ?? null,
+    subtitleExtra: question.subtitleExtra ?? null,
+    affiliateLink: question.affiliateLink ?? null,
+    options: question.options.map((option) => ({
+      id: option.id,
+      label: option.label,
+      description: option.description ?? null,
+    })),
+  }));
+}
+
+function summarizeModelPool() {
+  return trampolines.map((trampoline) => ({
+    id: trampoline.id,
+    slug: trampoline.slug,
+    brand: trampoline.brand,
+    displayName: trampoline.displayName,
+    availableIn: trampoline.availableIn,
+    eligibleInResolvedCountry: {
+      AU: trampoline.availableIn.includes(resolveQuizCountry('AU')),
+      US: trampoline.availableIn.includes(resolveQuizCountry('US')),
+      OTHER: trampoline.availableIn.includes(resolveQuizCountry('OTHER')),
+    },
+    isVuly: trampoline.isVuly,
+    springType: trampoline.springType,
+    shape: trampoline.shape,
+    advancedSafety: trampoline.advancedSafety,
+    meetsAUStandards: trampoline.meetsAUStandards,
+    meetsUSStandards: trampoline.meetsUSStandards,
+    priceFrom: trampoline.priceFrom,
+    sizesFt: trampoline.sizes,
+    displaySize: trampoline.displaySize,
+    fitsYard: trampoline.fitsYard,
+    metricScores: trampoline.metricScores,
+    bestFor: trampoline.bestFor,
+    matchReasonKeysPresent: Object.keys(trampoline.matchReasons),
+  }));
+}
+
+function buildLlmQuizAudit() {
+  const linkEntries = Object.entries(links).map(([slug, config]) => ({
+    slug,
+    label: config.label,
+    affiliate: config.affiliate,
+    destination: config.destination,
+  }));
+  const modelPool = summarizeModelPool();
+
+  return JSON.stringify(
+    {
+      artifactPurpose:
+        'Paste this into another LLM to audit the current Bounce Arena quiz logic, country differences, scoring, ranking, model pool, and link coverage. Treat it as machine-readable source-of-truth documentation generated from the current admin render.',
+      generatedAtRuntime: true,
+      quizVersionNotes: [
+        'The old user-type/who-is-it-for step has been removed.',
+        'There are currently 6 questions.',
+        'The safety priority was removed to avoid double-counting safety; safety is scored through safetyFeatures only.',
+        'Vuly bias is tie-break only, not a score boost.',
+        'Below-budget bonus was removed.',
+      ],
+      australiaVsUsQuizDifferences: {
+        countryResolution:
+          'detectCountry returns AU/US/OTHER from localStorage override or Vercel geo cookie. resolveQuizCountry maps US to US and maps AU/OTHER to AU.',
+        questionFlow:
+          'AU and US have the same step IDs, option IDs, order, skip defaults, scoring functions, hard exclusion rules, ranking rules, and priority list.',
+        standardsQuestion: {
+          AU: {
+            title: questions.find((question) => question.id === 'standards')?.title,
+            subtitle: questions.find((question) => question.id === 'standards')?.subtitle,
+            scoringFieldUsedWhenStandardsYes: 'meetsAUStandards',
+          },
+          US: {
+            title: usQuestions.find((question) => question.id === 'standards')?.title,
+            subtitle: usQuestions.find((question) => question.id === 'standards')?.subtitle,
+            scoringFieldUsedWhenStandardsYes: 'meetsUSStandards',
+          },
+        },
+        eligibleModelPoolCounts: {
+          AU: modelPool.filter((model) => model.eligibleInResolvedCountry.AU).length,
+          US: modelPool.filter((model) => model.eligibleInResolvedCountry.US).length,
+          OTHER: modelPool.filter((model) => model.eligibleInResolvedCountry.OTHER).length,
+        },
+        eligibleModelIds: {
+          AU: modelPool.filter((model) => model.eligibleInResolvedCountry.AU).map((model) => model.id),
+          US: modelPool.filter((model) => model.eligibleInResolvedCountry.US).map((model) => model.id),
+          OTHER: modelPool.filter((model) => model.eligibleInResolvedCountry.OTHER).map((model) => model.id),
+        },
+        linkBehavior:
+          'getLink resolves country-specific destinations where available. Vuly links are affiliate links for AU and US. Most non-Vuly product links are AU-only; if a US destination is absent, getLink falls back according to lib/links.ts behavior.',
+      },
+      questionsByCountry: {
+        AU: summarizeQuestions(questions),
+        US: summarizeQuestions(usQuestions),
+      },
+      skipDefaultsInQuizPage: {
+        safetyFeatures: 'nice-to-have',
+        springType: 'not-sure',
+        backyardSize: 'not-sure',
+        standards: 'no',
+        budget: 'flexible',
+        priorities: [],
+      },
+      budgetRanges,
+      scoringSpec,
+      modelPool,
+      redirectAndExternalLinkMap: linkEntries,
+      auditChecklistForLLM: [
+        'Check whether scoring weights overweight or underweight any factor relative to user intent.',
+        'Check whether hard exclusions remove reasonable alternatives.',
+        'Check whether standards scoring is too harsh or too weak for AU vs US.',
+        'Check whether low-signal fallback returns a useful spread across brands/types/prices.',
+        'Check whether Vuly tie-break behavior is limited to exact dead heats.',
+        'Check whether every likely top result has a redirect/link destination.',
+        'Check whether model prices, sizes, AU/US availability, and standards flags look stale or inconsistent.',
+        'Check whether Springfree/Jumpflex/Lifespan/Kahuna/Oz models are disadvantaged by missing metricScores or matchReasons.',
+      ],
+    },
+    null,
+    2,
+  );
+}
+
+const llmQuizAudit = buildLlmQuizAudit();
 
 function yardFitLabel(key: 'small' | 'medium' | 'large' | 'longNarrow') {
   if (key === 'longNarrow') return 'long-narrow';
@@ -245,29 +498,15 @@ export default async function AdminPage() {
 
           <details className="mt-8 rounded-2xl border border-black/[0.07] bg-black/[0.02] p-5">
             <summary className="cursor-pointer list-none font-semibold text-black">
-              Full quiz logic
+              LLM quiz audit snapshot
             </summary>
-            <div className="mt-4 space-y-4 text-sm leading-7 text-black/55">
-              <p>
-                The quiz ranks every eligible trampoline in <code className="rounded bg-black/[0.05] px-1.5 py-0.5 text-xs">lib/trampolines.ts</code>.
-                Core scoring lives in <code className="rounded bg-black/[0.05] px-1.5 py-0.5 text-xs">lib/scoring.ts</code>.
-                Questions are defined in <code className="rounded bg-black/[0.05] px-1.5 py-0.5 rounded text-xs">lib/quiz.ts</code>.
-              </p>
-              <ul className="space-y-2">
-                <li>Country filter: only models available in the resolved country enter the scoring pool.</li>
-                <li>Hard exclusions: size mismatch, spring-type mismatch, and major budget overruns short-circuit the model before ranking.</li>
-                <li>Size scoring: small/medium/large uses the trampoline&apos;s <code className="rounded bg-black/[0.05] px-1.5 py-0.5 text-xs">fitsYard</code> flags. Long-narrow strongly prefers oval and rectangle shapes. Not-sure yard now softly prefers compact or medium-fit models and penalises oversized ones.</li>
-                <li>Standards scoring: only applied when the user says standards matter. AU users check <code className="rounded bg-black/[0.05] px-1.5 py-0.5 text-xs">meetsAUStandards</code>; US users check <code className="rounded bg-black/[0.05] px-1.5 py-0.5 text-xs">meetsUSStandards</code>.</li>
-                <li>Safety scoring: only the dedicated safety question affects safety weighting. There is no separate safety priority any more.</li>
-                <li>Budget scoring: in-range = +25, below budget = 0, moderately above = -30, extreme above = -100.</li>
-                <li>Priority scoring: up to two priorities are used, each contributing <code className="rounded bg-black/[0.05] px-1.5 py-0.5 text-xs">metricScores[priority] × 2</code>.</li>
-                <li>Low-signal fallback: if the user gives almost no signals, the quiz returns a deliberately broader top 3 instead of simply sorting by cheapest.</li>
-                <li>Ranking: passing models are sorted by raw score, then lower <code className="rounded bg-black/[0.05] px-1.5 py-0.5 text-xs">priceFrom</code> on ties.</li>
-                <li>Vuly tiebreak: only on an exact dead heat with the top non-Vuly model, Vuly is promoted to #1.</li>
-                <li>Recommended size display: for multi-size families, the UI picks the closest size to an 8ft small-yard target, 12ft medium-yard target, and 14ft large-yard target.</li>
-                <li>Price syncing: quiz <code className="rounded bg-black/[0.05] px-1.5 py-0.5 text-xs">priceFrom</code> values are refreshed from compare data where a slug-to-model match exists, so the quiz no longer depends only on stale hardcoded prices.</li>
-              </ul>
-            </div>
+            <p className="mt-3 text-sm leading-6 text-black/45">
+              Machine-oriented JSON for auditing the current quiz. It includes AU vs US differences,
+              scoring rules, hard exclusions, ranking, fallback behaviour, model pool inputs, and link coverage.
+            </p>
+            <pre className="mt-4 max-h-[42rem] overflow-auto rounded-2xl border border-black/[0.08] bg-gray-950 p-5 text-[11px] leading-5 text-gray-100">
+              {llmQuizAudit}
+            </pre>
           </details>
         </section>
 

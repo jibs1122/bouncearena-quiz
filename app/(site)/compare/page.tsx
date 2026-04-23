@@ -17,24 +17,29 @@ type GroupedTrampoline = {
 
 const ALL_BRANDS = [...new Set(TRAMPOLINES.map((t) => t.brand))];
 const ALL_SHAPES = [...new Set(TRAMPOLINES.map((t) => t.shape))];
-const MAX_PRICE = Math.max(...TRAMPOLINES.map((t) => t.priceAud ?? 0));
-// Yard slider: 4 m – 15 m (in whole metres)
-const YARD_MIN = 4;
-const YARD_MAX = 15;
+const MIN_PRICE = 0;
+const PRICE_STEP = 100;
+const MAX_PRICE = Math.ceil(Math.max(...TRAMPOLINES.map((t) => t.priceAud ?? 0)) / PRICE_STEP) * PRICE_STEP;
+// Desired trampoline size filter: users usually think in ft, not total yard size.
+const TRAMPOLINE_SIZE_MIN_FT = 4;
+const TRAMPOLINE_SIZE_MAX_FT = 20;
 const CLEARANCE_M = 1.5;
 const AFFILIATE_DISCLOSURE =
   'This page contains affiliate links and we may earn a commission on purchases.';
 
 const BRAND_COLORS: Record<string, string> = {
-  Vuly: 'bg-purple-50 text-purple-700 border-purple-200',
-  Jumpflex: 'bg-orange-50 text-orange-700 border-orange-200',
-  Springfree: 'bg-green-50 text-green-700 border-green-200',
-  'Oz Trampolines': 'bg-blue-50 text-blue-700 border-blue-200',
-  'Jump Star': 'bg-yellow-50 text-yellow-700 border-yellow-200',
+  Vuly: 'bg-[#f15a01]/10 text-[#c44900] border-[#f15a01]/30',
+  Jumpflex: 'bg-[#98c84e]/15 text-black border-[#98c84e]/70',
+  Springfree: 'bg-[#0088CE]/10 text-[#0074AE] border-[#0088CE]/60',
+  'Oz Trampolines': 'bg-[#0066B3]/10 text-[#005999] border-[#0066B3]/30',
+  'Jump Star': 'bg-[#ED1C24]/10 text-[#C9151C] border-[#ED1C24]/30',
+  'Lifespan Kids': 'bg-[#0054A6]/10 text-[#004887] border-[#0054A6]/30',
+  Kahuna: 'bg-[#FF6C11]/10 text-[#B84A00] border-[#FF6C11]/30',
 };
 
 function Tip({ text }: { text: string }) {
   const [pos, setPos] = useState<{ x: number; y: number; placeBelow: boolean } | null>(null);
+  const [isPinned, setIsPinned] = useState(false);
 
   function getTooltipStyle() {
     if (!pos) return undefined;
@@ -59,18 +64,50 @@ function Tip({ text }: { text: string }) {
     } as const;
   }
 
+  function openTooltip(target: HTMLElement, pinned = false) {
+    const r = target.getBoundingClientRect();
+    setPos({
+      x: r.left + r.width / 2,
+      y: r.top,
+      placeBelow: r.top < 80,
+    });
+    setIsPinned(pinned);
+  }
+
   return (
     <span
       className="ml-1 cursor-help inline-block"
       onMouseEnter={(e) => {
-        const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
-        setPos({
-          x: r.left + r.width / 2,
-          y: r.top,
-          placeBelow: r.top < 80,
-        });
+        if (isPinned) return;
+        openTooltip(e.currentTarget as HTMLElement);
       }}
-      onMouseLeave={() => setPos(null)}
+      onMouseLeave={() => {
+        if (!isPinned) setPos(null);
+      }}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (isPinned && pos) {
+          setPos(null);
+          setIsPinned(false);
+          return;
+        }
+        openTooltip(e.currentTarget as HTMLElement, true);
+      }}
+      onKeyDown={(e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (isPinned && pos) {
+          setPos(null);
+          setIsPinned(false);
+          return;
+        }
+        openTooltip(e.currentTarget as HTMLElement, true);
+      }}
+      role="button"
+      tabIndex={0}
+      aria-label={`More info: ${text}`}
+      aria-expanded={Boolean(pos)}
     >
       <span className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-black/10 text-[9px] font-bold text-black/50">?</span>
       {pos && (
@@ -85,13 +122,12 @@ function Tip({ text }: { text: string }) {
   );
 }
 
-function Cell({ val, unit, highlight }: { val: number | string | null | boolean; unit?: string; highlight?: 'high' | 'low' | null }) {
+function Cell({ val, unit }: { val: number | string | null | boolean; unit?: string }) {
   if (val === null || val === undefined || val === '') return <span className="text-black/25">—</span>;
   if (typeof val === 'boolean') {
     return val ? <span className="font-semibold text-emerald-600">✓</span> : <span className="text-black/30">✗</span>;
   }
-  const cls = highlight === 'high' ? 'text-emerald-600 font-semibold' : highlight === 'low' ? 'text-rose-500' : '';
-  return <span className={cls}>{val}{unit ? <span className="text-black/40 text-xs ml-0.5">{unit}</span> : null}</span>;
+  return <span>{val}{unit ? <span className="text-black/40 text-xs ml-0.5">{unit}</span> : null}</span>;
 }
 
 function sizeLabel(t: Trampoline) {
@@ -106,7 +142,30 @@ function formatFeet(valueCm: number): string {
   return `${Number.isInteger(rounded) ? rounded.toFixed(0) : rounded.toFixed(1)} ft`;
 }
 
+function springfreeFamilyModel(model: string): string | null {
+  const match = model.match(/^(Mini|Compact|Medium|Large|Jumbo)\s+(Round|Oval|Square)\s+Trampoline$/i);
+  if (!match) return null;
+
+  return `${match[2]} Trampoline`;
+}
+
+function springfreeSizeLabel(model: string): string | null {
+  const match = model.match(/^(Mini|Compact|Medium|Large|Jumbo)\s+(Round|Oval|Square)\s+Trampoline$/i);
+  if (!match) return null;
+
+  return match[1];
+}
+
 function compareSizeLabel(t: Trampoline): string {
+  if (t.brand === 'Springfree') {
+    const springfreeLabel = springfreeSizeLabel(t.model);
+    const maxDimensionCm = longestFootprintCm(t);
+
+    if (springfreeLabel && maxDimensionCm) {
+      return `${formatFeet(maxDimensionCm)} (${springfreeLabel})`;
+    }
+  }
+
   if (/^[SMLX]+$/i.test(t.size)) {
     if (t.shape === 'Round' && t.overallDiamCm) {
       return `${formatFeet(t.overallDiamCm)} (${t.size})`;
@@ -142,12 +201,51 @@ function longestFootprintCm(t: Trampoline): number | null {
   return t.overallDiamCm ?? t.overallLenCm ?? sizeStringToMaxDimensionCm(t.size);
 }
 
+function cmToFeet(valueCm: number): number {
+  return valueCm / 30.48;
+}
+
+function trampolineSizeFilterLabel(valueFt: number): string {
+  if (valueFt >= TRAMPOLINE_SIZE_MAX_FT) return 'Any';
+
+  const valueM = valueFt * 0.3048;
+  return `Up to ${valueFt} ft (${valueM.toFixed(1)} m)`;
+}
+
+function requiredYardSizeLabel(valueFt: number): string {
+  if (valueFt >= TRAMPOLINE_SIZE_MAX_FT) return '';
+
+  const trampolineM = valueFt * 0.3048;
+  const yardM = trampolineM + CLEARANCE_M * 2;
+  return `Needs about ${yardM.toFixed(1)} m clear yard width including ${CLEARANCE_M} m clearance each side`;
+}
+
+function priceRangePercent(value: number): number {
+  return ((value - MIN_PRICE) / (MAX_PRICE - MIN_PRICE)) * 100;
+}
+
+function variantKey(group: GroupedTrampoline, variant: Trampoline): string {
+  return [
+    group.key,
+    variant.goSlug ?? variant.model,
+    variant.size,
+    variant.overallDiamCm ?? 'd',
+    variant.overallLenCm ?? 'l',
+    variant.overallWidCm ?? 'w',
+  ].join('|');
+}
+
 function productUrl(t: Trampoline, useAffiliate: boolean): string | null {
   if (useAffiliate && t.goSlug) return `/go/${t.goSlug}/`;
   return t.sourceUrl ?? null;
 }
 
 function groupKey(t: Trampoline): string {
+  if (t.brand === 'Springfree') {
+    const familyModel = springfreeFamilyModel(t.model);
+    if (familyModel) return `${t.brand}|${familyModel}`;
+  }
+
   return `${t.brand}|${t.model}`;
 }
 
@@ -161,7 +259,7 @@ function groupRows(rows: Trampoline[]): GroupedTrampoline[] {
       groups.set(key, {
         key,
         brand: row.brand,
-        model: row.model,
+        model: row.brand === 'Springfree' ? (springfreeFamilyModel(row.model) ?? row.model) : row.model,
         shape: row.shape,
         variants: [],
       });
@@ -170,7 +268,14 @@ function groupRows(rows: Trampoline[]): GroupedTrampoline[] {
     groups.get(key)?.variants.push(row);
   }
 
-  return [...groups.values()];
+  return [...groups.values()].map((group) => ({
+    ...group,
+    variants: [...group.variants].sort((a, b) => {
+      const aSize = longestFootprintCm(a) ?? Infinity;
+      const bSize = longestFootprintCm(b) ?? Infinity;
+      return aSize - bSize;
+    }),
+  }));
 }
 
 function formatRange(values: Array<number | null | undefined>, unit: string) {
@@ -191,7 +296,7 @@ function sizeSummary(group: GroupedTrampoline) {
     <div className="flex flex-wrap gap-1.5">
       {group.variants.map((variant) => (
         <span
-          key={`${group.key}|size|${variant.size}`}
+          key={variantKey(group, variant)}
           className="whitespace-nowrap rounded-full border border-black/10 bg-gray-50 px-2 py-0.5 text-[11px] font-medium text-black/60"
         >
           {compareSizeLabel(variant)}
@@ -247,8 +352,9 @@ export default function ComparePage() {
   const [shapes, setShapes] = useState<string[]>([]);
   const [springlessOnly, setSpringlessOnly] = useState(false);
   const [auStdOnly, setAuStdOnly] = useState(false);
+  const [minPrice, setMinPrice] = useState(MIN_PRICE);
   const [maxPrice, setMaxPrice] = useState(MAX_PRICE);
-  const [yardM, setYardM] = useState(YARD_MAX);
+  const [trampolineSizeFt, setTrampolineSizeFt] = useState(TRAMPOLINE_SIZE_MAX_FT);
   const [sortKey, setSortKey] = useState<SortKey>('priceAud');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -273,7 +379,8 @@ export default function ComparePage() {
     });
   }
 
-  const maxFootprintCm = yardM < YARD_MAX ? (yardM - CLEARANCE_M * 2) * 100 : Infinity;
+  const maxFootprintFt =
+    trampolineSizeFt < TRAMPOLINE_SIZE_MAX_FT ? trampolineSizeFt : Infinity;
 
   const filtered = useMemo(() => {
     let rows = TRAMPOLINES.filter((t) => {
@@ -281,10 +388,11 @@ export default function ComparePage() {
       if (shapes.length && !shapes.includes(t.shape)) return false;
       if (springlessOnly && !t.springless) return false;
       if (auStdOnly && !t.meetsAuStd) return false;
+      if (t.priceAud !== null && t.priceAud < minPrice) return false;
       if (t.priceAud !== null && t.priceAud > maxPrice) return false;
-      // Yard filter: use longest dimension
+      // Trampoline size filter: use longest overall dimension, converted to feet.
       const footprint = longestFootprintCm(t);
-      if (footprint !== null && footprint > maxFootprintCm) return false;
+      if (footprint !== null && cmToFeet(footprint) > maxFootprintFt) return false;
       return true;
     });
     rows.sort((a, b) => {
@@ -293,15 +401,9 @@ export default function ComparePage() {
       return sortDir === 'asc' ? (av as number) - (bv as number) : (bv as number) - (av as number);
     });
     return rows;
-  }, [brands, shapes, springlessOnly, auStdOnly, maxPrice, maxFootprintCm, sortKey, sortDir]);
+  }, [brands, shapes, springlessOnly, auStdOnly, minPrice, maxPrice, maxFootprintFt, sortKey, sortDir]);
 
   const grouped = useMemo(() => groupRows(filtered), [filtered]);
-
-  const allWeights = filtered.map((t) => t.maxWeightKg).filter(Boolean) as number[];
-  const maxW = Math.max(...allWeights);
-  const minW = Math.min(...allWeights);
-  const allWarranties = filtered.map((t) => t.warrantyFrameYrs).filter(Boolean) as number[];
-  const maxWar = Math.max(...allWarranties);
 
   function SortTh({ label, k, tip }: { label: string; k: SortKey; tip: string }) {
     const active = sortKey === k;
@@ -321,8 +423,14 @@ export default function ComparePage() {
     ...shapes.map((s) => ({ label: s, clear: () => setShapes((p) => p.filter((x) => x !== s)) })),
     ...(springlessOnly ? [{ label: 'Springless only', clear: () => setSpringlessOnly(false) }] : []),
     ...(auStdOnly ? [{ label: 'AU Standard', clear: () => setAuStdOnly(false) }] : []),
-    ...(maxPrice < MAX_PRICE ? [{ label: `≤ $${maxPrice.toLocaleString()}`, clear: () => setMaxPrice(MAX_PRICE) }] : []),
-    ...(yardM < YARD_MAX ? [{ label: `Yard ≤ ${yardM} m`, clear: () => setYardM(YARD_MAX) }] : []),
+    ...(minPrice > MIN_PRICE || maxPrice < MAX_PRICE ? [{
+      label: `$${minPrice.toLocaleString()}-$${maxPrice.toLocaleString()}`,
+      clear: () => { setMinPrice(MIN_PRICE); setMaxPrice(MAX_PRICE); },
+    }] : []),
+    ...(trampolineSizeFt < TRAMPOLINE_SIZE_MAX_FT ? [{
+      label: `Size ≤ ${trampolineSizeFt} ft`,
+      clear: () => setTrampolineSizeFt(TRAMPOLINE_SIZE_MAX_FT),
+    }] : []),
   ];
 
   return (
@@ -338,71 +446,131 @@ export default function ComparePage() {
       </div>
 
       {/* Filter panel */}
-      <div className="rounded-2xl border border-black/[0.08] bg-gray-50/60 p-5 mb-6 space-y-4">
-        <div>
-          <p className="text-xs font-semibold text-black/40 uppercase tracking-wide mb-2">Brand</p>
-          <div className="flex flex-wrap gap-2">
-            {ALL_BRANDS.map((b) => (
-              <button key={b} onClick={() => setBrands((p) => p.includes(b) ? p.filter((x) => x !== b) : [...p, b])}
-                className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${brands.includes(b) ? 'bg-[#38b1ab] border-[#38b1ab] text-white' : 'border-black/10 bg-white text-black/60 hover:border-[#38b1ab] hover:text-[#38b1ab]'}`}>
-                {b}
-              </button>
-            ))}
+      <div className="mb-6 grid gap-6 rounded-2xl border border-black/[0.08] bg-gray-50/60 p-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
+        <div className="space-y-4">
+          <div>
+            <p className="text-xs font-semibold text-black/40 uppercase tracking-wide mb-2">Brand</p>
+            <div className="flex flex-wrap gap-2">
+              {ALL_BRANDS.map((b) => (
+                <button key={b} onClick={() => setBrands((p) => p.includes(b) ? p.filter((x) => x !== b) : [...p, b])}
+                  className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${brands.includes(b) ? 'bg-[#38b1ab] border-[#38b1ab] text-white' : 'border-black/10 bg-white text-black/60 hover:border-[#38b1ab] hover:text-[#38b1ab]'}`}>
+                  {b}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-x-8 gap-y-4">
+            <div>
+              <p className="text-xs font-semibold text-black/40 uppercase tracking-wide mb-2">Shape</p>
+              <div className="flex flex-wrap gap-2">
+                {ALL_SHAPES.map((s) => (
+                  <button key={s} onClick={() => setShapes((p) => p.includes(s) ? p.filter((x) => x !== s) : [...p, s])}
+                    className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${shapes.includes(s) ? 'bg-[#38b1ab] border-[#38b1ab] text-white' : 'border-black/10 bg-white text-black/60 hover:border-[#38b1ab] hover:text-[#38b1ab]'}`}>
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold text-black/40 uppercase tracking-wide mb-2">Type</p>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { label: 'Springless only', val: springlessOnly, set: setSpringlessOnly },
+                  { label: 'AU Standard certified', val: auStdOnly, set: setAuStdOnly },
+                ].map(({ label, val, set }) => (
+                  <button key={label} onClick={() => set(!val)}
+                    className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${val ? 'bg-[#38b1ab] border-[#38b1ab] text-white' : 'border-black/10 bg-white text-black/60 hover:border-[#38b1ab] hover:text-[#38b1ab]'}`}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-x-8 gap-y-4">
-          <div>
-            <p className="text-xs font-semibold text-black/40 uppercase tracking-wide mb-2">Shape</p>
-            <div className="flex flex-wrap gap-2">
-              {ALL_SHAPES.map((s) => (
-                <button key={s} onClick={() => setShapes((p) => p.includes(s) ? p.filter((x) => x !== s) : [...p, s])}
-                  className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${shapes.includes(s) ? 'bg-[#38b1ab] border-[#38b1ab] text-white' : 'border-black/10 bg-white text-black/60 hover:border-[#38b1ab] hover:text-[#38b1ab]'}`}>
-                  {s}
-                </button>
-              ))}
+        <div className="flex w-full max-w-full flex-col gap-5 lg:pt-0">
+            {/* Price range sliders */}
+            <div>
+              <p className="text-xs font-semibold text-black/40 uppercase tracking-wide mb-2">
+                Price range:{' '}
+                <span className="text-black">
+                  ${minPrice.toLocaleString()}-${maxPrice.toLocaleString()}
+                </span>
+              </p>
+              <div
+                className="relative h-8"
+                style={{
+                  '--min-pct': `${priceRangePercent(minPrice)}%`,
+                  '--max-pct': `${priceRangePercent(maxPrice)}%`,
+                } as React.CSSProperties}
+              >
+                <div className="absolute left-0 right-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-black/10" />
+                <div className="absolute left-[var(--min-pct)] right-[calc(100%-var(--max-pct))] top-1/2 h-1 -translate-y-1/2 rounded-full bg-[#38b1ab]" />
+                <input
+                  aria-label="Minimum price"
+                  type="range"
+                  min={MIN_PRICE}
+                  max={MAX_PRICE}
+                  step={PRICE_STEP}
+                  value={minPrice}
+                  onChange={(e) => setMinPrice(Math.min(Number(e.target.value), maxPrice))}
+                  className="pointer-events-none absolute inset-x-0 top-0 h-8 w-full appearance-none bg-transparent accent-[#38b1ab] [&::-webkit-slider-thumb]:pointer-events-auto [&::-moz-range-thumb]:pointer-events-auto"
+                />
+                <input
+                  aria-label="Maximum price"
+                  type="range"
+                  min={MIN_PRICE}
+                  max={MAX_PRICE}
+                  step={PRICE_STEP}
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(Math.max(Number(e.target.value), minPrice))}
+                  className="pointer-events-none absolute inset-x-0 top-0 h-8 w-full appearance-none bg-transparent accent-[#38b1ab] [&::-webkit-slider-thumb]:pointer-events-auto [&::-moz-range-thumb]:pointer-events-auto"
+                />
+                <div className="absolute -bottom-2 left-0 right-0 flex justify-between text-[10px] text-black/30">
+                  <span>${MIN_PRICE.toLocaleString()}</span>
+                  <span>${MAX_PRICE.toLocaleString()}</span>
+                </div>
+              </div>
             </div>
-          </div>
 
-          <div>
-            <p className="text-xs font-semibold text-black/40 uppercase tracking-wide mb-2">Type</p>
-            <div className="flex flex-wrap gap-2">
-              {[
-                { label: 'Springless only', val: springlessOnly, set: setSpringlessOnly },
-                { label: 'AU Standard certified', val: auStdOnly, set: setAuStdOnly },
-              ].map(({ label, val, set }) => (
-                <button key={label} onClick={() => set(!val)}
-                  className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${val ? 'bg-[#38b1ab] border-[#38b1ab] text-white' : 'border-black/10 bg-white text-black/60 hover:border-[#38b1ab] hover:text-[#38b1ab]'}`}>
-                  {label}
-                </button>
-              ))}
+            {/* Trampoline size slider */}
+            <div>
+              <p className="text-xs font-semibold text-black/40 uppercase tracking-wide mb-1">
+                Trampoline size:{' '}
+                <span className="text-black">{trampolineSizeFilterLabel(trampolineSizeFt)}</span>
+              </p>
+              {trampolineSizeFt < TRAMPOLINE_SIZE_MAX_FT && (
+                <p className="mb-2 min-h-[1rem] text-[11px] text-black/35">
+                  {requiredYardSizeLabel(trampolineSizeFt)}
+                </p>
+              )}
+              <div
+                className="relative h-8"
+                style={{
+                  '--size-pct': `${((trampolineSizeFt - TRAMPOLINE_SIZE_MIN_FT) / (TRAMPOLINE_SIZE_MAX_FT - TRAMPOLINE_SIZE_MIN_FT)) * 100}%`,
+                } as React.CSSProperties}
+              >
+                <div className="absolute left-0 right-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-black/10" />
+                <div className="absolute left-0 right-[calc(100%-var(--size-pct))] top-1/2 h-1 -translate-y-1/2 rounded-full bg-[#38b1ab]" />
+                <input
+                  aria-label="Trampoline size"
+                  type="range"
+                  min={TRAMPOLINE_SIZE_MIN_FT}
+                  max={TRAMPOLINE_SIZE_MAX_FT}
+                  step={1}
+                  value={trampolineSizeFt}
+                  onChange={(e) => setTrampolineSizeFt(Number(e.target.value))}
+                  className="absolute inset-x-0 top-0 h-8 w-full appearance-none bg-transparent accent-[#38b1ab]"
+                />
+                <div className="absolute -bottom-2 left-0 right-0 flex justify-between text-[10px] text-black/30">
+                  <span>{TRAMPOLINE_SIZE_MIN_FT} ft</span>
+                  <span>Any</span>
+                </div>
+              </div>
+              <p className="pt-2 text-[10px] text-black/30">Uses the model&apos;s longest overall dimension.</p>
             </div>
-          </div>
-
-          {/* Price slider */}
-          <div className="w-[240px] max-w-full">
-            <p className="text-xs font-semibold text-black/40 uppercase tracking-wide mb-2">
-              Max price: <span className="text-black">${maxPrice.toLocaleString()}</span>
-            </p>
-            <input type="range" min={400} max={MAX_PRICE} step={100} value={maxPrice}
-              onChange={(e) => setMaxPrice(Number(e.target.value))} className="w-full accent-[#38b1ab]" />
-          </div>
-
-          {/* Yard size slider */}
-          <div className="w-[280px] max-w-full">
-            <p className="text-xs font-semibold text-black/40 uppercase tracking-wide mb-1">
-              Yard size:{' '}
-              <span className="text-black">{yardM < YARD_MAX ? `${yardM} m` : 'Any'}</span>
-            </p>
-            <p className="mb-2 min-h-[1rem] text-[11px] text-black/35">
-              {yardM < YARD_MAX
-                ? `Fits up to ${(yardM - CLEARANCE_M * 2).toFixed(1)} m trampoline`
-                : `Set a yard limit to filter larger models`}
-            </p>
-            <input type="range" min={YARD_MIN} max={YARD_MAX} step={0.5} value={yardM}
-              onChange={(e) => setYardM(Number(e.target.value))} className="w-full accent-[#38b1ab]" />
-            <p className="text-[10px] text-black/30 mt-0.5">Assumes {CLEARANCE_M} m clearance each side</p>
-          </div>
         </div>
       </div>
 
@@ -419,7 +587,7 @@ export default function ComparePage() {
           </button>
         ))}
         {activeFilters.length > 0 && (
-          <button onClick={() => { setBrands([]); setShapes([]); setSpringlessOnly(false); setAuStdOnly(false); setMaxPrice(MAX_PRICE); setYardM(YARD_MAX); }}
+          <button onClick={() => { setBrands([]); setShapes([]); setSpringlessOnly(false); setAuStdOnly(false); setMinPrice(MIN_PRICE); setMaxPrice(MAX_PRICE); setTrampolineSizeFt(TRAMPOLINE_SIZE_MAX_FT); }}
             className="text-xs text-black/40 hover:text-black underline">Clear all</button>
         )}
       </div>
@@ -427,7 +595,7 @@ export default function ComparePage() {
       {/* Table */}
       <div className="overflow-x-auto rounded-2xl border border-black/[0.08] shadow-sm">
         <table className="w-full min-w-[860px] text-sm">
-          <thead className="bg-gray-50 border-b border-black/[0.06]">
+          <thead className="sticky top-0 z-20 bg-gray-50 border-b border-black/[0.06] shadow-[0_1px_0_rgba(0,0,0,0.06)]">
             <tr>
               <th className="sticky left-0 z-10 bg-gray-50 px-4 py-3 text-left text-xs font-semibold text-black/50 uppercase tracking-wide whitespace-nowrap">Model</th>
               <th className="hidden px-4 py-3 text-left text-xs font-semibold text-black/50 uppercase tracking-wide whitespace-nowrap sm:table-cell">Size</th>
@@ -447,17 +615,6 @@ export default function ComparePage() {
             )}
             {grouped.map((group) => {
               const isExpanded = expanded.has(group.key);
-              const weightValues = group.variants.map((variant) => variant.maxWeightKg).filter(Boolean) as number[];
-              const warrantyValues = group.variants.map((variant) => variant.warrantyFrameYrs).filter(Boolean) as number[];
-              const groupMaxWeight = weightValues.length ? Math.max(...weightValues) : null;
-              const groupMinWeight = weightValues.length ? Math.min(...weightValues) : null;
-              const weightHighlight: 'high' | 'low' | null =
-                groupMaxWeight !== null && groupMaxWeight === maxW ? 'high' :
-                groupMinWeight !== null && groupMinWeight === minW ? 'low' :
-                null;
-              const groupMaxWarranty = warrantyValues.length ? Math.max(...warrantyValues) : null;
-              const warHighlight: 'high' | null =
-                groupMaxWarranty !== null && groupMaxWarranty === maxWar ? 'high' : null;
               const brandColor = BRAND_COLORS[group.brand] ?? 'bg-gray-50 text-gray-600 border-gray-200';
               const shopUrl = groupShopUrl(group, useAffiliate);
               const review = groupReview(group);
@@ -500,13 +657,13 @@ export default function ComparePage() {
                     </td>
                     {/* Max weight */}
                     <td className="px-4 py-3">
-                      <Cell val={formatRange(group.variants.map((variant) => variant.maxWeightKg), 'kg')} highlight={weightHighlight} />
+                      <Cell val={formatRange(group.variants.map((variant) => variant.maxWeightKg), 'kg')} />
                     </td>
                     {/* Overall size */}
                     <td className="px-4 py-3 text-black/60">{overallSizeSummary(group)}</td>
                     {/* Frame warranty */}
                     <td className="px-4 py-3">
-                      <Cell val={formatRange(group.variants.map((variant) => variant.warrantyFrameYrs), 'yr')} highlight={warHighlight} />
+                      <Cell val={formatRange(group.variants.map((variant) => variant.warrantyFrameYrs), 'yr')} />
                     </td>
                     {/* AU Std */}
                     <td className="px-4 py-3"><Cell val={allMeetAuStd} /></td>
@@ -534,7 +691,7 @@ export default function ComparePage() {
                                 const variantShopUrl = productUrl(variant, useAffiliate);
 
                                 return (
-                                  <tr key={`${group.key}|variant|${variant.size}`}>
+                                  <tr key={variantKey(group, variant)}>
                                     <td className="py-2.5 pr-4 font-medium text-black/70">{compareSizeLabel(variant)}</td>
                                     <td className="py-2.5 pr-4 text-black/70">
                                       {variant.priceAud ? `$${variant.priceAud.toLocaleString()}` : '—'}

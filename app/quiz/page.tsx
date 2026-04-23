@@ -191,6 +191,18 @@ export default function QuizPage() {
       <CountryDetector country={answers.country} onCountryChange={updateCountry} />
 
       <section className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8">
+        {currentIndex === 0 && (
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold tracking-tight text-black sm:text-4xl">
+              Trampoline quiz - find the right option for your family
+            </h1>
+            <p className="mt-3 max-w-2xl text-base leading-7 text-black/55">
+              Answer 6 quick questions and we&apos;ll match you with the right trampoline for your
+              family — based on your safety priorities, spring preference, backyard size, and budget.
+            </p>
+          </div>
+        )}
+
         {/* Progress row */}
         <div className="mb-5 flex items-center gap-4">
           <div className="flex-1">
@@ -208,16 +220,6 @@ export default function QuizPage() {
           </p>
         )}
 
-        {/* Welcome blurb — only on first question */}
-        {currentIndex === 0 && (
-          <div className="mb-6 rounded-2xl bg-black/[0.025] px-5 py-4">
-            <p className="text-sm leading-7 text-black/55">
-              Answer 6 quick questions and we&apos;ll match you with the right trampoline for your
-              family — based on your safety priorities, spring preference, backyard size, and budget.
-            </p>
-          </div>
-        )}
-
         {/* Question */}
         <div
           key={currentQuestion.id}
@@ -225,6 +227,7 @@ export default function QuizPage() {
         >
           <QuizQuestion
             question={currentQuestion}
+            stepNumber={currentIndex + 1}
             selected={selectedValues(currentQuestion.id)}
             onAnswer={handleAnswer}
             onSkip={handleSkip}

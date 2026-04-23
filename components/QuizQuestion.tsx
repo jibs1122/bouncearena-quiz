@@ -38,6 +38,7 @@ interface QuizQuestionProps {
   onSkip: () => void;
   onSelectionChange?: (values: string[]) => void;
   vulyDisclaimer?: boolean;
+  stepNumber?: number;
 }
 
 export default function QuizQuestion({
@@ -47,6 +48,7 @@ export default function QuizQuestion({
   onSkip,
   onSelectionChange,
   vulyDisclaimer = false,
+  stepNumber,
 }: QuizQuestionProps) {
   const [expanded, setExpanded] = useState(false);
   const [pendingId, setPendingId] = useState<string | null>(null);
@@ -101,9 +103,9 @@ export default function QuizQuestion({
     <div className="mx-auto w-full max-w-2xl">
       {/* Heading */}
       <div className="mb-5">
-        <h1 className="text-2xl font-bold tracking-tight text-black sm:text-3xl leading-snug">
-          {question.title}
-        </h1>
+        <h2 className="text-2xl font-bold tracking-tight text-black sm:text-3xl leading-snug">
+          {stepNumber ? `${stepNumber}. ` : ''}{question.title}
+        </h2>
 
         {question.subtitle && (
           <p className="mt-3 text-base leading-7 text-black/55">{question.subtitle}</p>
