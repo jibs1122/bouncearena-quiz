@@ -205,23 +205,30 @@ function cmToFeet(valueCm: number): number {
   return valueCm / 30.48;
 }
 
-function trampolineSizeFilterLabel(valueFt: number): string {
-  if (valueFt >= TRAMPOLINE_SIZE_MAX_FT) return 'Any';
-
+function formatTrampolineSize(valueFt: number): string {
   const valueM = valueFt * 0.3048;
-  return `Up to ${valueFt} ft (${valueM.toFixed(1)} m)`;
+  return `${valueFt} ft (${valueM.toFixed(1)} m)`;
 }
 
-function requiredYardSizeLabel(valueFt: number): string {
-  if (valueFt >= TRAMPOLINE_SIZE_MAX_FT) return '';
+function trampolineSizeFilterLabel(minFt: number, maxFt: number): string {
+  if (minFt <= TRAMPOLINE_SIZE_MIN_FT && maxFt >= TRAMPOLINE_SIZE_MAX_FT) return 'Any';
+  return `${formatTrampolineSize(minFt)}-${formatTrampolineSize(maxFt)}`;
+}
 
-  const trampolineM = valueFt * 0.3048;
+function requiredYardSizeLabel(maxFt: number): string {
+  if (maxFt >= TRAMPOLINE_SIZE_MAX_FT) return '';
+
+  const trampolineM = maxFt * 0.3048;
   const yardM = trampolineM + CLEARANCE_M * 2;
-  return `Needs about ${yardM.toFixed(1)} m clear yard width including ${CLEARANCE_M} m clearance each side`;
+  return `Largest selected size needs about ${yardM.toFixed(1)} m clear yard width including ${CLEARANCE_M} m clearance each side`;
 }
 
 function priceRangePercent(value: number): number {
   return ((value - MIN_PRICE) / (MAX_PRICE - MIN_PRICE)) * 100;
+}
+
+function trampolineSizeRangePercent(value: number): number {
+  return ((value - TRAMPOLINE_SIZE_MIN_FT) / (TRAMPOLINE_SIZE_MAX_FT - TRAMPOLINE_SIZE_MIN_FT)) * 100;
 }
 
 function variantKey(group: GroupedTrampoline, variant: Trampoline): string {
@@ -354,7 +361,8 @@ export default function ComparePage() {
   const [auStdOnly, setAuStdOnly] = useState(false);
   const [minPrice, setMinPrice] = useState(MIN_PRICE);
   const [maxPrice, setMaxPrice] = useState(MAX_PRICE);
-  const [trampolineSizeFt, setTrampolineSizeFt] = useState(TRAMPOLINE_SIZE_MAX_FT);
+  const [minTrampolineSizeFt, setMinTrampolineSizeFt] = useState(TRAMPOLINE_SIZE_MIN_FT);
+  const [maxTrampolineSizeFt, setMaxTrampolineSizeFt] = useState(TRAMPOLINE_SIZE_MAX_FT);
   const [sortKey, setSortKey] = useState<SortKey>('priceAud');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -379,9 +387,6 @@ export default function ComparePage() {
     });
   }
 
-  const maxFootprintFt =
-    trampolineSizeFt < TRAMPOLINE_SIZE_MAX_FT ? trampolineSizeFt : Infinity;
-
   const filtered = useMemo(() => {
     let rows = TRAMPOLINES.filter((t) => {
       if (brands.length && !brands.includes(t.brand)) return false;
@@ -392,7 +397,10 @@ export default function ComparePage() {
       if (t.priceAud !== null && t.priceAud > maxPrice) return false;
       // Trampoline size filter: use longest overall dimension, converted to feet.
       const footprint = longestFootprintCm(t);
-      if (footprint !== null && cmToFeet(footprint) > maxFootprintFt) return false;
+      if (footprint !== null) {
+        const footprintFt = cmToFeet(footprint);
+        if (footprintFt < minTrampolineSizeFt || footprintFt > maxTrampolineSizeFt) return false;
+      }
       return true;
     });
     rows.sort((a, b) => {
@@ -401,7 +409,7 @@ export default function ComparePage() {
       return sortDir === 'asc' ? (av as number) - (bv as number) : (bv as number) - (av as number);
     });
     return rows;
-  }, [brands, shapes, springlessOnly, auStdOnly, minPrice, maxPrice, maxFootprintFt, sortKey, sortDir]);
+  }, [brands, shapes, springlessOnly, auStdOnly, minPrice, maxPrice, minTrampolineSizeFt, maxTrampolineSizeFt, sortKey, sortDir]);
 
   const grouped = useMemo(() => groupRows(filtered), [filtered]);
 
@@ -427,9 +435,9 @@ export default function ComparePage() {
       label: `$${minPrice.toLocaleString()}-$${maxPrice.toLocaleString()}`,
       clear: () => { setMinPrice(MIN_PRICE); setMaxPrice(MAX_PRICE); },
     }] : []),
-    ...(trampolineSizeFt < TRAMPOLINE_SIZE_MAX_FT ? [{
-      label: `Size ≤ ${trampolineSizeFt} ft`,
-      clear: () => setTrampolineSizeFt(TRAMPOLINE_SIZE_MAX_FT),
+    ...(minTrampolineSizeFt > TRAMPOLINE_SIZE_MIN_FT || maxTrampolineSizeFt < TRAMPOLINE_SIZE_MAX_FT ? [{
+      label: `${minTrampolineSizeFt}-${maxTrampolineSizeFt} ft`,
+      clear: () => { setMinTrampolineSizeFt(TRAMPOLINE_SIZE_MIN_FT); setMaxTrampolineSizeFt(TRAMPOLINE_SIZE_MAX_FT); },
     }] : []),
   ];
 
@@ -460,7 +468,7 @@ export default function ComparePage() {
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-x-8 gap-y-4">
+          <div className="space-y-4">
             <div>
               <p className="text-xs font-semibold text-black/40 uppercase tracking-wide mb-2">Shape</p>
               <div className="flex flex-wrap gap-2">
@@ -539,30 +547,41 @@ export default function ComparePage() {
             <div>
               <p className="text-xs font-semibold text-black/40 uppercase tracking-wide mb-1">
                 Trampoline size:{' '}
-                <span className="text-black">{trampolineSizeFilterLabel(trampolineSizeFt)}</span>
+                <span className="text-black">{trampolineSizeFilterLabel(minTrampolineSizeFt, maxTrampolineSizeFt)}</span>
               </p>
-              {trampolineSizeFt < TRAMPOLINE_SIZE_MAX_FT && (
+              {maxTrampolineSizeFt < TRAMPOLINE_SIZE_MAX_FT && (
                 <p className="mb-2 min-h-[1rem] text-[11px] text-black/35">
-                  {requiredYardSizeLabel(trampolineSizeFt)}
+                  {requiredYardSizeLabel(maxTrampolineSizeFt)}
                 </p>
               )}
               <div
                 className="relative h-8"
                 style={{
-                  '--size-pct': `${((trampolineSizeFt - TRAMPOLINE_SIZE_MIN_FT) / (TRAMPOLINE_SIZE_MAX_FT - TRAMPOLINE_SIZE_MIN_FT)) * 100}%`,
+                  '--min-size-pct': `${trampolineSizeRangePercent(minTrampolineSizeFt)}%`,
+                  '--max-size-pct': `${trampolineSizeRangePercent(maxTrampolineSizeFt)}%`,
                 } as React.CSSProperties}
               >
                 <div className="absolute left-0 right-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-black/10" />
-                <div className="absolute left-0 right-[calc(100%-var(--size-pct))] top-1/2 h-1 -translate-y-1/2 rounded-full bg-[#38b1ab]" />
+                <div className="absolute left-[var(--min-size-pct)] right-[calc(100%-var(--max-size-pct))] top-1/2 h-1 -translate-y-1/2 rounded-full bg-[#38b1ab]" />
                 <input
-                  aria-label="Trampoline size"
+                  aria-label="Minimum trampoline size"
                   type="range"
                   min={TRAMPOLINE_SIZE_MIN_FT}
                   max={TRAMPOLINE_SIZE_MAX_FT}
                   step={1}
-                  value={trampolineSizeFt}
-                  onChange={(e) => setTrampolineSizeFt(Number(e.target.value))}
-                  className="absolute inset-x-0 top-0 h-8 w-full appearance-none bg-transparent accent-[#38b1ab]"
+                  value={minTrampolineSizeFt}
+                  onChange={(e) => setMinTrampolineSizeFt(Math.min(Number(e.target.value), maxTrampolineSizeFt))}
+                  className="pointer-events-none absolute inset-x-0 top-0 h-8 w-full appearance-none bg-transparent accent-[#38b1ab] [&::-webkit-slider-thumb]:pointer-events-auto [&::-moz-range-thumb]:pointer-events-auto"
+                />
+                <input
+                  aria-label="Maximum trampoline size"
+                  type="range"
+                  min={TRAMPOLINE_SIZE_MIN_FT}
+                  max={TRAMPOLINE_SIZE_MAX_FT}
+                  step={1}
+                  value={maxTrampolineSizeFt}
+                  onChange={(e) => setMaxTrampolineSizeFt(Math.max(Number(e.target.value), minTrampolineSizeFt))}
+                  className="pointer-events-none absolute inset-x-0 top-0 h-8 w-full appearance-none bg-transparent accent-[#38b1ab] [&::-webkit-slider-thumb]:pointer-events-auto [&::-moz-range-thumb]:pointer-events-auto"
                 />
                 <div className="absolute -bottom-2 left-0 right-0 flex justify-between text-[10px] text-black/30">
                   <span>{TRAMPOLINE_SIZE_MIN_FT} ft</span>
@@ -587,7 +606,7 @@ export default function ComparePage() {
           </button>
         ))}
         {activeFilters.length > 0 && (
-          <button onClick={() => { setBrands([]); setShapes([]); setSpringlessOnly(false); setAuStdOnly(false); setMinPrice(MIN_PRICE); setMaxPrice(MAX_PRICE); setTrampolineSizeFt(TRAMPOLINE_SIZE_MAX_FT); }}
+          <button onClick={() => { setBrands([]); setShapes([]); setSpringlessOnly(false); setAuStdOnly(false); setMinPrice(MIN_PRICE); setMaxPrice(MAX_PRICE); setMinTrampolineSizeFt(TRAMPOLINE_SIZE_MIN_FT); setMaxTrampolineSizeFt(TRAMPOLINE_SIZE_MAX_FT); }}
             className="text-xs text-black/40 hover:text-black underline">Clear all</button>
         )}
       </div>
