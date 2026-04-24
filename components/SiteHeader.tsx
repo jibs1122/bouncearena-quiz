@@ -17,6 +17,7 @@ type SearchItem = {
 interface SiteHeaderProps {
   active?: NavItem;
   searchItems?: SearchItem[];
+  sticky?: boolean;
 }
 
 const NAV_LINKS: { label: string; href: string; id: NavItem }[] = [
@@ -26,11 +27,11 @@ const NAV_LINKS: { label: string; href: string; id: NavItem }[] = [
   { label: 'BLOG', href: '/blog/', id: 'blog' },
 ];
 
-export default function SiteHeader({ active, searchItems = [] }: SiteHeaderProps) {
+export default function SiteHeader({ active, searchItems = [], sticky = true }: SiteHeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="bg-white border-b border-black/[0.08] sticky top-0 z-40">
+    <header className={`bg-white border-b border-black/[0.08] ${sticky ? 'sticky top-0 z-40' : 'relative z-40'}`}>
       <div className="mx-auto w-full max-w-6xl px-5 py-3 sm:px-8">
         <div className="flex items-center justify-between gap-4 lg:grid lg:grid-cols-[auto_minmax(19rem,32rem)_auto] lg:gap-6">
           <Link

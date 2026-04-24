@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import SiteHeader from '@/components/SiteHeader';
+import { trackOutboundClick } from '@/lib/gtag';
 import { getLink, normalizeCountry } from '@/lib/links';
 import {
   buildSummaryText,
@@ -106,6 +107,7 @@ function ResultCard({
                   href={href}
                   target="_blank"
                   rel="nofollow noopener noreferrer"
+                  onClick={() => trackOutboundClick({ url: href, label: `View on ${rec.brand}`, location: `results_card_rank_${rank}` })}
                   className="inline-flex items-center gap-2 bg-[#38b1ab] text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-[#2e9a94] transition-colors active:scale-95"
                 >
                   View on {rec.brand} →

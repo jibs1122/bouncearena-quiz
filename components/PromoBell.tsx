@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { trackOutboundClick } from '@/lib/gtag';
 
 export default function PromoBell() {
   const [mobileClosed, setMobileClosed] = useState(false);
@@ -24,13 +25,13 @@ export default function PromoBell() {
       <button
         type="button"
         onClick={() => copyCode(code)}
-        className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors ${
+        className={`w-[7.5rem] rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors ${
           active
             ? 'border-[#38b1ab] bg-[#38b1ab] text-white'
             : 'border-black/10 bg-black/[0.03] text-black/65 hover:border-[#38b1ab]/35 hover:text-[#38b1ab]'
         }`}
       >
-        <span className="inline-block min-w-[6.5ch] text-center">{active ? 'Copied' : code}</span>
+        <span className="block text-center">{active ? 'Copied' : code}</span>
       </button>
     );
   }
@@ -57,6 +58,7 @@ export default function PromoBell() {
                   href="https://www.vulyplay.com/aff/100/"
                   target="_blank"
                   rel="nofollow noopener noreferrer"
+                  onClick={() => trackOutboundClick({ url: 'https://www.vulyplay.com/aff/100/', label: 'Click to shop', location: 'promo_pill_desktop' })}
                   className="mt-3 inline-flex items-center rounded-full bg-[#38b1ab] px-3 py-1.5 text-[11px] font-semibold text-white transition-colors hover:bg-[#2e9a94]"
                 >
                   Click to shop
@@ -88,6 +90,7 @@ export default function PromoBell() {
                   href="https://www.vulyplay.com/aff/100/"
                   target="_blank"
                   rel="nofollow noopener noreferrer"
+                  onClick={() => trackOutboundClick({ url: 'https://www.vulyplay.com/aff/100/', label: 'Click to shop', location: 'promo_pill_mobile' })}
                   className="inline-flex items-center rounded-full bg-[#38b1ab] px-3 py-1.5 text-[11px] font-semibold text-white transition-colors hover:bg-[#2e9a94]"
                 >
                   Click to shop

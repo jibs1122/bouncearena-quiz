@@ -1,4 +1,4 @@
-import SiteHeader from '@/components/SiteHeader';
+import SiteHeaderShell from '@/components/SiteHeaderShell';
 import Footer from '@/components/Footer';
 import { getAllPosts } from '@/lib/content';
 
@@ -12,7 +12,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <>
-      <SiteHeader searchItems={searchItems} />
+      <SiteHeaderShell searchItems={searchItems} />
       <main className="min-h-screen">{children}</main>
       <Footer />
     </>

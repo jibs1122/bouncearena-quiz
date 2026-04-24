@@ -354,6 +354,9 @@ function groupReview(group: GroupedTrampoline) {
   return group.variants.find((variant) => variant.reviewSlug || variant.baScore) ?? null;
 }
 
+const TABLE_HEAD_CELL_CLASS =
+  'sticky top-0 z-20 bg-gray-50 px-4 py-3 text-left text-xs font-semibold text-black/50 uppercase tracking-wide whitespace-nowrap shadow-[0_1px_0_rgba(0,0,0,0.06)]';
+
 export default function ComparePage() {
   const [brands, setBrands] = useState<string[]>([]);
   const [shapes, setShapes] = useState<string[]>([]);
@@ -417,7 +420,7 @@ export default function ComparePage() {
     const active = sortKey === k;
     return (
       <th
-        className="whitespace-nowrap cursor-pointer select-none px-4 py-3 text-left text-xs font-semibold text-black/50 uppercase tracking-wide hover:text-black transition-colors"
+        className={`${TABLE_HEAD_CELL_CLASS} cursor-pointer select-none hover:text-black transition-colors`}
         onClick={() => toggleSort(k)}
       >
         {label}<Tip text={tip} />
@@ -614,16 +617,16 @@ export default function ComparePage() {
       {/* Table */}
       <div className="overflow-x-auto rounded-2xl border border-black/[0.08] shadow-sm">
         <table className="w-full min-w-[860px] text-sm">
-          <thead className="sticky top-0 z-20 bg-gray-50 border-b border-black/[0.06] shadow-[0_1px_0_rgba(0,0,0,0.06)]">
+          <thead className="border-b border-black/[0.06]">
             <tr>
-              <th className="sticky left-0 z-10 bg-gray-50 px-4 py-3 text-left text-xs font-semibold text-black/50 uppercase tracking-wide whitespace-nowrap">Model</th>
-              <th className="hidden px-4 py-3 text-left text-xs font-semibold text-black/50 uppercase tracking-wide whitespace-nowrap sm:table-cell">Size</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-black/50 uppercase tracking-wide whitespace-nowrap">Spring type</th>
+              <th className={`${TABLE_HEAD_CELL_CLASS} left-0 z-30`}>Model</th>
+              <th className={`${TABLE_HEAD_CELL_CLASS} hidden sm:table-cell`}>Size</th>
+              <th className={TABLE_HEAD_CELL_CLASS}>Spring type</th>
               <SortTh label="Price" k="priceAud" tip="AUD price. 'from' prices show the model's lowest available size." />
               <SortTh label="Max weight" k="maxWeightKg" tip="Maximum single-user weight rating in kg." />
               <SortTh label="Overall size" k="overallDiamCm" tip="Overall footprint — diameter for round, longest dimension for other shapes. Manufacturers generally recommend 1–2 m clearance on all sides." />
               <SortTh label="Frame warranty" k="warrantyFrameYrs" tip="Manufacturer's frame warranty in years." />
-              <th className="px-4 py-3 text-left text-xs font-semibold text-black/50 uppercase tracking-wide whitespace-nowrap">
+              <th className={TABLE_HEAD_CELL_CLASS}>
                 AU Std<Tip text="Meets AS4989:2015, the Australian trampoline safety standard." />
               </th>
             </tr>

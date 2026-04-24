@@ -1,12 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import CountryDetector from '@/components/CountryDetector';
 import ProgressBar from '@/components/ProgressBar';
 import QuizQuestion from '@/components/QuizQuestion';
 import SiteHeader from '@/components/SiteHeader';
 import { detectCountry, type Country } from '@/lib/geolocation';
+import { trackOutboundClick, trackQuizComplete, trackQuizStart, trackQuizStep } from '@/lib/gtag';
 import { getLink, normalizeCountry } from '@/lib/links';
 import { buildQuestions } from '@/lib/quiz';
 import { encodeAnswers, getRecommendations, type QuizAnswers } from '@/lib/scoring';
@@ -41,6 +42,8 @@ export default function QuizPage() {
   const [direction, setDirection] = useState<'forward' | 'back'>('forward');
   const [ready, setReady] = useState(false);
   const [previewPriorities, setPreviewPriorities] = useState<PriorityId[]>([]);
+  const quizContentRef = useRef<HTMLElement | null>(null);
+  const hasMountedQuestionRef = useRef(false);
 
   const handlePreviewPrioritiesChange = useCallback((vals: string[]) => {
     setPreviewPriorities((current) => {
@@ -59,11 +62,26 @@ export default function QuizPage() {
     const country = detectCountry();
     setAnswers((current) => ({ ...current, country }));
     setReady(true);
+    trackQuizStart(country);
   }, []);
 
   const questions = useMemo(() => buildQuestions(answers.country), [answers.country]);
   const currentQuestion = questions[currentIndex];
   const progress = ((currentIndex + 1) / questions.length) * 100;
+
+  useEffect(() => {
+    if (!ready) return;
+
+    if (!hasMountedQuestionRef.current) {
+      hasMountedQuestionRef.current = true;
+      return;
+    }
+
+    quizContentRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  }, [currentIndex, ready]);
 
   // Compute whether top result is Vuly when on the priorities question.
   // Used to conditionally show the "Opens your top match in a new tab" disclaimer.
@@ -103,11 +121,14 @@ export default function QuizPage() {
     const topResults = getRecommendations(nextAnswers);
     const top = topResults[0];
 
+    trackQuizComplete({ country, topResult: top?.slug ?? null });
+
     // Only open a tab if the top result is Vuly (affiliate).
     // Must stay synchronous in the click handler — no await, no setTimeout.
     if (top?.isVuly) {
       const href = getLink(top.slug, country);
       if (href) {
+        trackOutboundClick({ url: href, label: `View on ${top.brand}`, location: 'quiz_auto_open' });
         window.open(href, '_blank', 'noopener,noreferrer');
       }
     }
@@ -124,6 +145,13 @@ export default function QuizPage() {
     } else {
       (nextAnswers as Record<string, unknown>)[questionId] = value;
     }
+
+    trackQuizStep({
+      stepNumber: currentIndex + 1,
+      questionId,
+      answerValue: Array.isArray(value) ? value.join(',') : value,
+      skipped: false,
+    });
 
     setAnswers(nextAnswers);
 
@@ -147,6 +175,13 @@ export default function QuizPage() {
     } else {
       (nextAnswers as Record<string, unknown>)[questionId] = skipValue;
     }
+
+    trackQuizStep({
+      stepNumber: currentIndex + 1,
+      questionId,
+      answerValue: '(skipped)',
+      skipped: true,
+    });
 
     setAnswers(nextAnswers);
 
@@ -190,7 +225,7 @@ export default function QuizPage() {
       <SiteHeader active="quiz" />
       <CountryDetector country={answers.country} onCountryChange={updateCountry} />
 
-      <section className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8">
+      <section ref={quizContentRef} className="scroll-mt-20 mx-auto w-full max-w-3xl px-5 py-8 sm:px-8">
         {currentIndex === 0 && (
           <div className="mb-6">
             <h1 className="text-3xl font-bold tracking-tight text-black sm:text-4xl">
