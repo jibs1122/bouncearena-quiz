@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | Bounce Arena',
+  title: 'Privacy Policy',
   description: 'Privacy policy for Bounce Arena.',
   alternates: { canonical: 'https://bouncearena.com.au/privacy-policy/' },
 };

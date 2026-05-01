@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import CountryDetector from '@/components/CountryDetector';
+import Footer from '@/components/Footer';
 import ProgressBar from '@/components/ProgressBar';
 import QuizQuestion from '@/components/QuizQuestion';
 import SiteHeader from '@/components/SiteHeader';
@@ -298,6 +299,7 @@ export default function QuizPage() {
 
         </div>
       </section>
+      <Footer />
     </main>
   );
 }

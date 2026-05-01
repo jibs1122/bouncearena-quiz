@@ -1,3 +1,4 @@
+import Footer from '@/components/Footer';
 import SiteHeader from '@/components/SiteHeader';
 import { getAnalyticsStatus, readAnalytics } from '@/lib/analytics';
 import { resolveQuizCountry } from '@/lib/geolocation';
@@ -629,6 +630,7 @@ export default async function AdminPage() {
         </section>
 
       </section>
+      <Footer />
     </main>
   );
 }

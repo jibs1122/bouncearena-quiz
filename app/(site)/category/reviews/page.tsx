@@ -3,7 +3,7 @@ import PostCard from '@/components/PostCard';
 import { getPostsByCategory } from '@/lib/content';
 
 export const metadata: Metadata = {
-  title: 'Trampoline Reviews | Bounce Arena',
+  title: 'Trampoline Reviews',
   description: 'In-depth, unbiased reviews of Australia\'s top trampolines — Vuly, Springfree, JumpFlex and more.',
   alternates: { canonical: 'https://bouncearena.com.au/reviews/' },
 };

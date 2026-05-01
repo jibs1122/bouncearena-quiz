@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Earnings Disclaimer | Bounce Arena',
+  title: 'Earnings Disclaimer',
   description: 'Bounce Arena earnings and affiliate disclosure.',
   alternates: { canonical: 'https://bouncearena.com.au/earnings-disclaimer/' },
 };

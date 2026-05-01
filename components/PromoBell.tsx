@@ -47,7 +47,7 @@ export default function PromoBell() {
               </span>
               <div className="w-[208px] pr-7">
                 <p className="text-sm font-semibold leading-5 text-black">Vuly promo codes</p>
-                <div className="mt-2 flex flex-wrap gap-1.5">
+                <div className="mt-2 flex flex-wrap justify-start gap-1.5">
                   <CopyCodeButton code="BOUNCE15" />
                   <CopyCodeButton code="BOUNCESURGE" />
                 </div>

@@ -43,7 +43,7 @@ export async function generateMetadata(
   const post = getPost(slug);
   if (!post) return {};
   return {
-    title: `${post.title} | Bounce Arena`,
+    title: post.title,
     description: post.description,
     openGraph: {
       title: post.title,

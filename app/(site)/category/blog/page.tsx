@@ -3,7 +3,7 @@ import PostCard from '@/components/PostCard';
 import { getPostsByCategory } from '@/lib/content';
 
 export const metadata: Metadata = {
-  title: 'Trampoline Buying Guides & Tips | Bounce Arena',
+  title: 'Trampoline Buying Guides & Tips',
   description: 'Buying guides, safety tips, and expert advice on choosing the right trampoline for your Australian family.',
   alternates: { canonical: 'https://bouncearena.com.au/category/blog/' },
 };

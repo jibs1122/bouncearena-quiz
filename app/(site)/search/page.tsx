@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { getAllPosts } from '@/lib/content';
 
 export const metadata: Metadata = {
-  title: 'Search | Bounce Arena',
+  title: 'Search',
   description: 'Search trampoline reviews, comparisons, and guides on Bounce Arena.',
   alternates: { canonical: 'https://bouncearena.com.au/search/' },
 };

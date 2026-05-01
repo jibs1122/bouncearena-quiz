@@ -3,7 +3,7 @@ import PostCard from '@/components/PostCard';
 import { getPostsByCategory } from '@/lib/content';
 
 export const metadata: Metadata = {
-  title: 'Trampoline Comparisons | Bounce Arena',
+  title: 'Trampoline Comparisons',
   description: 'Side-by-side comparisons of Australia\'s top trampolines to help you choose the right one for your family.',
   alternates: { canonical: 'https://bouncearena.com.au/comparisons/' },
 };

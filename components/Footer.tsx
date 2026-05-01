@@ -47,6 +47,7 @@ const SOCIAL = [
 const FOOTER_LINKS = [
   { label: 'About Us', href: '/about/' },
   { label: 'Contact', href: '/contact/' },
+  { label: 'Bounce Arena North America', href: 'https://www.bouncearenareviews.com/' },
   { label: 'Earnings Disclaimer', href: '/earnings-disclaimer/' },
   { label: 'Privacy Policy', href: '/privacy-policy/' },
   { label: 'Terms of Use', href: '/terms-of-use/' },
@@ -59,15 +60,27 @@ export default function Footer() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
           {/* Links */}
           <nav className="flex flex-wrap justify-center sm:justify-start gap-x-5 gap-y-2">
-            {FOOTER_LINKS.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                className="text-sm text-black/50 hover:text-black transition-colors"
-              >
-                {l.label}
-              </Link>
-            ))}
+            {FOOTER_LINKS.map((l) =>
+              l.href.startsWith('http') ? (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-black/50 hover:text-black transition-colors"
+                >
+                  {l.label}
+                </a>
+              ) : (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  className="text-sm text-black/50 hover:text-black transition-colors"
+                >
+                  {l.label}
+                </Link>
+              ),
+            )}
           </nav>
 
           {/* Social icons */}

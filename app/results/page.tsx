@@ -4,6 +4,7 @@ import { Suspense, useEffect, useMemo, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import Footer from '@/components/Footer';
 import SiteHeader from '@/components/SiteHeader';
 import { trackOutboundClick } from '@/lib/gtag';
 import { getLink, normalizeCountry } from '@/lib/links';
@@ -251,6 +252,7 @@ function ResultsContent() {
         )}
 
       </section>
+      <Footer />
     </main>
   );
 }
