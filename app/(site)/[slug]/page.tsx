@@ -10,9 +10,25 @@ import ArticleQuizCta from '@/components/ArticleQuizCta';
 import SmartLink from '@/components/SmartLink';
 import YouTubeEmbed from '@/components/YouTubeEmbed';
 
+export const revalidate = 86400;
+
 const YT_RE = /^https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)[^\s]*/gm;
 const QUIZ_BLOCK_RE =
   /### Take the Quiz\s+Our Trampoline Quiz guides you through the key decisions you should make when choosing a trampoline and recommends the best options based on your preferences\.\s+\[Take the Quiz\]\(\/quiz\/?\)/g;
+const MONTHLY_DEALS_SLUG = 'trampoline-deals-sales';
+
+function getCurrentMonthYear(): string {
+  return new Intl.DateTimeFormat('en-AU', {
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'Australia/Melbourne',
+  }).format(new Date());
+}
+
+function getDisplayTitle(post: { slug: string; title: string }): string {
+  if (post.slug !== MONTHLY_DEALS_SLUG) return post.title;
+  return `${post.title} - ${getCurrentMonthYear()}`;
+}
 
 function processContent(content: string): { body: string; hasLeadYoutube: boolean } {
   const firstParaMatch = content.match(/^([^\n]*\n?){0,3}/);
@@ -42,11 +58,12 @@ export async function generateMetadata(
   const { slug } = await params;
   const post = getPost(slug);
   if (!post) return {};
+  const displayTitle = getDisplayTitle(post);
   return {
-    title: post.title,
+    title: displayTitle,
     description: post.description,
     openGraph: {
-      title: post.title,
+      title: displayTitle,
       description: post.description,
       url: `https://bouncearena.com.au/${slug}/`,
       siteName: 'Bounce Arena',
@@ -70,6 +87,7 @@ export default async function PostPage(
   const related = getRelatedPosts(slug, post.category, 3);
   const { body, hasLeadYoutube } = processContent(post.content);
   const showFeaturedImage = Boolean(post.featuredImage && !hasLeadYoutube);
+  const displayTitle = getDisplayTitle(post);
 
   return (
     <article className="mx-auto max-w-3xl px-5 sm:px-8 py-10">
@@ -81,7 +99,7 @@ export default async function PostPage(
           {post.category}
         </Link>
         <span>/</span>
-        <span className="text-black/60 line-clamp-1">{post.title}</span>
+        <span className="text-black/60 line-clamp-1">{displayTitle}</span>
       </nav>
 
       {/* Meta */}
@@ -98,7 +116,7 @@ export default async function PostPage(
       </div>
 
       <h1 className="text-3xl sm:text-4xl font-bold text-black leading-tight mb-6">
-        {post.title}
+        {displayTitle}
       </h1>
 
       {!showFeaturedImage && (
@@ -112,7 +130,7 @@ export default async function PostPage(
         <div className="mb-8">
           <Image
             src={post.featuredImage}
-            alt={post.title}
+            alt={displayTitle}
             width={1400}
             height={788}
             quality={85}
