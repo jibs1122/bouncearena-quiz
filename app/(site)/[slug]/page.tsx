@@ -30,13 +30,18 @@ function getDisplayTitle(post: { slug: string; title: string }): string {
   return `${post.title} - ${getCurrentMonthYear()}`;
 }
 
-function processContent(content: string): { body: string; hasLeadYoutube: boolean } {
+function processContent(content: string): {
+  body: string;
+  hasLeadYoutube: boolean;
+  hasInlineQuizCta: boolean;
+} {
   const firstParaMatch = content.match(/^([^\n]*\n?){0,3}/);
   const firstChunk = firstParaMatch ? firstParaMatch[0] : content.slice(0, 300);
   const hasLeadYoutube = /https?:\/\/(?:www\.)?(?:youtube\.com\/watch|youtu\.be\/)/.test(firstChunk);
   const withYoutube = content.replace(YT_RE, (_, id) => `<YouTubeEmbed id="${id}" />`);
+  const hasInlineQuizCta = withYoutube.match(QUIZ_BLOCK_RE) !== null;
   const body = withYoutube.replace(QUIZ_BLOCK_RE, '<ArticleQuizCta />');
-  return { body, hasLeadYoutube };
+  return { body, hasLeadYoutube, hasInlineQuizCta };
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -85,7 +90,7 @@ export default async function PostPage(
   if (!post) notFound();
 
   const related = getRelatedPosts(slug, post.category, 3);
-  const { body, hasLeadYoutube } = processContent(post.content);
+  const { body, hasLeadYoutube, hasInlineQuizCta } = processContent(post.content);
   const showFeaturedImage = Boolean(post.featuredImage && !hasLeadYoutube);
   const displayTitle = getDisplayTitle(post);
 
@@ -165,7 +170,7 @@ export default async function PostPage(
       </div>
 
       {/* Quiz CTA */}
-      <ArticleQuizCta className="mt-12" />
+      {!hasInlineQuizCta && <ArticleQuizCta className="mt-12" />}
 
       {/* Related posts */}
       {related.length > 0 && (

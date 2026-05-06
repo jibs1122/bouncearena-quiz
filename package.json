@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "refresh:compare-data": "node scripts/refresh-compare-data.mjs"
+    "refresh:compare-data": "node scripts/refresh-compare-data.mjs",
+    "update:trampoline-deals": "node scripts/update-trampoline-deals.mjs"
   },
   "dependencies": {
     "@tailwindcss/typography": "^0.5.19",
