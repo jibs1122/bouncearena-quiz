@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import CountryDetector from '@/components/CountryDetector';
 import Footer from '@/components/Footer';
 import ProgressBar from '@/components/ProgressBar';
 import QuizQuestion from '@/components/QuizQuestion';
@@ -105,10 +104,6 @@ export default function QuizPage() {
     if (questionId === 'priorities') return answers.priorities ?? [];
     const value = answers[questionId as keyof PartialQuizAnswers];
     return typeof value === 'string' ? [value] : [];
-  }
-
-  function updateCountry(country: Country) {
-    setAnswers((current) => ({ ...current, country }));
   }
 
   function goBack() {
@@ -224,7 +219,7 @@ export default function QuizPage() {
   return (
     <main className="min-h-screen bg-white text-black">
       <SiteHeader active="quiz" />
-      <CountryDetector country={answers.country} onCountryChange={updateCountry} />
+
 
       <section ref={quizContentRef} className="scroll-mt-20 mx-auto w-full max-w-3xl px-5 py-8 sm:px-8">
         {currentIndex === 0 && (
