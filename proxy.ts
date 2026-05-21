@@ -2,6 +2,20 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
 const GEO_COOKIE = 'ba_country';
+const SPRINGFREE_AFFILIATE_URL = 'https://t.cfjump.com/59728/t/87128';
+const SPRINGFREE_TRAMPOLINES_AFFILIATE_URL =
+  'https://t.cfjump.com/59728/t/87128?Url=https%3a%2f%2fwww.springfreetrampoline.com.au%2fcollections%2ftrampolines';
+
+function springfreeRedirectForPath(pathname: string): string | null {
+  const normalizedPath = pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
+
+  if (normalizedPath === '/go/springfree') return SPRINGFREE_AFFILIATE_URL;
+  if (normalizedPath === '/go/springfree-trampolines') {
+    return SPRINGFREE_TRAMPOLINES_AFFILIATE_URL;
+  }
+
+  return null;
+}
 
 function setGeoCookie(response: NextResponse, request: NextRequest) {
   if (request.cookies.has(GEO_COOKIE)) return;
@@ -23,6 +37,14 @@ function unauthorizedResponse() {
 }
 
 export function proxy(request: NextRequest) {
+  const springfreeRedirect = springfreeRedirectForPath(request.nextUrl.pathname);
+  if (springfreeRedirect) {
+    return new NextResponse(null, {
+      status: 308,
+      headers: { Location: springfreeRedirect },
+    });
+  }
+
   if (!request.nextUrl.pathname.startsWith('/admin')) {
     const response = NextResponse.next();
     setGeoCookie(response, request);

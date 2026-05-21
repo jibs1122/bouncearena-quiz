@@ -21,7 +21,7 @@ export default function GeoBanner({ country }: GeoBannerProps) {
     const params = new URLSearchParams(window.location.search);
     if (params.has('utm_source') || params.has('utm_medium') || params.has('utm_campaign')) {
       setDismissCookie(1);
-      setVisible(false);
+      window.setTimeout(() => setVisible(false), 0);
     }
   }, []);
 
@@ -41,6 +41,8 @@ export default function GeoBanner({ country }: GeoBannerProps) {
           Looks like you&rsquo;re browsing from {regionLabel}.{' '}
           <a
             href="https://www.bouncearenareviews.com/"
+            target="_blank"
+            rel="noopener noreferrer"
             onClick={dismiss}
             className="font-semibold underline underline-offset-2 hover:no-underline"
           >
@@ -51,10 +53,12 @@ export default function GeoBanner({ country }: GeoBannerProps) {
         <div className="flex shrink-0 items-center gap-2">
           <a
             href="https://www.bouncearenareviews.com/"
+            target="_blank"
+            rel="noopener noreferrer"
             onClick={dismiss}
             className="hidden rounded-full bg-white px-3.5 py-1.5 text-xs font-semibold text-[#38b1ab] transition-colors hover:bg-white/90 sm:block"
           >
-            Visit Reviews site
+            Visit our US &amp; Canada site
           </a>
           <button
             type="button"

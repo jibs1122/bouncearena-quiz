@@ -1,5 +1,12 @@
 import type { Country } from '@/lib/geolocation';
 
+export const SPRINGFREE_AFFILIATE_URL = 'https://t.cfjump.com/59728/t/87128';
+export const SPRINGFREE_GO_URL = 'https://www.bouncearena.com.au/go/springfree';
+export const SPRINGFREE_TRAMPOLINES_AFFILIATE_URL =
+  'https://t.cfjump.com/59728/t/87128?Url=https%3a%2f%2fwww.springfreetrampoline.com.au%2fcollections%2ftrampolines';
+export const SPRINGFREE_TRAMPOLINES_GO_URL =
+  'https://www.bouncearena.com.au/go/springfree-trampolines';
+
 export type LinkSlug =
   // Vuly
   | 'vuly-thunder-2-pro'
@@ -11,6 +18,8 @@ export type LinkSlug =
   | 'vuly-size-guide'
   | 'vuly-buying-guide'
   // Springfree
+  | 'springfree'
+  | 'springfree-trampolines'
   | 'springfree-mini-round'
   | 'springfree-compact-round'
   | 'springfree-medium-round'
@@ -123,61 +132,71 @@ export const links: Record<LinkSlug, LinkConfig> = {
       US: 'https://www.vulyplay.com/aff/100/?url=blog/trampoline-buying-guide',
     },
   },
-  // ─── Springfree (non-affiliate, AU only) ─────────────────────────────────────
+  // ─── Springfree (affiliate, AU only) ─────────────────────────────────────────
+  'springfree': {
+    label: 'Springfree',
+    affiliate: true,
+    destination: { AU: SPRINGFREE_AFFILIATE_URL },
+  },
+  'springfree-trampolines': {
+    label: 'Springfree Trampolines',
+    affiliate: true,
+    destination: { AU: SPRINGFREE_TRAMPOLINES_AFFILIATE_URL },
+  },
   'springfree-mini-round': {
     label: 'Springfree Mini Round',
-    affiliate: false,
-    destination: { AU: 'https://www.springfreetrampoline.com.au/products/mini-round-trampoline' },
+    affiliate: true,
+    destination: { AU: SPRINGFREE_TRAMPOLINES_GO_URL },
   },
   'springfree-compact-round': {
     label: 'Springfree Compact Round',
-    affiliate: false,
-    destination: { AU: 'https://www.springfreetrampoline.com.au/products/compact-round-trampoline' },
+    affiliate: true,
+    destination: { AU: SPRINGFREE_TRAMPOLINES_GO_URL },
   },
   'springfree-medium-round': {
     label: 'Springfree Medium Round',
-    affiliate: false,
-    destination: { AU: 'https://www.springfreetrampoline.com.au/products/medium-round-trampoline' },
+    affiliate: true,
+    destination: { AU: SPRINGFREE_TRAMPOLINES_GO_URL },
   },
   'springfree-jumbo-round': {
     label: 'Springfree Jumbo Round',
-    affiliate: false,
-    destination: { AU: 'https://www.springfreetrampoline.com.au/products/jumbo-round-trampoline' },
+    affiliate: true,
+    destination: { AU: SPRINGFREE_TRAMPOLINES_GO_URL },
   },
   'springfree-compact-oval': {
     label: 'Springfree Compact Oval',
-    affiliate: false,
-    destination: { AU: 'https://www.springfreetrampoline.com.au/products/compact-oval-trampoline' },
+    affiliate: true,
+    destination: { AU: SPRINGFREE_TRAMPOLINES_GO_URL },
   },
   'springfree-medium-oval': {
     label: 'Springfree Medium Oval',
-    affiliate: false,
-    destination: { AU: 'https://www.springfreetrampoline.com.au/products/medium-oval-trampoline' },
+    affiliate: true,
+    destination: { AU: SPRINGFREE_TRAMPOLINES_GO_URL },
   },
   'springfree-large-oval': {
     label: 'Springfree Large Oval',
-    affiliate: false,
-    destination: { AU: 'https://www.springfreetrampoline.com.au/products/large-oval-trampoline' },
+    affiliate: true,
+    destination: { AU: SPRINGFREE_TRAMPOLINES_GO_URL },
   },
   'springfree-jumbo-oval': {
     label: 'Springfree Jumbo Oval',
-    affiliate: false,
-    destination: { AU: 'https://www.springfreetrampoline.com.au/products/jumbo-oval-trampoline' },
+    affiliate: true,
+    destination: { AU: SPRINGFREE_TRAMPOLINES_GO_URL },
   },
   'springfree-medium-square': {
     label: 'Springfree Medium Square',
-    affiliate: false,
-    destination: { AU: 'https://www.springfreetrampoline.com.au/products/medium-square-trampoline' },
+    affiliate: true,
+    destination: { AU: SPRINGFREE_TRAMPOLINES_GO_URL },
   },
   'springfree-large-square': {
     label: 'Springfree Large Square',
-    affiliate: false,
-    destination: { AU: 'https://www.springfreetrampoline.com.au/products/large-square-trampoline' },
+    affiliate: true,
+    destination: { AU: SPRINGFREE_TRAMPOLINES_GO_URL },
   },
   'springfree-jumbo-square': {
     label: 'Springfree Jumbo Square',
-    affiliate: false,
-    destination: { AU: 'https://www.springfreetrampoline.com.au/products/jumbo-square-trampoline' },
+    affiliate: true,
+    destination: { AU: SPRINGFREE_TRAMPOLINES_GO_URL },
   },
   // ─── Jumpflex (non-affiliate, AU only) ───────────────────────────────────────
   'jumpflex-flex-10ft': {
@@ -291,4 +310,8 @@ export function getLink(slug: string, country?: Country | null): string | null {
   const resolvedCountry = normalizeCountry(country);
   if (resolvedCountry === 'US') return config.destination.US ?? null;
   return config.destination.AU;
+}
+
+export function isAffiliateLink(slug: string): boolean {
+  return links[slug as LinkSlug]?.affiliate ?? false;
 }

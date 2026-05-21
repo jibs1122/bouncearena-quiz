@@ -37,7 +37,7 @@ interface QuizQuestionProps {
   onAnswer: (value: string | string[]) => void;
   onSkip: () => void;
   onSelectionChange?: (values: string[]) => void;
-  vulyDisclaimer?: boolean;
+  newTabDisclaimer?: boolean;
   stepNumber?: number;
 }
 
@@ -47,7 +47,7 @@ export default function QuizQuestion({
   onAnswer,
   onSkip,
   onSelectionChange,
-  vulyDisclaimer = false,
+  newTabDisclaimer = false,
   stepNumber,
 }: QuizQuestionProps) {
   const [expanded, setExpanded] = useState(false);
@@ -55,16 +55,20 @@ export default function QuizQuestion({
   const [localSelected, setLocalSelected] = useState<string[]>(selected);
 
   useEffect(() => {
-    setLocalSelected((current) => {
-      if (
-        current.length === selected.length &&
-        current.every((value, index) => value === selected[index])
-      ) {
-        return current;
-      }
+    const syncTimer = window.setTimeout(() => {
+      setLocalSelected((current) => {
+        if (
+          current.length === selected.length &&
+          current.every((value, index) => value === selected[index])
+        ) {
+          return current;
+        }
 
-      return selected;
-    });
+        return selected;
+      });
+    }, 0);
+
+    return () => window.clearTimeout(syncTimer);
   }, [selected]);
 
   useEffect(() => {
@@ -277,7 +281,7 @@ export default function QuizQuestion({
               </button>
             </div>
           </div>
-          {vulyDisclaimer && (
+          {newTabDisclaimer && (
             <p className="text-xs text-black/35 text-right">Opens your top match in a new tab</p>
           )}
         </div>

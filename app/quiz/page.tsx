@@ -5,10 +5,11 @@ import { useRouter } from 'next/navigation';
 import Footer from '@/components/Footer';
 import ProgressBar from '@/components/ProgressBar';
 import QuizQuestion from '@/components/QuizQuestion';
+import GeoBannerAuto from '@/components/GeoBannerAuto';
 import SiteHeader from '@/components/SiteHeader';
 import { detectCountry, type Country } from '@/lib/geolocation';
 import { trackOutboundClick, trackQuizComplete, trackQuizStart, trackQuizStep } from '@/lib/gtag';
-import { getLink, normalizeCountry } from '@/lib/links';
+import { getLink, isAffiliateLink, normalizeCountry } from '@/lib/links';
 import { buildQuestions } from '@/lib/quiz';
 import { encodeAnswers, getRecommendations, type QuizAnswers } from '@/lib/scoring';
 import type { PriorityId } from '@/lib/trampolines';
@@ -60,9 +61,13 @@ export default function QuizPage() {
 
   useEffect(() => {
     const country = detectCountry();
-    setAnswers((current) => ({ ...current, country }));
-    setReady(true);
+    const readyTimer = window.setTimeout(() => {
+      setAnswers((current) => ({ ...current, country }));
+      setReady(true);
+    }, 0);
     trackQuizStart(country);
+
+    return () => window.clearTimeout(readyTimer);
   }, []);
 
   const questions = useMemo(() => buildQuestions(answers.country), [answers.country]);
@@ -83,9 +88,9 @@ export default function QuizPage() {
     });
   }, [currentIndex, ready]);
 
-  // Compute whether top result is Vuly when on the priorities question.
+  // Compute whether the top result will auto-open when on the priorities question.
   // Used to conditionally show the "Opens your top match in a new tab" disclaimer.
-  const topResultIsVuly = useMemo(() => {
+  const topResultAutoOpens = useMemo(() => {
     if (currentQuestion.id !== 'priorities') return false;
     if (
       !answers.backyardSize ||
@@ -97,7 +102,7 @@ export default function QuizPage() {
       return false;
     const preview = { ...answers, priorities: previewPriorities } as QuizAnswers;
     const top = getRecommendations(preview)[0];
-    return top?.isVuly ?? false;
+    return Boolean(top && isAffiliateLink(top.slug) && getLink(top.slug, answers.country));
   }, [answers, previewPriorities, currentQuestion.id]);
 
   function selectedValues(questionId: string): string[] {
@@ -119,9 +124,9 @@ export default function QuizPage() {
 
     trackQuizComplete({ country, topResult: top?.slug ?? null });
 
-    // Only open a tab if the top result is Vuly (affiliate).
+    // Only open a tab if the top result is an affiliate recommendation.
     // Must stay synchronous in the click handler — no await, no setTimeout.
-    if (top?.isVuly) {
+    if (top && isAffiliateLink(top.slug)) {
       const href = getLink(top.slug, country);
       if (href) {
         trackOutboundClick({ url: href, label: `View on ${top.brand}`, location: 'quiz_auto_open' });
@@ -218,6 +223,7 @@ export default function QuizPage() {
 
   return (
     <main className="min-h-screen bg-white text-black">
+      <GeoBannerAuto />
       <SiteHeader active="quiz" />
 
 
@@ -267,7 +273,7 @@ export default function QuizPage() {
                 ? handlePreviewPrioritiesChange
                 : undefined
             }
-            vulyDisclaimer={topResultIsVuly}
+            newTabDisclaimer={topResultAutoOpens}
           />
         </div>
 

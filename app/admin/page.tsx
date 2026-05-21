@@ -120,7 +120,7 @@ const scoringSpec = {
   ],
   resultBehavior: [
     'On final priorities answer, app/quiz/page.tsx computes recommendations.',
-    'If top result is Vuly and a link exists, it opens that affiliate link in a new tab synchronously, then navigates to /results with encoded answers.',
+    'If the top result is an affiliate recommendation and a link exists, it opens that affiliate link in a new tab synchronously, then navigates to /results with encoded answers.',
     'Results page parses URL params with parseAnswers; invalid params fall back to a retake prompt.',
     'Results page records one quiz completion through /api/analytics/quiz-completion.',
     'Retake link points to /quiz/.',
@@ -227,7 +227,7 @@ function buildLlmQuizAudit() {
           OTHER: modelPool.filter((model) => model.eligibleInResolvedCountry.OTHER).map((model) => model.id),
         },
         linkBehavior:
-          'getLink resolves country-specific destinations where available. Vuly links are affiliate links for AU and US. Most non-Vuly product links are AU-only; if a US destination is absent, getLink falls back according to lib/links.ts behavior.',
+          'getLink resolves country-specific destinations where available. Vuly links are affiliate links for AU and US. Springfree links are affiliate links for AU. Most other product links are AU-only; if a US destination is absent, getLink falls back according to lib/links.ts behavior.',
       },
       questionsByCountry: {
         AU: summarizeQuestions(questions),
@@ -414,7 +414,7 @@ export default async function AdminPage() {
         {/* Compare table settings */}
         <section className="rounded-3xl border border-black/[0.08] bg-white p-6">
           <h2 className="text-xl font-bold mb-1">Compare table settings</h2>
-          <p className="text-sm text-black/50 mb-5">Controls how "View best price" links behave on the Compare page.</p>
+          <p className="text-sm text-black/50 mb-5">Controls how &quot;View best price&quot; links behave on the Compare page.</p>
           <CompareAffiliateToggle />
         </section>
 

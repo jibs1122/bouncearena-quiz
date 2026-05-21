@@ -6,8 +6,8 @@ type SmartLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
   href?: string;
 };
 
-function isExternalHref(href: string): boolean {
-  return /^https?:\/\//i.test(href);
+function opensOffSite(href: string): boolean {
+  return /^https?:\/\//i.test(href) || href === '/go' || href.startsWith('/go/');
 }
 
 export default function SmartLink({ href = '', children, ...props }: SmartLinkProps) {
@@ -15,7 +15,7 @@ export default function SmartLink({ href = '', children, ...props }: SmartLinkPr
     return <a {...props}>{children}</a>;
   }
 
-  if (isExternalHref(href)) {
+  if (opensOffSite(href)) {
     return (
       <a
         {...props}

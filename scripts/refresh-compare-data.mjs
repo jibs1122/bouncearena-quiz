@@ -12,6 +12,8 @@ const dataFile = path.join(rootDir, 'data', 'trampolines.ts');
 const SHEET_CSV_URL =
   process.env.COMPARE_SHEET_CSV_URL ||
   'https://docs.google.com/spreadsheets/d/1CLjH67Sf9o2diBMUwiG9zmkhs47N90GmL4LxQ6TYsZk/export?format=csv';
+const SPRINGFREE_TRAMPOLINES_GO_URL =
+  'https://www.bouncearena.com.au/go/springfree-trampolines';
 
 function parseCsv(input) {
   const rows = [];
@@ -190,7 +192,11 @@ async function main() {
       const fromPrice = readNullableNumber(entry.model_from_price_aud);
       const rawSourceUrl = pickSourceUrl(entry.source_urls) ?? enrichment?.sourceUrl ?? null;
       const sourceUrl =
-        brand === 'Vuly' ? formatVulyAffiliateUrl(rawSourceUrl) : rawSourceUrl;
+        brand === 'Springfree'
+          ? SPRINGFREE_TRAMPOLINES_GO_URL
+          : brand === 'Vuly'
+            ? formatVulyAffiliateUrl(rawSourceUrl)
+            : rawSourceUrl;
       const springSystem = readNullableString(entry.spring_system);
       const auStdDetail =
         readNullableString(entry.au_standard_details) ??
@@ -231,7 +237,7 @@ async function main() {
         reviewSlug: enrichment?.reviewSlug ?? null,
         baScore: enrichment?.baScore ?? null,
         sourceUrl,
-        goSlug: enrichment?.goSlug ?? null,
+        goSlug: brand === 'Springfree' ? 'springfree-trampolines' : enrichment?.goSlug ?? null,
       };
     });
 

@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { getClientIp, isInternalTraffic, trackRedirectClick } from '@/lib/analytics';
-import { getLink } from '@/lib/links';
+import { getLink, SPRINGFREE_TRAMPOLINES_AFFILIATE_URL } from '@/lib/links';
 import type { Country } from '@/lib/geolocation';
 
 export async function GET(request: NextRequest, context: RouteContext<'/go/[slug]'>) {
@@ -17,5 +17,12 @@ export async function GET(request: NextRequest, context: RouteContext<'/go/[slug
     void trackRedirectClick(slug);
   }
 
-  return Response.redirect(destination, 302);
+  if (slug === 'springfree-trampolines') {
+    return new Response(null, {
+      status: 308,
+      headers: { Location: SPRINGFREE_TRAMPOLINES_AFFILIATE_URL },
+    });
+  }
+
+  return Response.redirect(destination, slug === 'springfree' ? 308 : 302);
 }

@@ -7,7 +7,7 @@ import { useSearchParams } from 'next/navigation';
 import Footer from '@/components/Footer';
 import SiteHeader from '@/components/SiteHeader';
 import { trackOutboundClick } from '@/lib/gtag';
-import { getLink, normalizeCountry } from '@/lib/links';
+import { getLink, isAffiliateLink, normalizeCountry } from '@/lib/links';
 import {
   buildSummaryText,
   getRecommendations,
@@ -135,27 +135,11 @@ function ResultsContent() {
     [answers],
   );
 
-  if (!answers) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-white px-5">
-        <div className="max-w-md rounded-3xl border border-black/[0.08] p-8 text-center">
-          <h1 className="text-2xl font-bold text-black">Quiz answers are missing</h1>
-          <p className="mt-3 text-black/50 leading-7">
-            Head back and complete the quiz so we can find your best matches.
-          </p>
-          <Link
-            href="/quiz/"
-            className="mt-6 inline-flex rounded-xl bg-[#38b1ab] px-6 py-3 text-sm font-semibold text-white hover:bg-[#2e9a94] transition-colors"
-          >
-            Retake the quiz
-          </Link>
-        </div>
-      </main>
-    );
-  }
-
-  const resolvedCountry = normalizeCountry(answers.country);
+  const resolvedCountry = normalizeCountry(answers?.country);
   const queryKey = searchParams.toString();
+  const hasAffiliateRecommendations = recommendations.some(
+    (rec) => isAffiliateLink(rec.slug) && getLink(rec.slug, resolvedCountry),
+  );
 
   useEffect(() => {
     if (trackedRef.current || !answers) return;
@@ -185,6 +169,25 @@ function ResultsContent() {
     });
   }, [answers, queryKey, recommendations, resolvedCountry]);
 
+  if (!answers) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-white px-5">
+        <div className="max-w-md rounded-3xl border border-black/[0.08] p-8 text-center">
+          <h1 className="text-2xl font-bold text-black">Quiz answers are missing</h1>
+          <p className="mt-3 text-black/50 leading-7">
+            Head back and complete the quiz so we can find your best matches.
+          </p>
+          <Link
+            href="/quiz/"
+            className="mt-6 inline-flex rounded-xl bg-[#38b1ab] px-6 py-3 text-sm font-semibold text-white hover:bg-[#2e9a94] transition-colors"
+          >
+            Retake the quiz
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-white text-black">
       <SiteHeader active="quiz" />
@@ -204,6 +207,11 @@ function ResultsContent() {
           <p className="mt-3 text-base leading-7 text-black/50 max-w-xl">
             {buildSummaryText(answers)}
           </p>
+          {hasAffiliateRecommendations && (
+            <p className="mt-3 text-xs text-black/30">
+              This page contains affiliate links and we may earn a commission on purchases.
+            </p>
+          )}
         </div>
 
         {/* No results */}
