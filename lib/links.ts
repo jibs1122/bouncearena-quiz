@@ -6,6 +6,8 @@ export const SPRINGFREE_TRAMPOLINES_AFFILIATE_URL =
   'https://t.cfjump.com/59728/t/87128?Url=https%3a%2f%2fwww.springfreetrampoline.com.au%2fcollections%2ftrampolines';
 export const SPRINGFREE_TRAMPOLINES_GO_URL =
   'https://www.bouncearena.com.au/go/springfree-trampolines';
+export const SPRINGFREE_MEDIUM_ROUND_GO_URL =
+  'https://www.bouncearena.com.au/go/springfree-medium-round';
 
 export type LinkSlug =
   // Vuly
@@ -156,7 +158,7 @@ export const links: Record<LinkSlug, LinkConfig> = {
   'springfree-medium-round': {
     label: 'Springfree Medium Round',
     affiliate: true,
-    destination: { AU: SPRINGFREE_TRAMPOLINES_GO_URL },
+    destination: { AU: SPRINGFREE_MEDIUM_ROUND_GO_URL },
   },
   'springfree-jumbo-round': {
     label: 'Springfree Jumbo Round',

@@ -11,6 +11,8 @@ const SPRINGFREE_TRAMPOLINE_SPACE_AFFILIATE_URL =
   'https://t.cfjump.com/59728/t/87128?Url=https%3a%2f%2fwww.springfreetrampoline.com.au%2fblogs%2fbeyond-the-bounce%2fhow-much-space-do-you-need-for-a-trampoline';
 const SPRINGFREE_TRAMPOLINE_STANDARDS_AFFILIATE_URL =
   'https://t.cfjump.com/59728/t/87128?Url=https%3a%2f%2fwww.springfreetrampoline.com.au%2fpages%2ftrampoline-standards';
+const SPRINGFREE_MEDIUM_ROUND_AFFILIATE_URL =
+  'https://t.cfjump.com/59728/t/87128?Url=https%3a%2f%2fwww.springfreetrampoline.com.au%2fproducts%2fexclusive-round-bundles%3fvariant%3d52174104297840';
 
 function springfreeRedirectForPath(pathname: string): string | null {
   const normalizedPath = pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
@@ -27,6 +29,9 @@ function springfreeRedirectForPath(pathname: string): string | null {
   }
   if (normalizedPath === '/go/trampoline-standards') {
     return SPRINGFREE_TRAMPOLINE_STANDARDS_AFFILIATE_URL;
+  }
+  if (normalizedPath === '/go/springfree-medium-round') {
+    return SPRINGFREE_MEDIUM_ROUND_AFFILIATE_URL;
   }
 
   return null;
