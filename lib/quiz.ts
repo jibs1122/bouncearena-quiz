@@ -8,12 +8,22 @@ export function buildQuestions(country: Country): Question[] {
   const standardsTitle =
     resolvedCountry === 'US'
       ? 'Is it important to you that your trampoline meets ASTM safety standards?'
-      : 'Is it important to you that your trampoline meets the Australian Trampoline Standards (AS 4989:2015)?';
+      : 'Is it important to you that your trampoline meets the Australian Trampoline Standards?';
 
   const standardsSubtitle =
     resolvedCountry === 'US'
       ? 'ASTM International standards set widely used safety and durability benchmarks for recreational trampolines, covering design, padding, warning labels, and test methods.'
-      : 'Standards Australia sets voluntary safety and durability guidelines for recreational trampolines covering design, construction, safety padding, warning labels, and testing methods.';
+      : undefined;
+
+  const standardsLinkedSubtitle =
+    resolvedCountry === 'US'
+      ? undefined
+      : {
+          text: 'Australian Trampoline Standard AS 4989:2015',
+          href: '/go/trampoline-standards/',
+          suffix:
+            ' is set by Standards Australia and covers voluntary safety and durability guidelines for recreational trampolines covering design, construction, safety padding, warning labels, and testing methods.',
+        };
 
   return [
     // Q1 — Safety features
@@ -24,11 +34,12 @@ export function buildQuestions(country: Country): Question[] {
         'Advanced features include curved safety poles that angle away from jumpers, springs positioned outside the enclosure, and the frame sitting away from the jumping area.',
       subtitleExtra:
         'If you want to learn more about trampoline safety before answering, we recommend this guide:',
-      questionImage: '/images/trampoline-safety-features.png',
       type: 'single',
       affiliateLink: {
-        text: 'Trampoline safety guide by Vuly (opens in new tab)',
+        text: 'Trampoline safety guide by Vuly',
         href: getLink('vuly-safety-guide', resolvedCountry) ?? 'https://www.vulyplay.com/aff/100/?url=blog/trampoline-safety',
+        suffix: ' (opens in new tab)',
+        showArrow: false,
       },
       options: [
         {
@@ -54,7 +65,14 @@ export function buildQuestions(country: Country): Question[] {
       id: 'springType',
       title: 'What type of spring system do you prefer?',
       subtitle: 'Choose the system you want, or let the quiz compare both.',
+      subtitleExtra: 'Check out:',
       type: 'single',
+      affiliateLink: {
+        text: 'Spring vs. Springless Trampolines (An Honest Comparison)',
+        href: '/go/spring-vs-springless',
+        suffix: ' (opens in new tab)',
+        showArrow: false,
+      },
       cardLayout: true,
       options: [
         {
@@ -87,11 +105,20 @@ export function buildQuestions(country: Country): Question[] {
       title: 'What size is your backyard?',
       subtitle:
         'We use this to prefer trampolines that actually fit your space. Allow at least 1 metre of clearance on all sides between the trampoline and fences, walls, or trees.',
-      subtitleExtra: `Not sure what size you need? This guide from Vuly walks through it:`,
-      affiliateLink: {
-        text: 'Trampoline size guide by Vuly (opens in new tab)',
-        href: getLink('vuly-size-guide', resolvedCountry) ?? 'https://www.vulyplay.com/aff/100/?url=blog/what-size-trampoline',
-      },
+      subtitleExtra:
+        'Not sure what size you need? Check out these guides (they will open in a new tab):',
+      affiliateLinks: [
+        {
+          text: 'Trampoline size guide by Vuly',
+          href: getLink('vuly-size-guide', resolvedCountry) ?? 'https://www.vulyplay.com/aff/100/?url=blog/what-size-trampoline',
+          showArrow: false,
+        },
+        {
+          text: 'How Much Space Do You Need for a Trampoline? (And How to Measure) by Springfree',
+          href: '/go/how-much-space-do-you-need-for-a-trampoline/',
+          showArrow: false,
+        },
+      ],
       type: 'single',
       options: [
         { id: 'small', label: 'Small', description: 'Room for 8–10ft (≈ 2.4–3m)' },
@@ -111,6 +138,7 @@ export function buildQuestions(country: Country): Question[] {
       id: 'standards',
       title: standardsTitle,
       subtitle: standardsSubtitle,
+      linkedSubtitle: standardsLinkedSubtitle,
       type: 'single',
       options: [
         { id: 'yes', label: 'Yes, this matters to me' },
@@ -122,14 +150,18 @@ export function buildQuestions(country: Country): Question[] {
     {
       id: 'budget',
       title: "What's your budget?",
-      type: 'single',
+      subtitle: 'Choose one range, or two neighboring ranges if your budget can stretch.',
+      type: 'multi',
+      maxSelect: 2,
+      adjacentOnly: true,
+      submitLabel: 'Continue',
       options: [
         { id: 'under-500', label: 'Under $500' },
         { id: '500-1000', label: '$500 – $1,000' },
         { id: '1000-1500', label: '$1,000 – $1,500' },
         { id: '1500-2500', label: '$1,500 – $2,500' },
         { id: '2500-plus', label: '$2,500+' },
-        { id: 'flexible', label: 'Flexible / not sure' },
+        { id: 'flexible', label: 'Flexible / not sure', exclusive: true },
       ],
     },
 

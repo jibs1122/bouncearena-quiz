@@ -72,7 +72,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: true,
     fitsYard: { small: true, medium: true, large: true, longNarrow: false },
     bestFor: 'Families wanting the safest premium Vuly springless model.',
-    metricScores: { bounce: 9, durability: 10, value: 4, assembly: 5, warranty: 9 },
+    metricScores: { bounce: 8, durability: 10, value: 4, assembly: 5, warranty: 9 },
     matchReasons: {
       springless: 'Springless leaf-spring system — no exposed metal coil springs anywhere on the frame',
       safetyEssential: 'Maximum safety — curved poles angle away from jumpers, springs sit outside the net, frame positioned away from the jump zone',
@@ -106,7 +106,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: true,
     fitsYard: { small: true, medium: true, large: true, longNarrow: false },
     bestFor: 'Families wanting a springless Vuly at a lower entry price than the Pro.',
-    metricScores: { bounce: 9, durability: 9, value: 6, assembly: 5, warranty: 9 },
+    metricScores: { bounce: 8, durability: 8, value: 6, assembly: 5, warranty: 9 },
     matchReasons: {
       springless: 'Springless leaf-spring system — no exposed metal coil springs',
       safetyEssential: 'Very high safety — curved poles and springless design remove the most common injury points',
@@ -241,7 +241,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: true, medium: false, large: false, longNarrow: false },
     bestFor: 'Young kids in tight urban backyards who need maximum safety in a small footprint.',
-    metricScores: { bounce: 7, durability: 10, value: 6, assembly: 5, warranty: 10 },
+    metricScores: { bounce: 8, durability: 10, value: 6, assembly: 5, warranty: 10 },
     matchReasons: {
       springless: 'Composite rod system — no exposed springs, no pinch points anywhere',
       safetyEssential: 'Maximum safety design — composite rods, SoftEdge mat, hidden frame with no hard edges',
@@ -335,7 +335,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: false, medium: false, large: true, longNarrow: false },
     bestFor: 'Large families wanting maximum Springfree jumping space.',
-    metricScores: { bounce: 9, durability: 10, value: 4, assembly: 5, warranty: 10 },
+    metricScores: { bounce: 8, durability: 10, value: 4, assembly: 5, warranty: 10 },
     matchReasons: {
       springless: 'Composite rod system — no exposed springs',
       safetyEssential: 'Maximum safety design at jumbo scale — composite rods and SoftEdge mat',
@@ -432,7 +432,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: false, medium: true, large: true, longNarrow: true },
     bestFor: 'Larger yards with a long narrow layout needing extra length.',
-    metricScores: { bounce: 9, durability: 10, value: 5, assembly: 5, warranty: 10 },
+    metricScores: { bounce: 8, durability: 10, value: 5, assembly: 5, warranty: 10 },
     matchReasons: {
       springless: 'Composite rod system — no exposed springs',
       safetyEssential: 'Maximum safety — composite rods, SoftEdge mat, hidden frame',
@@ -466,7 +466,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: false, medium: false, large: true, longNarrow: true },
     bestFor: 'Huge yards and athletes who want the largest oval Springfree makes.',
-    metricScores: { bounce: 10, durability: 10, value: 3, assembly: 4, warranty: 10 },
+    metricScores: { bounce: 8, durability: 10, value: 3, assembly: 4, warranty: 10 },
     matchReasons: {
       springless: 'Composite rod system — no exposed springs',
       safetyEssential: 'Maximum safety design at jumbo scale',
@@ -498,7 +498,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: true, medium: true, large: false, longNarrow: false },
     bestFor: 'Medium yards wanting maximum corner-to-corner jumping area in a square shape.',
-    metricScores: { bounce: 9, durability: 10, value: 5, assembly: 5, warranty: 10 },
+    metricScores: { bounce: 8, durability: 10, value: 5, assembly: 5, warranty: 10 },
     matchReasons: {
       springless: 'Composite rod system — no exposed springs',
       safetyEssential: 'Maximum safety — composite rods, SoftEdge mat, hidden frame',
@@ -530,7 +530,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: false, medium: true, large: true, longNarrow: false },
     bestFor: 'Larger backyards wanting the maximum Springfree square jump area.',
-    metricScores: { bounce: 9, durability: 10, value: 4, assembly: 5, warranty: 10 },
+    metricScores: { bounce: 8, durability: 10, value: 4, assembly: 5, warranty: 10 },
     matchReasons: {
       springless: 'Composite rod system — no exposed springs',
       safetyEssential: 'Maximum safety — composite rods, SoftEdge mat, hidden frame',
@@ -562,7 +562,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: false, medium: false, large: true, longNarrow: false },
     bestFor: 'Large yards wanting the biggest possible square Springfree.',
-    metricScores: { bounce: 10, durability: 10, value: 3, assembly: 4, warranty: 10 },
+    metricScores: { bounce: 8, durability: 10, value: 3, assembly: 4, warranty: 10 },
     matchReasons: {
       springless: 'Composite rod system — no exposed springs',
       safetyEssential: 'Maximum safety at jumbo scale — composite rods and SoftEdge mat',

@@ -28,7 +28,11 @@ const scoringSpec = {
     standards: ['yes', 'no'],
     safetyFeatures: ['essential', 'nice-to-have', 'not-important'],
     springType: ['traditional', 'springless', 'not-sure'],
-    budget: Object.keys(budgetRanges),
+    budget: {
+      allowed: Object.keys(budgetRanges),
+      maxSelected: 2,
+      rule: 'One budget range, or two neighboring ranges. flexible must be selected alone.',
+    },
     priorities: {
       allowed: priorityKeys,
       maxUsedByScoring: 2,
@@ -69,7 +73,8 @@ const scoringSpec = {
     {
       name: 'scoreBudget',
       rules: [
-        'budget=flexible: 0.',
+        'budget includes flexible, or no budget is selected: 0.',
+        'Two neighboring budget selections are combined into one min/max range.',
         'priceFrom within selected min/max budget range: +25.',
         'priceFrom below selected budget range: 0. There is intentionally no below-budget bonus.',
         'priceFrom above selected max but <= 1.5x selected max: -30.',
@@ -96,11 +101,11 @@ const scoringSpec = {
     'rawScore = scoreSize + scoreStandards + scoreSafety + scoreSpringType + scoreBudget + scorePriorities.',
     'After scoring, keep only models where rawScore > 0.',
     'Sort by rawScore descending, then priceFrom ascending.',
-    'Return the top 3 after Vuly tiebreak logic.',
+    'Return the top 3 after Vuly tiebreak logic and top-two brand diversity.',
   ],
   lowSignalFallback: [
     'If countSignals(answers) <= 1, bypass normal score ranking and use getDiverseRecommendations.',
-    'Signals counted: backyardSize is not not-sure; standards yes; safetyFeatures essential; springType not not-sure; budget not flexible; priorities length > 0.',
+    'Signals counted: backyardSize is not not-sure; standards yes; safetyFeatures essential; springType not not-sure; budget does not include flexible; priorities length > 0.',
     'Fallback pool removes hard exclusions, removes negative budget fit, removes standards failures when standards=yes.',
     'Fallback sorts by baseMeritScore descending then priceFrom ascending.',
     'baseMeritScore = bounce + durability + value + assembly + warranty + 3 if advancedSafety.',
@@ -112,6 +117,10 @@ const scoringSpec = {
     'If top Vuly rawScore exactly equals top non-Vuly rawScore, promote that Vuly model to #1.',
     'If Vuly is already ahead, no change. If Vuly trails by any amount, no promotion.',
     'Low-signal fallback does not call applyVulyBias.',
+  ],
+  brandDiversity: [
+    'After Vuly tiebreak logic, if spots 1 and 2 have the same brand, move the highest-scoring later model from a different brand into spot 2.',
+    'If no different-brand model exists, omit the same-brand second result rather than showing the same brand in spots 1 and 2.',
   ],
   recommendedSizeDisplay: [
     'Single-size models return displaySize.',
@@ -140,8 +149,10 @@ function summarizeQuestions(sourceQuestions: typeof questions) {
     maxSelect: question.maxSelect ?? null,
     title: question.title,
     subtitle: question.subtitle ?? null,
+    linkedSubtitle: question.linkedSubtitle ?? null,
     subtitleExtra: question.subtitleExtra ?? null,
     affiliateLink: question.affiliateLink ?? null,
+    affiliateLinks: question.affiliateLinks ?? null,
     options: question.options.map((option) => ({
       id: option.id,
       label: option.label,
@@ -238,7 +249,7 @@ function buildLlmQuizAudit() {
         springType: 'not-sure',
         backyardSize: 'not-sure',
         standards: 'no',
-        budget: 'flexible',
+        budget: ['flexible'],
         priorities: [],
       },
       budgetRanges,

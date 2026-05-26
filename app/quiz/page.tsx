@@ -11,7 +11,7 @@ import { detectCountry, type Country } from '@/lib/geolocation';
 import { trackOutboundClick, trackQuizComplete, trackQuizStart, trackQuizStep } from '@/lib/gtag';
 import { getLink, isAffiliateLink, normalizeCountry } from '@/lib/links';
 import { buildQuestions } from '@/lib/quiz';
-import { encodeAnswers, getRecommendations, type QuizAnswers } from '@/lib/scoring';
+import { encodeAnswers, getRecommendations, type BudgetId, type QuizAnswers } from '@/lib/scoring';
 import type { PriorityId } from '@/lib/trampolines';
 
 type PartialQuizAnswers = Partial<QuizAnswers> & { country: Country };
@@ -21,7 +21,7 @@ const SKIP_DEFAULTS: Record<string, string | string[]> = {
   springType: 'not-sure',
   backyardSize: 'not-sure',
   standards: 'no',
-  budget: 'flexible',
+  budget: ['flexible'],
   priorities: [],
 };
 
@@ -31,7 +31,8 @@ function isCompleteAnswers(answers: PartialQuizAnswers): answers is QuizAnswers 
       answers.standards &&
       answers.safetyFeatures &&
       answers.springType &&
-      answers.budget &&
+      Array.isArray(answers.budget) &&
+      answers.budget.length > 0 &&
       Array.isArray(answers.priorities), // allow empty array
   );
 }
@@ -97,7 +98,8 @@ export default function QuizPage() {
       !answers.standards ||
       !answers.safetyFeatures ||
       !answers.springType ||
-      !answers.budget
+      !Array.isArray(answers.budget) ||
+      answers.budget.length === 0
     )
       return false;
     const preview = { ...answers, priorities: previewPriorities } as QuizAnswers;
@@ -107,6 +109,7 @@ export default function QuizPage() {
 
   function selectedValues(questionId: string): string[] {
     if (questionId === 'priorities') return answers.priorities ?? [];
+    if (questionId === 'budget') return answers.budget ?? [];
     const value = answers[questionId as keyof PartialQuizAnswers];
     return typeof value === 'string' ? [value] : [];
   }
@@ -143,6 +146,8 @@ export default function QuizPage() {
 
     if (questionId === 'priorities') {
       nextAnswers.priorities = value as PriorityId[];
+    } else if (questionId === 'budget') {
+      nextAnswers.budget = value as BudgetId[];
     } else {
       (nextAnswers as Record<string, unknown>)[questionId] = value;
     }
@@ -173,6 +178,8 @@ export default function QuizPage() {
 
     if (questionId === 'priorities') {
       nextAnswers.priorities = [];
+    } else if (questionId === 'budget') {
+      nextAnswers.budget = skipValue as BudgetId[];
     } else {
       (nextAnswers as Record<string, unknown>)[questionId] = skipValue;
     }
@@ -295,7 +302,9 @@ export default function QuizPage() {
             >
               ← Back
             </button>
-            <p className="text-xs text-black/25">Tap an answer to continue</p>
+            <p className="text-xs text-black/25">
+              {currentQuestion.type === 'multi' ? 'Choose your answers, then continue' : 'Tap an answer to continue'}
+            </p>
           </div>
 
         </div>

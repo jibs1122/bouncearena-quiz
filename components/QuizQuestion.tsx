@@ -9,16 +9,24 @@ export interface QuizOption {
   description?: string;
   imageSrc?: string;
   imageAlt?: string;
+  exclusive?: boolean;
 }
 
 export interface Question {
   id: string;
   title: string;
   subtitle?: string;
+  linkedSubtitle?: {
+    text: string;
+    href: string;
+    suffix: string;
+  };
   subtitleExtra?: string;
   questionImage?: string; // supporting image shown above options
   type: 'single' | 'multi';
   maxSelect?: number;
+  adjacentOnly?: boolean;
+  submitLabel?: string;
   options: QuizOption[];
   expandable?: {
     trigger: string;
@@ -27,7 +35,14 @@ export interface Question {
   affiliateLink?: {
     text: string;
     href: string;
+    suffix?: string;
+    showArrow?: boolean;
   };
+  affiliateLinks?: Array<{
+    text: string;
+    href: string;
+    showArrow?: boolean;
+  }>;
   cardLayout?: boolean;
 }
 
@@ -88,11 +103,59 @@ export default function QuizQuestion({
 
     const max = question.maxSelect ?? 2;
     setLocalSelected((current) => {
-      return current.includes(id)
-        ? current.filter((v) => v !== id)
-        : current.length >= max
-          ? [...current.slice(1), id]
-          : [...current, id];
+      if (current.includes(id)) return current.filter((v) => v !== id);
+
+      const option = question.options.find((item) => item.id === id);
+      if (option?.exclusive) return [id];
+
+      const withoutExclusive = current.filter(
+        (value) => !question.options.find((item) => item.id === value)?.exclusive,
+      );
+
+      if (!question.adjacentOnly) {
+        return withoutExclusive.length >= max
+          ? [...withoutExclusive.slice(1), id]
+          : [...withoutExclusive, id];
+      }
+
+      const optionIndex = question.options.findIndex((item) => item.id === id);
+      const sortedSelection = [...withoutExclusive, id].sort(
+        (a, b) =>
+          question.options.findIndex((item) => item.id === a) -
+          question.options.findIndex((item) => item.id === b),
+      );
+
+      const isAdjacent = (values: string[]) => {
+        if (values.length <= 1) return true;
+        const indexes = values.map((value) => question.options.findIndex((item) => item.id === value));
+        return indexes.every((index, arrayIndex) => arrayIndex === 0 || index === indexes[arrayIndex - 1] + 1);
+      };
+
+      if (sortedSelection.length <= max && isAdjacent(sortedSelection)) {
+        return sortedSelection;
+      }
+
+      const adjacentPair = withoutExclusive
+        .map((value) => [value, id])
+        .map((values) =>
+          values.sort(
+            (a, b) =>
+              question.options.findIndex((item) => item.id === a) -
+              question.options.findIndex((item) => item.id === b),
+          ),
+        )
+        .filter(isAdjacent)
+        .sort((a, b) => {
+          const aDistance = Math.min(
+            ...a.map((value) => Math.abs(question.options.findIndex((item) => item.id === value) - optionIndex)),
+          );
+          const bDistance = Math.min(
+            ...b.map((value) => Math.abs(question.options.findIndex((item) => item.id === value) - optionIndex)),
+          );
+          return aDistance - bDistance;
+        })[0];
+
+      return adjacentPair ?? [id];
     });
   }
 
@@ -115,21 +178,59 @@ export default function QuizQuestion({
           <p className="mt-3 text-base leading-7 text-black/55">{question.subtitle}</p>
         )}
 
+        {question.linkedSubtitle && (
+          <p className="mt-3 text-base leading-7 text-black/55">
+            <a
+              href={question.linkedSubtitle.href}
+              target="_blank"
+              rel="nofollow noopener noreferrer"
+              className="font-medium text-[#38b1ab] underline underline-offset-4 transition-colors hover:text-[#2e9a94]"
+            >
+              {question.linkedSubtitle.text}
+            </a>
+            {question.linkedSubtitle.suffix}
+          </p>
+        )}
+
         {question.subtitleExtra && (
           <p className="mt-2 text-base leading-7 text-black/55">{question.subtitleExtra}</p>
         )}
 
         {question.affiliateLink && (
-          <p className="mt-2 text-sm">
+          <p className="mt-2 text-base leading-7">
             <a
               href={question.affiliateLink.href}
               target="_blank"
               rel="nofollow noopener noreferrer"
               className="font-medium text-[#38b1ab] underline underline-offset-4 hover:text-[#2e9a94] transition-colors"
             >
-              {question.affiliateLink.text} →
+              {question.affiliateLink.text}
             </a>
+            {question.affiliateLink.suffix ? (
+              <span className="text-black/55">{question.affiliateLink.suffix}</span>
+            ) : null}
+            {question.affiliateLink.showArrow === false ? null : (
+              <span className="text-[#38b1ab]"> →</span>
+            )}
           </p>
+        )}
+
+        {question.affiliateLinks && (
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-base leading-7">
+            {question.affiliateLinks.map((link) => (
+              <li key={link.href}>
+                <a
+                  href={link.href}
+                  target="_blank"
+                  rel="nofollow noopener noreferrer"
+                  className="font-medium text-[#38b1ab] underline underline-offset-4 transition-colors hover:text-[#2e9a94]"
+                >
+                  {link.text}
+                </a>
+                {link.showArrow === false ? null : <span className="text-[#38b1ab]"> →</span>}
+              </li>
+            ))}
+          </ul>
         )}
 
         {question.expandable && (
@@ -275,9 +376,10 @@ export default function QuizQuestion({
               <button
                 type="button"
                 onClick={() => onAnswer(localSelected)}
-                className="rounded-xl px-5 py-2.5 text-sm font-semibold transition-all bg-[#38b1ab] text-white hover:bg-[#2e9a94] active:scale-95"
+                disabled={localSelected.length === 0}
+                className="rounded-xl bg-[#38b1ab] px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#2e9a94] active:scale-95 disabled:cursor-default disabled:bg-black/15"
               >
-                See my results →
+                {question.submitLabel ?? 'See my results →'}
               </button>
             </div>
           </div>

@@ -15,6 +15,7 @@ export type BudgetId =
   | '1500-2500'
   | '2500-plus'
   | 'flexible';
+export type BudgetSelection = BudgetId[];
 
 export interface QuizAnswers {
   country: Country;
@@ -22,7 +23,7 @@ export interface QuizAnswers {
   standards: 'yes' | 'no';
   safetyFeatures: 'essential' | 'nice-to-have' | 'not-important';
   springType: SpringType | 'not-sure';
-  budget: BudgetId;
+  budget: BudgetSelection;
   priorities: PriorityId[];
 }
 
@@ -40,6 +41,26 @@ export const budgetRanges: Record<BudgetId, [number, number]> = {
   '2500-plus': [2500, 999999],
   flexible: [0, 999999],
 };
+
+export const budgetOrder: BudgetId[] = [
+  'under-500',
+  '500-1000',
+  '1000-1500',
+  '1500-2500',
+  '2500-plus',
+  'flexible',
+];
+
+function isValidBudgetSelection(budget: BudgetSelection): boolean {
+  if (budget.length === 0 || budget.length > 2) return false;
+  if (budget.includes('flexible')) return budget.length === 1;
+  if (budget.length === 1) return true;
+
+  const sortedIndexes = budget
+    .map((budgetId) => budgetOrder.indexOf(budgetId))
+    .sort((a, b) => a - b);
+  return sortedIndexes[1] === sortedIndexes[0] + 1;
+}
 
 // ─── Individual scoring functions ──────────────────────────────────────────────
 
@@ -92,9 +113,21 @@ function scoreSpringType(
   return trampoline.springType === springType ? 40 : -100;
 }
 
-function scoreBudget(trampoline: Trampoline, budget: BudgetId): number {
-  if (budget === 'flexible') return 0;
-  const [min, max] = budgetRanges[budget];
+function getBudgetRange(budget: BudgetSelection): [number, number] {
+  if (budget.length === 0 || budget.includes('flexible')) return budgetRanges.flexible;
+
+  return budget.reduce<[number, number]>(
+    ([currentMin, currentMax], budgetId) => {
+      const [min, max] = budgetRanges[budgetId];
+      return [Math.min(currentMin, min), Math.max(currentMax, max)];
+    },
+    [999999, 0],
+  );
+}
+
+function scoreBudget(trampoline: Trampoline, budget: BudgetSelection): number {
+  if (budget.length === 0 || budget.includes('flexible')) return 0;
+  const [min, max] = getBudgetRange(budget);
   if (trampoline.priceFrom >= min && trampoline.priceFrom <= max) return 25;
   if (trampoline.priceFrom > max) {
     const ratio = trampoline.priceFrom / Math.max(max, 1);
@@ -135,7 +168,7 @@ function countSignals(answers: QuizAnswers): number {
   if (answers.standards === 'yes') signals += 1;
   if (answers.safetyFeatures === 'essential') signals += 1;
   if (answers.springType !== 'not-sure') signals += 1;
-  if (answers.budget !== 'flexible') signals += 1;
+  if (answers.budget.length > 0 && !answers.budget.includes('flexible')) signals += 1;
   if (answers.priorities.length > 0) signals += 1;
   return signals;
 }
@@ -182,12 +215,14 @@ function getDiverseRecommendations(answers: QuizAnswers): ScoredTrampoline[] {
     seenIds.add(trampoline.id);
   }
 
-  return picks.slice(0, 3).map((trampoline) => ({
+  const scoredPicks = picks.slice(0, 3).map((trampoline) => ({
     ...trampoline,
     rawScore: 1,
     finalScore: 1,
     recommendedSizeDisplay: getRecommendedSizeDisplay(trampoline, answers.backyardSize),
   }));
+
+  return diversifyTopTwoBrands(scoredPicks).slice(0, 3);
 }
 
 // ─── Recommended size display ──────────────────────────────────────────────────
@@ -258,6 +293,26 @@ function applyVulyBias(sorted: ScoredTrampoline[]): ScoredTrampoline[] {
   return sorted;
 }
 
+function diversifyTopTwoBrands(sorted: ScoredTrampoline[]): ScoredTrampoline[] {
+  const [first, second] = sorted;
+  if (!first || !second || first.brand !== second.brand) return sorted;
+
+  const replacementIndex = sorted.findIndex((trampoline, index) => index > 1 && trampoline.brand !== first.brand);
+  if (replacementIndex === -1) return [first];
+
+  const replacement = sorted[replacementIndex];
+  return [
+    first,
+    replacement,
+    ...sorted.slice(1, replacementIndex),
+    ...sorted.slice(replacementIndex + 1),
+  ];
+}
+
+function applyRankingRules(sorted: ScoredTrampoline[]): ScoredTrampoline[] {
+  return diversifyTopTwoBrands(applyVulyBias(sorted));
+}
+
 export function getRecommendations(answers: QuizAnswers): ScoredTrampoline[] {
   if (countSignals(answers) <= 1) {
     return getDiverseRecommendations(answers);
@@ -267,7 +322,7 @@ export function getRecommendations(answers: QuizAnswers): ScoredTrampoline[] {
     .filter((t) => t.rawScore > 0)
     .sort((a, b) => b.rawScore - a.rawScore || a.priceFrom - b.priceFrom);
 
-  return applyVulyBias(passing).slice(0, 3);
+  return applyRankingRules(passing).slice(0, 3);
 }
 
 export function getBestVulyMatch(answers: QuizAnswers): ScoredTrampoline | null {
@@ -344,9 +399,14 @@ export function selectMatchReasons(
     '1500-2500': 'budget_1500_2500',
     '2500-plus': 'budget_2500_plus',
   };
-  const budgetKey = budgetKeyMap[answers.budget];
-  const budgetSnippet = budgetKey ? mr[budgetKey] : undefined;
-  if (budgetSnippet) reasons.push(budgetSnippet);
+  for (const budget of answers.budget.slice(0, 2)) {
+    const budgetKey = budgetKeyMap[budget];
+    const budgetSnippet = budgetKey ? mr[budgetKey] : undefined;
+    if (budgetSnippet) {
+      reasons.push(budgetSnippet);
+      break;
+    }
+  }
 
   // 6. Priority matches
   for (const priority of answers.priorities.slice(0, 2)) {
@@ -373,6 +433,14 @@ export function buildSummaryText(answers: QuizAnswers): string {
     flexible: 'a flexible budget',
   };
 
+  const selectedBudgetLabel = answers.budget.includes('flexible') || answers.budget.length === 0
+    ? budgetLabel.flexible
+    : answers.budget
+        .slice()
+        .sort((a, b) => budgetOrder.indexOf(a) - budgetOrder.indexOf(b))
+        .map((budget) => budgetLabel[budget])
+        .join(' to ');
+
   const springLabel: Record<QuizAnswers['springType'], string> = {
     springless: 'a springless setup',
     traditional: 'traditional springs',
@@ -395,7 +463,7 @@ export function buildSummaryText(answers: QuizAnswers): string {
           .join(' and ')
       : 'overall fit';
 
-  return `Based on your focus on ${priorities}, your preference for ${springLabel[answers.springType]}, and ${budgetLabel[answers.budget]}, these are the strongest matches for your family.`;
+  return `Based on your focus on ${priorities}, your preference for ${springLabel[answers.springType]}, and ${selectedBudgetLabel}, these are the strongest matches for your family.`;
 }
 
 // ─── URL serialization ──────────────────────────────────────────────────────────
@@ -407,7 +475,7 @@ export function encodeAnswers(answers: QuizAnswers): string {
   params.set('standards', answers.standards);
   params.set('safetyFeatures', answers.safetyFeatures);
   params.set('springType', answers.springType);
-  params.set('budget', answers.budget);
+  params.set('budget', answers.budget.join(','));
   params.set('priorities', answers.priorities.join(','));
   return params.toString();
 }
@@ -418,7 +486,9 @@ export function parseAnswers(searchParams: URLSearchParams): QuizAnswers | null 
   const standards = searchParams.get('standards');
   const safetyFeatures = searchParams.get('safetyFeatures');
   const springType = searchParams.get('springType');
-  const budget = searchParams.get('budget');
+  const budget = (searchParams.get('budget') ?? '')
+    .split(',')
+    .filter((value): value is BudgetId => budgetOrder.includes(value as BudgetId));
   const priorities = (searchParams.get('priorities') ?? '')
     .split(',')
     .filter((priority): priority is PriorityId =>
@@ -439,7 +509,7 @@ export function parseAnswers(searchParams: URLSearchParams): QuizAnswers | null 
     (springType !== 'traditional' &&
       springType !== 'springless' &&
       springType !== 'not-sure') ||
-    !budgetRanges[budget as BudgetId]
+    !isValidBudgetSelection(budget)
   ) {
     return null;
   }
@@ -450,7 +520,7 @@ export function parseAnswers(searchParams: URLSearchParams): QuizAnswers | null 
     standards,
     safetyFeatures,
     springType,
-    budget: budget as BudgetId,
+    budget,
     priorities,
   };
 }
