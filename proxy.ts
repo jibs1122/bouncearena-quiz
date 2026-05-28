@@ -13,6 +13,10 @@ const SPRINGFREE_TRAMPOLINE_STANDARDS_AFFILIATE_URL =
   'https://t.cfjump.com/59728/t/87128?Url=https%3a%2f%2fwww.springfreetrampoline.com.au%2fpages%2ftrampoline-standards';
 const SPRINGFREE_MEDIUM_ROUND_AFFILIATE_URL =
   'https://t.cfjump.com/59728/t/87128?Url=https%3a%2f%2fwww.springfreetrampoline.com.au%2fproducts%2fexclusive-round-bundles%3fvariant%3d52174104297840';
+const SPRINGFREE_RECTANGLE_VS_ROUND_TRAMPOLINE_AFFILIATE_URL =
+  'https://t.cfjump.com/59728/t/87128?Url=https%3a%2f%2fwww.springfreetrampoline.com.au%2fblogs%2fbeyond-the-bounce%2frectangle-vs-round-trampoline';
+const SPRINGFREE_COMPARE_TRAMPOLINE_MODELS_AFFILIATE_URL =
+  'https://t.cfjump.com/59728/t/87128?Url=https%3a%2f%2fwww.springfreetrampoline.com.au%2fpages%2fcompare-trampolines';
 
 function springfreeRedirectForPath(pathname: string): string | null {
   const normalizedPath = pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
@@ -32,6 +36,12 @@ function springfreeRedirectForPath(pathname: string): string | null {
   }
   if (normalizedPath === '/go/springfree-medium-round') {
     return SPRINGFREE_MEDIUM_ROUND_AFFILIATE_URL;
+  }
+  if (normalizedPath === '/go/springfree-rectangle-vs-round-trampoline') {
+    return SPRINGFREE_RECTANGLE_VS_ROUND_TRAMPOLINE_AFFILIATE_URL;
+  }
+  if (normalizedPath === '/go/springfree-compare-trampoline-models') {
+    return SPRINGFREE_COMPARE_TRAMPOLINE_MODELS_AFFILIATE_URL;
   }
 
   return null;
