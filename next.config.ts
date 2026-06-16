@@ -19,6 +19,16 @@ const nextConfig: NextConfig = {
         destination: SPRINGFREE_AFFILIATE_URL,
         permanent: true,
       },
+      {
+        source: '/best-trampolines-australia',
+        destination: '/best-trampolines-australia-2025',
+        permanent: true,
+      },
+      {
+        source: '/best-trampolines-australia/',
+        destination: '/best-trampolines-australia-2025',
+        permanent: true,
+      },
     ];
   },
 };
