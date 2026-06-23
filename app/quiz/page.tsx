@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import Footer from '@/components/Footer';
 import ProgressBar from '@/components/ProgressBar';
 import QuizQuestion from '@/components/QuizQuestion';
-import GeoBannerAuto from '@/components/GeoBannerAuto';
 import SiteHeader from '@/components/SiteHeader';
 import { detectCountry, type Country } from '@/lib/geolocation';
 import { trackOutboundClick, trackQuizComplete, trackQuizStart, trackQuizStep } from '@/lib/gtag';
@@ -230,7 +229,6 @@ export default function QuizPage() {
 
   return (
     <main className="min-h-screen bg-white text-black">
-      <GeoBannerAuto />
       <SiteHeader active="quiz" />
 
 
