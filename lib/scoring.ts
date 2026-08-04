@@ -116,19 +116,18 @@ function scoreSpringType(
   return trampoline.springType === springType ? 40 : -100;
 }
 
-// Ovals get partial credit both ways: they read as elongated rounds, and they're
-// the only springless non-round options — a springless + rectangle answer must
-// still surface Springfree squares/ovals rather than nothing.
+// Squares are grouped with rectangles in the question card. Ovals read as
+// elongated rounds: partial credit for a round preference, excluded for a
+// rectangle preference.
 function scoreShape(trampoline: Trampoline, shape: ShapeChoice): number {
   if (shape === 'no-preference') return 0;
   if (shape === 'round') {
     if (trampoline.shape === 'round') return 40;
     if (trampoline.shape === 'oval') return 15;
-    return -100; // squares are grouped with rectangles in the question
+    return -100;
   }
   if (trampoline.shape === 'rectangle') return 40;
   if (trampoline.shape === 'square') return 30;
-  if (trampoline.shape === 'oval') return 10;
   return -100;
 }
 
