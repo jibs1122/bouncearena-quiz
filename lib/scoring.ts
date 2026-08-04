@@ -213,7 +213,14 @@ function getDiverseRecommendations(answers: QuizAnswers): ScoredTrampoline[] {
     .filter((trampoline) => !isHardExcluded(trampoline, answers))
     .filter((trampoline) => scoreBudget(trampoline, answers.budget) >= 0)
     .filter((trampoline) => scoreStandards(trampoline, answers.standards, country) > -50)
-    .sort((a, b) => baseMeritScore(b) - baseMeritScore(a) || a.priceFrom - b.priceFrom);
+    // Shape first so a stated preference beats merit — e.g. a rectangle answer
+    // must rank true rectangles above the ovals that survive as partial matches.
+    .sort(
+      (a, b) =>
+        scoreShape(b, answers.shape) - scoreShape(a, answers.shape) ||
+        baseMeritScore(b) - baseMeritScore(a) ||
+        a.priceFrom - b.priceFrom,
+    );
 
   const picks: Trampoline[] = [];
   const seenIds = new Set<string>();
