@@ -16,6 +16,8 @@ const envLocalFile = path.join(rootDir, '.env.local');
 const MELBOURNE_TIME_ZONE = 'Australia/Melbourne';
 const VULY_SOURCE_NAME = 'Vuly';
 const VULY_PROMO_URL = 'https://www.vulyplay.com/aff/100/?url=promo';
+const SPRINGFREE_SOURCE_NAME = 'Springfree';
+const SPRINGFREE_DEAL_URL = 'https://www.bouncearena.com.au/go/springfree';
 const PREFERRED_ANTHROPIC_MODELS = [
   'claude-sonnet-4-20250514',
   'claude-3-7-sonnet-20250219',
@@ -399,7 +401,7 @@ function normalizeSentence(snippet) {
   return /[.!?]$/.test(clean) ? clean : `${clean}.`;
 }
 
-function summarizeSource({ name, url, pageTitle, snippets }) {
+function summarizeSource({ name, pageTitle, snippets }) {
   const lead = snippets.map(normalizeSentence).filter(Boolean).join(' ');
   if (lead) return lead;
   if (pageTitle) return `${pageTitle}. Review the live page and confirm the exact sale details before publishing.`;
@@ -499,9 +501,12 @@ function formatSection(monthYear, entries) {
   const heading = `## Australia Trampoline Sales ${monthYear}`;
   const sections = entries.map((entry) => {
     const titleLine = `### ${entry.name}`;
+    const dealUrl = entry.name.trim().toLowerCase() === SPRINGFREE_SOURCE_NAME.toLowerCase()
+      ? SPRINGFREE_DEAL_URL
+      : entry.url;
     const body = entry.error
       ? `\nCould not fetch this site automatically (${entry.error}). Check the live page manually before publishing.\n`
-      : `\n${entry.summary}\n\n[View current ${entry.name} deal](${entry.url})${entry.name === VULY_SOURCE_NAME ? `\n\n${VULY_PROMO_BLOCK}` : ''}\n`;
+      : `\n${entry.summary}\n\n[View current ${entry.name} deal](${dealUrl})${entry.name === VULY_SOURCE_NAME ? `\n\n${VULY_PROMO_BLOCK}` : ''}\n`;
     return `${titleLine}${body}`;
   });
 
@@ -517,6 +522,71 @@ function extractAnthropicText(payload) {
     .trim();
 }
 
+const DEAL_SUMMARY_TOOL = {
+  name: 'submit_deal_summary',
+  description: 'Submit the structured sale/promo decision and concise editor summary.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      include: {
+        type: 'boolean',
+        description: 'Whether the retailer has clear current sale or promo evidence.',
+      },
+      summary: {
+        type: 'string',
+        description: 'A concise factual summary, or an empty string when include is false.',
+      },
+    },
+    required: ['include', 'summary'],
+    additionalProperties: false,
+  },
+};
+
+const VULY_DEAL_SUMMARY_TOOL = {
+  name: 'submit_vuly_deal_summary',
+  description: 'Submit structured Vuly promo details extracted from visible page and banner evidence.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      include: {
+        type: 'boolean',
+        description: 'Whether Vuly has clear current or upcoming promo evidence.',
+      },
+      discount: {
+        type: 'string',
+        description: 'Exact visible discount terms, or an empty string.',
+      },
+      freebies: {
+        type: 'string',
+        description: 'Exact visible free delivery, free gift, or free accessory terms, or an empty string.',
+      },
+      saleTiming: {
+        type: 'string',
+        description: 'Exact visible sale timing or dates, or an empty string.',
+      },
+      summary: {
+        type: 'string',
+        description: 'A concise factual summary, or an empty string when include is false.',
+      },
+    },
+    required: ['include', 'discount', 'freebies', 'saleTiming', 'summary'],
+    additionalProperties: false,
+  },
+};
+
+function extractAnthropicToolInput(payload, toolName) {
+  if (!payload || !Array.isArray(payload.content)) return null;
+  const toolUse = payload.content.find(
+    (item) =>
+      item?.type === 'tool_use' &&
+      item.name === toolName &&
+      item.input &&
+      typeof item.input === 'object' &&
+      !Array.isArray(item.input),
+  );
+  return toolUse?.input ?? null;
+}
+
 function parseJsonResponse(text) {
   const trimmed = text.trim();
   if (!trimmed) {
@@ -526,6 +596,14 @@ function parseJsonResponse(text) {
   const fencedMatch = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
   const candidate = fencedMatch ? fencedMatch[1].trim() : trimmed;
   return JSON.parse(candidate);
+}
+
+function extractAnthropicStructuredResponse(payload, toolName) {
+  const toolInput = extractAnthropicToolInput(payload, toolName);
+  if (toolInput) return toolInput;
+
+  const text = extractAnthropicText(payload);
+  return parseJsonResponse(text);
 }
 
 async function buildAnthropicImageContent(imageUrls, maxImages) {
@@ -605,8 +683,8 @@ function buildVulySummary(details) {
 function buildAnthropicPrompt(monthYear, entry, forceInclude = false) {
   return [
     `Assess whether ${entry.name} has a real live sale or promo for Australia for ${monthYear}, based only on the supplied scraped evidence and any supplied images.`,
-    'Return strict JSON only in this shape:',
-    '{"include":true,"summary":"One short paragraph of 1-2 sentences."}',
+    `Call the ${DEAL_SUMMARY_TOOL.name} tool once with your decision and summary.`,
+    'Do not write a text response.',
     'Rules:',
     '- Ground every decision and summary only in the provided evidence and visible image text.',
     '- Set include=true only when the evidence suggests there is an actual current sale, promotion, discount, bonus, or other deal on the brand page.',
@@ -650,8 +728,8 @@ function buildVulyAnthropicPrompt(monthYear, entry, forceInclude = false) {
   return [
     `Review the supplied Vuly promotions-page evidence for ${monthYear}.`,
     'Your job is to extract the actual sale details from the visible promo banner text, especially image text.',
-    'Return strict JSON only in this shape:',
-    '{"include":true,"discount":"","freebies":"","saleTiming":"","summary":""}',
+    `Call the ${VULY_DEAL_SUMMARY_TOOL.name} tool once with your decision, extracted details, and summary.`,
+    'Do not write a text response.',
     'Rules:',
     '- Read the supplied images carefully and prefer the banner text over generic page copy.',
     '- Extract exact promo terms when visible, such as percentage-off ranges, free delivery, free accessories, and sale start dates.',
@@ -682,7 +760,6 @@ async function rewriteEntryWithAnthropic(entry, monthYear, apiKey, model, forceI
     entry.imageUrls ?? [],
     entry.name === VULY_SOURCE_NAME ? 8 : 3,
   );
-  const maxImages = entry.name === VULY_SOURCE_NAME ? 8 : 3;
 
   content.push({
     type: 'text',
@@ -699,8 +776,9 @@ async function rewriteEntryWithAnthropic(entry, monthYear, apiKey, model, forceI
     body: JSON.stringify({
       model,
       max_tokens: 350,
-      temperature: 0.1,
       system: 'You are editing a commercial content draft for an Australian trampoline deals page. Be factual, concise, and specific.',
+      tools: [DEAL_SUMMARY_TOOL],
+      tool_choice: { type: 'tool', name: DEAL_SUMMARY_TOOL.name },
       messages: [
         {
           role: 'user',
@@ -717,8 +795,7 @@ async function rewriteEntryWithAnthropic(entry, monthYear, apiKey, model, forceI
   }
 
   const payload = await response.json();
-  const text = extractAnthropicText(payload);
-  const parsed = parseJsonResponse(text);
+  const parsed = extractAnthropicStructuredResponse(payload, DEAL_SUMMARY_TOOL.name);
   return {
     ...entry,
     include: Boolean(parsed?.include),
@@ -761,8 +838,9 @@ async function rewriteVulyEntryWithAnthropic(entry, monthYear, apiKey, model, fo
     body: JSON.stringify({
       model,
       max_tokens: 300,
-      temperature: 0.1,
       system: 'Extract visible promo terms from Vuly sale banners and summarise them concisely.',
+      tools: [VULY_DEAL_SUMMARY_TOOL],
+      tool_choice: { type: 'tool', name: VULY_DEAL_SUMMARY_TOOL.name },
       messages: [
         {
           role: 'user',
@@ -779,8 +857,7 @@ async function rewriteVulyEntryWithAnthropic(entry, monthYear, apiKey, model, fo
   }
 
   const payload = await response.json();
-  const text = extractAnthropicText(payload);
-  const parsed = parseJsonResponse(text);
+  const parsed = extractAnthropicStructuredResponse(payload, VULY_DEAL_SUMMARY_TOOL.name);
   const normalized = {
     discount: typeof parsed?.discount === 'string' ? parsed.discount.trim() : '',
     freebies: typeof parsed?.freebies === 'string' ? parsed.freebies.trim() : '',
@@ -798,18 +875,31 @@ async function rewriteVulyEntryWithAnthropic(entry, monthYear, apiKey, model, fo
   };
 }
 
+async function rewriteEntryWithFallback(entry, monthYear, apiKey, model, forceInclude = false) {
+  try {
+    if (entry.error) return { ...entry, include: false, summary: '' };
+    if (entry.name === VULY_SOURCE_NAME) {
+      return await rewriteVulyEntryWithAnthropic(entry, monthYear, apiKey, model, forceInclude);
+    }
+    return await rewriteEntryWithAnthropic(entry, monthYear, apiKey, model, forceInclude);
+  } catch (error) {
+    const message = formatError(error);
+    console.log(`Anthropic rewrite failed for ${entry.name}, using fallback summary: ${message}`);
+    return {
+      ...entry,
+      include: hasLikelySaleSignal(entry),
+      summary: entry.summary ?? '',
+    };
+  }
+}
+
 async function rewriteSummariesWithAnthropic(entries, monthYear) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return entries;
   const model = await resolveAnthropicModel(apiKey);
+  const entryBySource = new Map(entries.map((entry) => [`${entry.name}\n${entry.url}`, entry]));
   const rewritten = await Promise.all(
-    entries.map(async (entry) => {
-      if (entry.error) return { ...entry, include: false, summary: '' };
-      if (entry.name === VULY_SOURCE_NAME) {
-        return rewriteVulyEntryWithAnthropic(entry, monthYear, apiKey, model);
-      }
-      return rewriteEntryWithAnthropic(entry, monthYear, apiKey, model);
-    }),
+    entries.map((entry) => rewriteEntryWithFallback(entry, monthYear, apiKey, model)),
   );
 
   const recovered = await Promise.all(
@@ -822,10 +912,8 @@ async function rewriteSummariesWithAnthropic(entries, monthYear) {
           : strongLocalSignal && hasLikelySaleSignal(entry));
 
       if (!shouldRecover) return entry;
-      if (entry.name === VULY_SOURCE_NAME) {
-        return rewriteVulyEntryWithAnthropic(entry, monthYear, apiKey, model, true);
-      }
-      return rewriteEntryWithAnthropic(entry, monthYear, apiKey, model, true);
+      const originalEntry = entryBySource.get(`${entry.name}\n${entry.url}`) ?? entry;
+      return rewriteEntryWithFallback(originalEntry, monthYear, apiKey, model, true);
     }),
   );
 
