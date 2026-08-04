@@ -6,6 +6,7 @@ const scenarios: Array<{ name: string; answers: QuizAnswers }> = [
     answers: {
       country: 'AU',
       backyardSize: 'medium',
+      shape: 'no-preference',
       standards: 'yes',
       safetyFeatures: 'essential',
       springType: 'springless',
@@ -18,6 +19,7 @@ const scenarios: Array<{ name: string; answers: QuizAnswers }> = [
     answers: {
       country: 'AU',
       backyardSize: 'not-sure',
+      shape: 'no-preference',
       standards: 'no',
       safetyFeatures: 'not-important',
       springType: 'not-sure',
@@ -30,6 +32,7 @@ const scenarios: Array<{ name: string; answers: QuizAnswers }> = [
     answers: {
       country: 'AU',
       backyardSize: 'long-narrow',
+      shape: 'no-preference',
       standards: 'no',
       safetyFeatures: 'nice-to-have',
       springType: 'not-sure',
@@ -42,11 +45,38 @@ const scenarios: Array<{ name: string; answers: QuizAnswers }> = [
     answers: {
       country: 'AU',
       backyardSize: 'medium',
+      shape: 'no-preference',
       standards: 'yes',
       safetyFeatures: 'not-important',
       springType: 'traditional',
       budget: ['500-1000'],
       priorities: ['value', 'assembly'],
+    },
+  },
+  {
+    name: 'Rectangle bounce seeker',
+    answers: {
+      country: 'AU',
+      backyardSize: 'large',
+      shape: 'rectangle',
+      standards: 'no',
+      safetyFeatures: 'not-important',
+      springType: 'traditional',
+      budget: ['1500-2500'],
+      priorities: ['bounce', 'durability'],
+    },
+  },
+  {
+    name: 'Springless rectangle',
+    answers: {
+      country: 'AU',
+      backyardSize: 'medium',
+      shape: 'rectangle',
+      standards: 'no',
+      safetyFeatures: 'nice-to-have',
+      springType: 'springless',
+      budget: ['flexible'],
+      priorities: ['bounce'],
     },
   },
 ];

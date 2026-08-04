@@ -17,9 +17,12 @@ export type BudgetId =
   | 'flexible';
 export type BudgetSelection = BudgetId[];
 
+export type ShapeChoice = 'round' | 'rectangle' | 'no-preference';
+
 export interface QuizAnswers {
   country: Country;
   backyardSize: 'small' | 'medium' | 'large' | 'long-narrow' | 'not-sure';
+  shape: ShapeChoice;
   standards: 'yes' | 'no';
   safetyFeatures: 'essential' | 'nice-to-have' | 'not-important';
   springType: SpringType | 'not-sure';
@@ -113,6 +116,22 @@ function scoreSpringType(
   return trampoline.springType === springType ? 40 : -100;
 }
 
+// Ovals get partial credit both ways: they read as elongated rounds, and they're
+// the only springless non-round options — a springless + rectangle answer must
+// still surface Springfree squares/ovals rather than nothing.
+function scoreShape(trampoline: Trampoline, shape: ShapeChoice): number {
+  if (shape === 'no-preference') return 0;
+  if (shape === 'round') {
+    if (trampoline.shape === 'round') return 40;
+    if (trampoline.shape === 'oval') return 15;
+    return -100; // squares are grouped with rectangles in the question
+  }
+  if (trampoline.shape === 'rectangle') return 40;
+  if (trampoline.shape === 'square') return 30;
+  if (trampoline.shape === 'oval') return 10;
+  return -100;
+}
+
 function getBudgetRange(budget: BudgetSelection): [number, number] {
   if (budget.length === 0 || budget.includes('flexible')) return budgetRanges.flexible;
 
@@ -156,6 +175,9 @@ function isHardExcluded(
   const springScore = scoreSpringType(trampoline, answers.springType);
   if (springScore <= -100) return true;
 
+  const shapeScore = scoreShape(trampoline, answers.shape);
+  if (shapeScore <= -100) return true;
+
   const budgetScore = scoreBudget(trampoline, answers.budget);
   if (budgetScore <= -100) return true;
 
@@ -165,6 +187,7 @@ function isHardExcluded(
 function countSignals(answers: QuizAnswers): number {
   let signals = 0;
   if (answers.backyardSize !== 'not-sure') signals += 1;
+  if (answers.shape !== 'no-preference') signals += 1;
   if (answers.standards === 'yes') signals += 1;
   if (answers.safetyFeatures === 'essential') signals += 1;
   if (answers.springType !== 'not-sure') signals += 1;
@@ -263,6 +286,7 @@ function scoreAll(answers: QuizAnswers): ScoredTrampoline[] {
 
     const rawScore =
       scoreSize(trampoline, answers.backyardSize) +
+      scoreShape(trampoline, answers.shape) +
       scoreStandards(trampoline, answers.standards, country) +
       scoreSafety(trampoline, answers.safetyFeatures) +
       scoreSpringType(trampoline, answers.springType) +
@@ -332,6 +356,7 @@ export function getBestVulyMatch(answers: QuizAnswers): ScoredTrampoline | null 
     .map((trampoline) => {
       const rawScore =
         scoreSize(trampoline, answers.backyardSize) +
+        scoreShape(trampoline, answers.shape) +
         scoreStandards(trampoline, answers.standards, country) +
         scoreSafety(trampoline, answers.safetyFeatures) +
         scoreSpringType(trampoline, answers.springType) +
@@ -364,7 +389,11 @@ export function selectMatchReasons(
   if (answers.springType === 'springless' && mr.springless) reasons.push(mr.springless);
   else if (answers.springType === 'traditional' && mr.traditional) reasons.push(mr.traditional);
 
-  // 2. Backyard size fit (always include)
+  // 2. Shape preference
+  if (answers.shape === 'round' && mr.shapeRound) reasons.push(mr.shapeRound);
+  else if (answers.shape === 'rectangle' && mr.shapeRectangle) reasons.push(mr.shapeRectangle);
+
+  // 3. Backyard size fit (always include)
   const sizeKey = answers.backyardSize;
   const sizeSnippet =
     sizeKey === 'small'
@@ -378,20 +407,20 @@ export function selectMatchReasons(
             : undefined;
   if (sizeSnippet) reasons.push(sizeSnippet);
 
-  // 3. Safety preference
+  // 4. Safety preference
   if (answers.safetyFeatures === 'essential' && mr.safetyEssential) {
     reasons.push(mr.safetyEssential);
   } else if (answers.safetyFeatures === 'nice-to-have' && mr.safetyNiceToHave) {
     reasons.push(mr.safetyNiceToHave);
   }
 
-  // 4. Standards compliance
+  // 5. Standards compliance
   if (answers.standards === 'yes') {
     const meets = country === 'US' ? rec.meetsUSStandards : rec.meetsAUStandards;
     if (meets && mr.meetsStandards) reasons.push(mr.meetsStandards);
   }
 
-  // 5. Budget fit
+  // 6. Budget fit
   const budgetKeyMap: Partial<Record<BudgetId, keyof MatchReasonBank>> = {
     'under-500': 'budget_under_500',
     '500-1000': 'budget_500_1000',
@@ -408,7 +437,7 @@ export function selectMatchReasons(
     }
   }
 
-  // 6. Priority matches
+  // 7. Priority matches
   for (const priority of answers.priorities.slice(0, 2)) {
     if (reasons.length >= 4) break;
     if (priority === 'bounce' && mr.bounce) reasons.push(mr.bounce);
@@ -447,6 +476,13 @@ export function buildSummaryText(answers: QuizAnswers): string {
     'not-sure': 'either spring system',
   };
 
+  const shapeClause =
+    answers.shape === 'round'
+      ? ' in a round shape'
+      : answers.shape === 'rectangle'
+        ? ' in a rectangle or square shape'
+        : '';
+
   const priorityLabel: Record<PriorityId, string> = {
     bounce: 'bounce quality',
     durability: 'durability',
@@ -463,7 +499,7 @@ export function buildSummaryText(answers: QuizAnswers): string {
           .join(' and ')
       : 'overall fit';
 
-  return `Based on your focus on ${priorities}, your preference for ${springLabel[answers.springType]}, and ${selectedBudgetLabel}, these are the strongest matches for your family.`;
+  return `Based on your focus on ${priorities}, your preference for ${springLabel[answers.springType]}${shapeClause}, and ${selectedBudgetLabel}, these are the strongest matches for your family.`;
 }
 
 // ─── URL serialization ──────────────────────────────────────────────────────────
@@ -472,6 +508,7 @@ export function encodeAnswers(answers: QuizAnswers): string {
   const params = new URLSearchParams();
   params.set('country', answers.country);
   params.set('backyardSize', answers.backyardSize);
+  params.set('shape', answers.shape);
   params.set('standards', answers.standards);
   params.set('safetyFeatures', answers.safetyFeatures);
   params.set('springType', answers.springType);
@@ -483,6 +520,8 @@ export function encodeAnswers(answers: QuizAnswers): string {
 export function parseAnswers(searchParams: URLSearchParams): QuizAnswers | null {
   const country = searchParams.get('country');
   const backyardSize = searchParams.get('backyardSize');
+  // Default keeps pre-shape-question results URLs working
+  const shape = searchParams.get('shape') ?? 'no-preference';
   const standards = searchParams.get('standards');
   const safetyFeatures = searchParams.get('safetyFeatures');
   const springType = searchParams.get('springType');
@@ -502,6 +541,7 @@ export function parseAnswers(searchParams: URLSearchParams): QuizAnswers | null 
       backyardSize !== 'large' &&
       backyardSize !== 'long-narrow' &&
       backyardSize !== 'not-sure') ||
+    (shape !== 'round' && shape !== 'rectangle' && shape !== 'no-preference') ||
     (standards !== 'yes' && standards !== 'no') ||
     (safetyFeatures !== 'essential' &&
       safetyFeatures !== 'nice-to-have' &&
@@ -517,6 +557,7 @@ export function parseAnswers(searchParams: URLSearchParams): QuizAnswers | null 
   return {
     country,
     backyardSize,
+    shape,
     standards,
     safetyFeatures,
     springType,

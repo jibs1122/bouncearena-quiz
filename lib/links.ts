@@ -55,7 +55,18 @@ export type LinkSlug =
   | 'oz-summit-8ft'
   | 'oz-summit-10ft'
   | 'oz-summit-12ft'
-  | 'oz-summit-14ft';
+  | 'oz-summit-14ft'
+  // GeeTramp
+  | 'geetramp-curve'
+  | 'geetramp-force-7x10'
+  | 'geetramp-force-8x12'
+  | 'geetramp-force-9x14'
+  | 'geetramp-force-10x17'
+  | 'geetramp-force-14x16'
+  // ACON
+  | 'acon-air-gen2'
+  | 'acon-16-hd-10x17'
+  | 'acon-x-10x17';
 
 type CountryDestination = {
   AU: string;
@@ -298,6 +309,53 @@ export const links: Record<LinkSlug, LinkConfig> = {
     label: 'OZ Summit 14ft',
     affiliate: false,
     destination: { AU: 'https://www.oztrampolines.com.au/trampolines/14ft-round-trampoline' },
+  },
+  // ─── GeeTramp (non-affiliate, AU only, via Web & Warehouse) ──────────────────
+  'geetramp-curve': {
+    label: 'GeeTramp Curve',
+    affiliate: false,
+    destination: { AU: 'https://webandwarehouse.com.au/products/geetramp-curve-10ft-round-trampoline-forest-green-12239' },
+  },
+  'geetramp-force-7x10': {
+    label: 'GeeTramp Force 7x10',
+    affiliate: false,
+    destination: { AU: 'https://webandwarehouse.com.au/products/geetramp-force-7ft-x-10ft-rectangle-trampoline-12324' },
+  },
+  'geetramp-force-8x12': {
+    label: 'GeeTramp Force 8x12',
+    affiliate: false,
+    destination: { AU: 'https://webandwarehouse.com.au/products/geetramp-force-8ft-x-12ft-rectangle-trampoline-10187' },
+  },
+  'geetramp-force-9x14': {
+    label: 'GeeTramp Force 9x14',
+    affiliate: false,
+    destination: { AU: 'https://webandwarehouse.com.au/products/geetramp-force-9ft-x-14ft-rectangle-trampoline-black-edition-standard-10150' },
+  },
+  'geetramp-force-10x17': {
+    label: 'GeeTramp Force 10x17',
+    affiliate: false,
+    destination: { AU: 'https://webandwarehouse.com.au/products/geetramp-force-10ft-x-17ft-rectangle-trampoline-black-edition-standard-11134' },
+  },
+  'geetramp-force-14x16': {
+    label: 'GeeTramp Force 14x16',
+    affiliate: false,
+    destination: { AU: 'https://webandwarehouse.com.au/products/geetramp-force-14ft-x-16ft-rectangle-trampoline-black-edition-standard-12114' },
+  },
+  // ─── ACON (non-affiliate, AU only, via Web & Warehouse) ──────────────────────
+  'acon-air-gen2': {
+    label: 'ACON Air GEN2',
+    affiliate: false,
+    destination: { AU: 'https://webandwarehouse.com.au/products/acon-air-12ft-round-trampoline-with-standard-net-gen-20-12049' },
+  },
+  'acon-16-hd-10x17': {
+    label: 'ACON 16 HD',
+    affiliate: false,
+    destination: { AU: 'https://webandwarehouse.com.au/products/acon-16-hd-rectangle-trampoline-and-enclosure-11930' },
+  },
+  'acon-x-10x17': {
+    label: 'ACON X',
+    affiliate: false,
+    destination: { AU: 'https://webandwarehouse.com.au/products/acon-x-17ft-trampoline-with-net-enclosure-and-ladder-black-11982' },
   },
 };
 

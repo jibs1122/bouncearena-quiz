@@ -18,6 +18,7 @@ type PartialQuizAnswers = Partial<QuizAnswers> & { country: Country };
 const SKIP_DEFAULTS: Record<string, string | string[]> = {
   safetyFeatures: 'nice-to-have',
   springType: 'not-sure',
+  shape: 'no-preference',
   backyardSize: 'not-sure',
   standards: 'no',
   budget: ['flexible'],
@@ -27,6 +28,7 @@ const SKIP_DEFAULTS: Record<string, string | string[]> = {
 function isCompleteAnswers(answers: PartialQuizAnswers): answers is QuizAnswers {
   return Boolean(
     answers.backyardSize &&
+      answers.shape &&
       answers.standards &&
       answers.safetyFeatures &&
       answers.springType &&
@@ -94,6 +96,7 @@ export default function QuizPage() {
     if (currentQuestion.id !== 'priorities') return false;
     if (
       !answers.backyardSize ||
+      !answers.shape ||
       !answers.standards ||
       !answers.safetyFeatures ||
       !answers.springType ||
@@ -239,8 +242,9 @@ export default function QuizPage() {
               Trampoline quiz - find the right option for your family
             </h1>
             <p className="mt-3 max-w-2xl text-base leading-7 text-black/55">
-              Answer 6 quick questions and we&apos;ll match you with the right trampoline for your
-              family — based on your safety priorities, spring preference, backyard size, and budget.
+              Answer 7 quick questions and we&apos;ll match you with the right trampoline for your
+              family — based on your safety priorities, spring preference, shape, backyard size, and
+              budget.
             </p>
           </div>
         )}

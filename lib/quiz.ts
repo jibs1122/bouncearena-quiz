@@ -99,7 +99,40 @@ export function buildQuestions(country: Country): Question[] {
       ],
     },
 
-    // Q3 — Backyard size
+    // Q3 — Shape
+    {
+      id: 'shape',
+      title: 'What shape trampoline are you after?',
+      subtitle:
+        'Shape changes how the trampoline bounces and how it fits your yard — pick one, or let the quiz decide.',
+      type: 'single',
+      cardLayout: true,
+      options: [
+        {
+          id: 'round',
+          label: 'Round',
+          description:
+            'Classic family shape with a predictable bounce that naturally guides jumpers back to the centre.',
+          imageSrc: '/images/geetramp/curve-12-ft.webp',
+          imageAlt: 'Round trampoline',
+        },
+        {
+          id: 'rectangle',
+          label: 'Rectangle or square',
+          description:
+            'Gymnast-style shape with a deeper, more powerful bounce. Suits more serious jumpers.',
+          imageSrc: '/images/geetramp/force-9-x-14-ft.webp',
+          imageAlt: 'Rectangle trampoline',
+        },
+        {
+          id: 'no-preference',
+          label: 'No preference',
+          description: 'Show me the best match either way.',
+        },
+      ],
+    },
+
+    // Q4 — Backyard size
     {
       id: 'backyardSize',
       title: 'What size is your backyard?',
@@ -133,7 +166,7 @@ export function buildQuestions(country: Country): Question[] {
       ],
     },
 
-    // Q4 — Standards compliance
+    // Q5 — Standards compliance
     {
       id: 'standards',
       title: standardsTitle,
@@ -146,7 +179,7 @@ export function buildQuestions(country: Country): Question[] {
       ],
     },
 
-    // Q5 — Budget
+    // Q6 — Budget
     {
       id: 'budget',
       title: "What's your budget?",
@@ -165,7 +198,7 @@ export function buildQuestions(country: Country): Question[] {
       ],
     },
 
-    // Q6 — Priorities (multi-select)
+    // Q7 — Priorities (multi-select)
     {
       id: 'priorities',
       title: 'What matters most to you?',
