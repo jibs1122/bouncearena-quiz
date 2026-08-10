@@ -50,7 +50,7 @@ const scenarios: Array<{ name: string; answers: QuizAnswers }> = [
       safetyFeatures: 'not-important',
       springType: 'traditional',
       budget: ['500-1000'],
-      priorities: ['value', 'assembly'],
+      priorities: ['value', 'warranty'],
     },
   },
   {

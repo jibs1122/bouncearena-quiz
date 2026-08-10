@@ -200,7 +200,6 @@ function baseMeritScore(trampoline: Trampoline): number {
     trampoline.metricScores.bounce +
     trampoline.metricScores.durability +
     trampoline.metricScores.value +
-    trampoline.metricScores.assembly +
     trampoline.metricScores.warranty +
     (trampoline.advancedSafety ? 3 : 0)
   );
@@ -449,7 +448,6 @@ export function selectMatchReasons(
     if (priority === 'bounce' && mr.bounce) reasons.push(mr.bounce);
     else if (priority === 'durability' && mr.durability) reasons.push(mr.durability);
     else if (priority === 'value' && mr.valueForMoney) reasons.push(mr.valueForMoney);
-    else if (priority === 'assembly' && mr.assembly) reasons.push(mr.assembly);
     else if (priority === 'warranty' && mr.warranty) reasons.push(mr.warranty);
   }
 
@@ -493,7 +491,6 @@ export function buildSummaryText(answers: QuizAnswers): string {
     bounce: 'bounce quality',
     durability: 'durability',
     value: 'value for money',
-    assembly: 'easy assembly',
     warranty: 'warranty and support',
   };
 
@@ -537,7 +534,7 @@ export function parseAnswers(searchParams: URLSearchParams): QuizAnswers | null 
   const priorities = (searchParams.get('priorities') ?? '')
     .split(',')
     .filter((priority): priority is PriorityId =>
-      ['bounce', 'durability', 'value', 'assembly', 'warranty'].includes(priority),
+      ['bounce', 'durability', 'value', 'warranty'].includes(priority),
     );
 
   if (

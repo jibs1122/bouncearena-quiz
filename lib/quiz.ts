@@ -209,7 +209,6 @@ export function buildQuestions(country: Country): Question[] {
         { id: 'bounce', label: 'Best bounce quality' },
         { id: 'durability', label: 'Durability / longevity' },
         { id: 'value', label: 'Value for money' },
-        { id: 'assembly', label: 'Easy assembly' },
         { id: 'warranty', label: 'Warranty & support' },
       ],
     },

@@ -4,7 +4,7 @@ import { TRAMPOLINES as COMPARE_ROWS } from '@/data/trampolines';
 
 export type SpringType = 'springless' | 'traditional';
 export type Shape = 'round' | 'oval' | 'square' | 'rectangle';
-export type PriorityId = 'bounce' | 'durability' | 'value' | 'assembly' | 'warranty';
+export type PriorityId = 'bounce' | 'durability' | 'value' | 'warranty';
 
 export interface MatchReasonBank {
   springless?: string;
@@ -26,7 +26,6 @@ export interface MatchReasonBank {
   bounce?: string;
   durability?: string;
   valueForMoney?: string;
-  assembly?: string;
   warranty?: string;
 }
 
@@ -74,7 +73,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: true,
     fitsYard: { small: true, medium: true, large: true, longNarrow: false },
     bestFor: 'Families wanting the safest premium Vuly springless model.',
-    metricScores: { bounce: 8, durability: 10, value: 4, assembly: 5, warranty: 9 },
+    metricScores: { bounce: 8, durability: 10, value: 4, warranty: 9 },
     matchReasons: {
       springless: 'Springless leaf-spring system — no exposed metal coil springs anywhere on the frame',
       safetyEssential: 'Maximum safety — curved poles angle away from jumpers, springs sit outside the net, frame positioned away from the jump zone',
@@ -108,7 +107,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: true,
     fitsYard: { small: true, medium: true, large: true, longNarrow: false },
     bestFor: 'Families wanting a springless Vuly at a lower entry price than the Pro.',
-    metricScores: { bounce: 8, durability: 8, value: 6, assembly: 5, warranty: 9 },
+    metricScores: { bounce: 8, durability: 8, value: 6, warranty: 9 },
     matchReasons: {
       springless: 'Springless leaf-spring system — no exposed metal coil springs',
       safetyEssential: 'Very high safety — curved poles and springless design remove the most common injury points',
@@ -142,7 +141,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: true,
     fitsYard: { small: true, medium: true, large: true, longNarrow: false },
     bestFor: 'Buyers who want a premium Vuly spring trampoline with excellent bounce.',
-    metricScores: { bounce: 10, durability: 8, value: 7, assembly: 8, warranty: 8 },
+    metricScores: { bounce: 8, durability: 8, value: 7, warranty: 8 },
     matchReasons: {
       traditional: 'Traditional spring system tuned for excellent bounce quality',
       safetyEssential: 'High safety — curved safety poles and premium enclosure design',
@@ -176,7 +175,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: true,
     fitsYard: { small: true, medium: true, large: true, longNarrow: false },
     bestFor: 'Families after a mid-range Vuly spring model with broad appeal.',
-    metricScores: { bounce: 9, durability: 7, value: 8, assembly: 8, warranty: 8 },
+    metricScores: { bounce: 8, durability: 7, value: 8, warranty: 8 },
     matchReasons: {
       traditional: 'Traditional spring system for a dependable, responsive bounce',
       safetyNiceToHave: 'Good safety design — Vuly build quality with solid enclosure',
@@ -209,7 +208,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: true,
     fitsYard: { small: true, medium: true, large: true, longNarrow: false },
     bestFor: 'Budget-conscious families who want Vuly quality at the entry-level price point.',
-    metricScores: { bounce: 8, durability: 7, value: 9, assembly: 9, warranty: 7 },
+    metricScores: { bounce: 8, durability: 7, value: 9, warranty: 7 },
     matchReasons: {
       traditional: 'Traditional spring system — good bounce, familiar feel',
       meetsStandards: 'Meets Australian AS 4989:2015 safety standard',
@@ -243,7 +242,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: true, medium: false, large: false, longNarrow: false },
     bestFor: 'Young kids in tight urban backyards who need maximum safety in a small footprint.',
-    metricScores: { bounce: 8, durability: 10, value: 6, assembly: 5, warranty: 10 },
+    metricScores: { bounce: 8, durability: 10, value: 6, warranty: 10 },
     matchReasons: {
       springless: 'Composite rod system — no exposed springs, no pinch points anywhere',
       safetyEssential: 'Maximum safety design — composite rods, SoftEdge mat, hidden frame with no hard edges',
@@ -273,7 +272,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: true, medium: false, large: false, longNarrow: false },
     bestFor: 'Small urban yards that need maximum safety in a compact footprint.',
-    metricScores: { bounce: 8, durability: 10, value: 6, assembly: 5, warranty: 10 },
+    metricScores: { bounce: 8, durability: 10, value: 6, warranty: 10 },
     matchReasons: {
       springless: 'Composite rod system — no exposed springs, no pinch points',
       safetyEssential: 'Maximum safety — composite rods, SoftEdge mat, hidden frame',
@@ -304,7 +303,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: true, medium: true, large: false, longNarrow: false },
     bestFor: 'Families wanting a mid-size Springfree round for mixed-age use.',
-    metricScores: { bounce: 8, durability: 10, value: 5, assembly: 5, warranty: 10 },
+    metricScores: { bounce: 8, durability: 10, value: 5, warranty: 10 },
     matchReasons: {
       springless: 'Composite rod system — no exposed springs',
       safetyEssential: 'Maximum safety — composite rods, SoftEdge mat, hidden frame',
@@ -337,7 +336,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: false, medium: false, large: true, longNarrow: false },
     bestFor: 'Large families wanting maximum Springfree jumping space.',
-    metricScores: { bounce: 8, durability: 10, value: 4, assembly: 5, warranty: 10 },
+    metricScores: { bounce: 8, durability: 10, value: 4, warranty: 10 },
     matchReasons: {
       springless: 'Composite rod system — no exposed springs',
       safetyEssential: 'Maximum safety design at jumbo scale — composite rods and SoftEdge mat',
@@ -369,7 +368,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: true, medium: false, large: false, longNarrow: true },
     bestFor: 'Long narrow yards that need a safe springless option in a compact oval footprint.',
-    metricScores: { bounce: 8, durability: 10, value: 6, assembly: 5, warranty: 10 },
+    metricScores: { bounce: 8, durability: 10, value: 6, warranty: 10 },
     matchReasons: {
       springless: 'Composite rod system — no exposed springs, no pinch points',
       safetyEssential: 'Maximum safety — composite rods, SoftEdge mat, hidden frame',
@@ -401,7 +400,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: false, medium: true, large: false, longNarrow: true },
     bestFor: 'Medium-sized yards with a long narrow layout.',
-    metricScores: { bounce: 8, durability: 10, value: 5, assembly: 5, warranty: 10 },
+    metricScores: { bounce: 8, durability: 10, value: 5, warranty: 10 },
     matchReasons: {
       springless: 'Composite rod system — no exposed springs',
       safetyEssential: 'Maximum safety — composite rods, SoftEdge mat, hidden frame',
@@ -434,7 +433,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: false, medium: true, large: true, longNarrow: true },
     bestFor: 'Larger yards with a long narrow layout needing extra length.',
-    metricScores: { bounce: 8, durability: 10, value: 5, assembly: 5, warranty: 10 },
+    metricScores: { bounce: 8, durability: 10, value: 5, warranty: 10 },
     matchReasons: {
       springless: 'Composite rod system — no exposed springs',
       safetyEssential: 'Maximum safety — composite rods, SoftEdge mat, hidden frame',
@@ -468,7 +467,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: false, medium: false, large: true, longNarrow: true },
     bestFor: 'Huge yards and athletes who want the largest oval Springfree makes.',
-    metricScores: { bounce: 8, durability: 10, value: 3, assembly: 4, warranty: 10 },
+    metricScores: { bounce: 8, durability: 10, value: 3, warranty: 10 },
     matchReasons: {
       springless: 'Composite rod system — no exposed springs',
       safetyEssential: 'Maximum safety design at jumbo scale',
@@ -500,7 +499,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: true, medium: true, large: false, longNarrow: false },
     bestFor: 'Medium yards wanting maximum corner-to-corner jumping area in a square shape.',
-    metricScores: { bounce: 8, durability: 10, value: 5, assembly: 5, warranty: 10 },
+    metricScores: { bounce: 8, durability: 10, value: 5, warranty: 10 },
     matchReasons: {
       springless: 'Composite rod system — no exposed springs',
       safetyEssential: 'Maximum safety — composite rods, SoftEdge mat, hidden frame',
@@ -533,7 +532,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: false, medium: true, large: true, longNarrow: false },
     bestFor: 'Larger backyards wanting the maximum Springfree square jump area.',
-    metricScores: { bounce: 8, durability: 10, value: 4, assembly: 5, warranty: 10 },
+    metricScores: { bounce: 8, durability: 10, value: 4, warranty: 10 },
     matchReasons: {
       springless: 'Composite rod system — no exposed springs',
       safetyEssential: 'Maximum safety — composite rods, SoftEdge mat, hidden frame',
@@ -566,7 +565,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: false, medium: false, large: true, longNarrow: false },
     bestFor: 'Large yards wanting the biggest possible square Springfree.',
-    metricScores: { bounce: 8, durability: 10, value: 3, assembly: 4, warranty: 10 },
+    metricScores: { bounce: 8, durability: 10, value: 3, warranty: 10 },
     matchReasons: {
       springless: 'Composite rod system — no exposed springs',
       safetyEssential: 'Maximum safety at jumbo scale — composite rods and SoftEdge mat',
@@ -600,7 +599,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: true, medium: false, large: false, longNarrow: false },
     bestFor: 'Budget-conscious families with smaller yards who want a certified spring model.',
-    metricScores: { bounce: 8, durability: 6, value: 9, assembly: 9, warranty: 6 },
+    metricScores: { bounce: 8, durability: 6, value: 9, warranty: 6 },
     matchReasons: {
       traditional: 'Traditional spring system — straightforward bounce',
       smallYard: '10ft size — fits smaller backyards well',
@@ -628,7 +627,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: false, medium: true, large: false, longNarrow: false },
     bestFor: 'Budget families with medium yards who want a dependable spring model.',
-    metricScores: { bounce: 8, durability: 6, value: 9, assembly: 9, warranty: 6 },
+    metricScores: { bounce: 8, durability: 6, value: 9, warranty: 6 },
     matchReasons: {
       traditional: 'Traditional spring system — dependable bounce',
       mediumYard: '12ft — ideal size for a medium-sized backyard',
@@ -656,7 +655,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: true, medium: false, large: false, longNarrow: false },
     bestFor: 'Families in smaller yards wanting high-safety spring performance without the springless price.',
-    metricScores: { bounce: 9, durability: 8, value: 8, assembly: 8, warranty: 8 },
+    metricScores: { bounce: 8, durability: 8, value: 8, warranty: 8 },
     matchReasons: {
       traditional: 'Traditional spring system with a high-performance curved-pole safety design',
       safetyEssential: 'High safety — curved poles, DualRing reinforced frame, and TightWeave enclosure net',
@@ -688,7 +687,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: false, medium: true, large: false, longNarrow: false },
     bestFor: 'Medium yard families wanting high-safety spring performance.',
-    metricScores: { bounce: 9, durability: 8, value: 8, assembly: 8, warranty: 8 },
+    metricScores: { bounce: 8, durability: 8, value: 8, warranty: 8 },
     matchReasons: {
       traditional: 'Traditional spring system with high-performance curved-pole safety design',
       safetyEssential: 'High safety — curved poles, DualRing reinforced frame, TightWeave enclosure net',
@@ -720,7 +719,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: false, medium: false, large: true, longNarrow: false },
     bestFor: 'Large yard families wanting high-safety spring performance in a 14ft model.',
-    metricScores: { bounce: 9, durability: 8, value: 7, assembly: 8, warranty: 8 },
+    metricScores: { bounce: 8, durability: 8, value: 7, warranty: 8 },
     matchReasons: {
       traditional: 'Traditional spring system with high-performance curved-pole design',
       safetyEssential: 'High safety — curved poles, DualRing frame, TightWeave enclosure net',
@@ -750,7 +749,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: false, medium: false, large: true, longNarrow: false },
     bestFor: 'Large-yard families who want the biggest round Jumpflex Hero option.',
-    metricScores: { bounce: 9, durability: 8, value: 7, assembly: 8, warranty: 8 },
+    metricScores: { bounce: 8, durability: 8, value: 7, warranty: 8 },
     matchReasons: {
       traditional: 'Traditional spring system with Jumpflex\'s curved-pole safety layout',
       safetyEssential: 'High safety — curved poles, DualRing frame, and TightWeave net',
@@ -776,12 +775,12 @@ const baseTrampolines: Trampoline[] = [
     priceFrom: 2099,
     sizes: [14],
     displaySize: '14ft square',
-    image: '/images/jumpflex/hero.png',
+    image: '/images/jumpflex/mega-14ft.jpg',
     slug: 'jumpflex-mega-14ft',
     isVuly: false,
     fitsYard: { small: false, medium: false, large: true, longNarrow: false },
     bestFor: 'Families who want a premium square trampoline with a big, gymnast-style jump area.',
-    metricScores: { bounce: 10, durability: 9, value: 6, assembly: 6, warranty: 8 },
+    metricScores: { bounce: 8, durability: 9, value: 6, warranty: 8 },
     matchReasons: {
       traditional: 'Traditional piano-wire spring system for powerful rebound',
       shapeRectangle: 'Square 14ft mat — the straight-edged jump area you asked for, with more usable corners than a round',
@@ -808,12 +807,12 @@ const baseTrampolines: Trampoline[] = [
     priceFrom: 2399,
     sizes: [17],
     displaySize: '17ft rectangle',
-    image: '/images/jumpflex/hero.png',
+    image: '/images/jumpflex/mega-17ft.jpg',
     slug: 'jumpflex-mega-17ft',
     isVuly: false,
     fitsYard: { small: false, medium: false, large: true, longNarrow: true },
     bestFor: 'Long, wide backyards wanting a premium rectangle trampoline.',
-    metricScores: { bounce: 10, durability: 9, value: 6, assembly: 6, warranty: 8 },
+    metricScores: { bounce: 8, durability: 9, value: 6, warranty: 8 },
     matchReasons: {
       traditional: 'Premium spring setup tuned for a bigger rectangle jump area',
       shapeRectangle: 'True 17ft rectangle — the long, straight jump lane you asked for',
@@ -840,12 +839,12 @@ const baseTrampolines: Trampoline[] = [
     priceFrom: 2799,
     sizes: [19],
     displaySize: '19ft square',
-    image: '/images/jumpflex/hero.png',
+    image: '/images/jumpflex/mega-19ft.jpg',
     slug: 'jumpflex-mega-19ft',
     isVuly: false,
     fitsYard: { small: false, medium: false, large: true, longNarrow: false },
     bestFor: 'Huge yards and older jumpers who want maximum square jumping space.',
-    metricScores: { bounce: 10, durability: 9, value: 5, assembly: 5, warranty: 8 },
+    metricScores: { bounce: 8, durability: 9, value: 5, warranty: 8 },
     matchReasons: {
       traditional: 'Premium piano-wire spring setup with a giant square footprint',
       shapeRectangle: 'Giant 19ft square — maximum straight-edged jump area for your shape preference',
@@ -874,12 +873,12 @@ const baseTrampolines: Trampoline[] = [
     priceFrom: 429,
     sizes: [10],
     displaySize: '10ft',
-    image: '/images/posts/kids-bouncing-on-trampoline.jpg',
+    image: '/images/lifespan-kids/hyperjump3-10-ft.webp',
     slug: 'lifespan-hyperjump-3-10ft',
     isVuly: false,
     fitsYard: { small: true, medium: false, large: false, longNarrow: false },
     bestFor: 'Budget-minded families who want a lower-cost springless-style option.',
-    metricScores: { bounce: 7, durability: 6, value: 9, assembly: 8, warranty: 7 },
+    metricScores: { bounce: 7, durability: 6, value: 9, warranty: 7 },
     matchReasons: {
       springless: 'Springless strap design removes exposed steel coil springs',
       safetyEssential: 'Safer than basic spring models thanks to the springless setup and enclosed jump area',
@@ -905,18 +904,17 @@ const baseTrampolines: Trampoline[] = [
     priceFrom: 549,
     sizes: [12],
     displaySize: '12ft',
-    image: '/images/posts/trampoline-family.png',
+    image: '/images/lifespan-kids/hyperjump4-12-ft.jpg',
     slug: 'lifespan-hyperjump-4-12ft',
     isVuly: false,
     fitsYard: { small: false, medium: true, large: false, longNarrow: false },
     bestFor: 'Families focused on value in a standard 12ft spring trampoline.',
-    metricScores: { bounce: 7, durability: 6, value: 8, assembly: 8, warranty: 5 },
+    metricScores: { bounce: 7, durability: 6, value: 8, warranty: 5 },
     matchReasons: {
       traditional: 'Traditional spring layout with a familiar bounce feel',
       mediumYard: '12ft footprint suits medium-sized family backyards',
       budget_500_1000: 'Affordable 12ft spring trampoline in the $500–$1,000 range',
       valueForMoney: 'Solid value for families who want a straightforward backyard trampoline',
-      assembly: 'Simple family-trampoline format is easier to assemble than premium oversized models',
     },
   },
 
@@ -938,7 +936,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: false, medium: true, large: true, longNarrow: true },
     bestFor: 'Longer, narrower backyards that suit a rectangle better than a round trampoline.',
-    metricScores: { bounce: 8, durability: 6, value: 7, assembly: 7, warranty: 5 },
+    metricScores: { bounce: 8, durability: 6, value: 7, warranty: 5 },
     matchReasons: {
       traditional: 'Rectangle spring layout offers a more directional bounce',
       shapeRectangle: '8×12ft rectangle — the shape you asked for at a mid-range price',
@@ -965,18 +963,17 @@ const baseTrampolines: Trampoline[] = [
     priceFrom: 509,
     sizes: [12],
     displaySize: '12ft',
-    image: '/images/posts/kids-bouncing-on-trampoline.jpg',
+    image: '/images/kahuna/classic-12ft.jpg',
     slug: 'kahuna-classic-12ft',
     isVuly: false,
     fitsYard: { small: false, medium: true, large: false, longNarrow: false },
     bestFor: 'Budget Australian families who just want a simple 12ft backyard trampoline.',
-    metricScores: { bounce: 7, durability: 5, value: 9, assembly: 8, warranty: 4 },
+    metricScores: { bounce: 7, durability: 5, value: 9, warranty: 4 },
     matchReasons: {
       traditional: 'Traditional spring setup with a straightforward family bounce',
       mediumYard: '12ft — the classic medium-yard family size',
       budget_500_1000: 'Low-cost 12ft option in the $500–$1,000 range',
       valueForMoney: 'Strong value if your main goal is a cheap family-size trampoline',
-      assembly: 'Simple round format keeps setup more manageable',
     },
   },
 
@@ -993,18 +990,17 @@ const baseTrampolines: Trampoline[] = [
     priceFrom: 509,
     sizes: [10],
     displaySize: '10ft',
-    image: '/images/posts/kids-bouncing-on-trampoline.jpg',
+    image: '/images/kahuna/blizzard-10ft.jpg',
     slug: 'kahuna-blizzard-10ft',
     isVuly: false,
     fitsYard: { small: true, medium: false, large: false, longNarrow: false },
     bestFor: 'Smaller Australian backyards looking for a cheap 10ft round model.',
-    metricScores: { bounce: 7, durability: 5, value: 9, assembly: 8, warranty: 4 },
+    metricScores: { bounce: 7, durability: 5, value: 9, warranty: 4 },
     matchReasons: {
       traditional: 'Traditional spring setup keeps the bounce familiar and simple',
       smallYard: '10ft — a practical size for smaller backyards',
       budget_500_1000: 'Affordable 10ft option without moving into premium pricing',
       valueForMoney: 'Budget-first value for a simple round family trampoline',
-      assembly: 'Simple round format is easier to set up than larger specialty shapes',
     },
   },
 
@@ -1021,12 +1017,12 @@ const baseTrampolines: Trampoline[] = [
     priceFrom: 899,
     sizes: [15],
     displaySize: '10×15ft oval',
-    image: '/images/posts/trampoline-family.png',
+    image: '/images/kahuna/oval-10x15.jpg',
     slug: 'kahuna-oval-10x15',
     isVuly: false,
     fitsYard: { small: false, medium: false, large: true, longNarrow: true },
     bestFor: 'Large or long-narrow yards that need length more than width.',
-    metricScores: { bounce: 8, durability: 5, value: 7, assembly: 7, warranty: 4 },
+    metricScores: { bounce: 8, durability: 5, value: 7, warranty: 4 },
     matchReasons: {
       traditional: 'Traditional spring setup in an oval footprint',
       largeYard: '10×15ft oval suits larger yards that have the length to spare',
@@ -1056,7 +1052,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: true, medium: false, large: false, longNarrow: false },
     bestFor: 'Budget-first Australian families needing a small, AU-standards-compliant option.',
-    metricScores: { bounce: 7, durability: 6, value: 10, assembly: 9, warranty: 5 },
+    metricScores: { bounce: 7, durability: 6, value: 10, warranty: 5 },
     matchReasons: {
       traditional: 'Traditional spring setup — familiar bounce',
       meetsStandards: 'Meets Australian AS 4989:2015 standard',
@@ -1084,7 +1080,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: true, medium: false, large: false, longNarrow: false },
     bestFor: 'Budget Australian families wanting a larger small-yard option.',
-    metricScores: { bounce: 7, durability: 6, value: 10, assembly: 9, warranty: 5 },
+    metricScores: { bounce: 7, durability: 6, value: 10, warranty: 5 },
     matchReasons: {
       traditional: 'Traditional spring setup — familiar bounce',
       meetsStandards: 'Meets Australian AS 4989:2015 standard',
@@ -1112,7 +1108,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: false, medium: true, large: false, longNarrow: false },
     bestFor: 'Budget Australian families with a medium yard.',
-    metricScores: { bounce: 7, durability: 6, value: 10, assembly: 9, warranty: 5 },
+    metricScores: { bounce: 7, durability: 6, value: 10, warranty: 5 },
     matchReasons: {
       traditional: 'Traditional spring setup — familiar bounce',
       meetsStandards: 'Meets Australian AS 4989:2015 standard',
@@ -1141,7 +1137,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: false, medium: false, large: true, longNarrow: false },
     bestFor: 'Budget Australian families with a large yard.',
-    metricScores: { bounce: 7, durability: 6, value: 10, assembly: 9, warranty: 5 },
+    metricScores: { bounce: 7, durability: 6, value: 10, warranty: 5 },
     matchReasons: {
       traditional: 'Traditional spring setup',
       meetsStandards: 'Meets Australian AS 4989:2015 standard',
@@ -1171,7 +1167,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: true, medium: true, large: false, longNarrow: false },
     bestFor: 'Value-focused families who want a well-built round with a long warranty.',
-    metricScores: { bounce: 7, durability: 8, value: 9, assembly: 8, warranty: 8 },
+    metricScores: { bounce: 8, durability: 8, value: 9, warranty: 8 },
     matchReasons: {
       traditional: 'Traditional coil-spring system with a dependable family bounce',
       shapeRound: 'Classic round shape with an even, centre-guiding bounce',
@@ -1204,7 +1200,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: true, medium: true, large: false, longNarrow: true },
     bestFor: 'Smaller yards that still want a true performance rectangle.',
-    metricScores: { bounce: 10, durability: 9, value: 7, assembly: 6, warranty: 9 },
+    metricScores: { bounce: 10, durability: 9, value: 7, warranty: 9 },
     matchReasons: {
       traditional: 'Performance coil springs tuned for a powerful rectangle bounce',
       shapeRectangle: 'True 7×10ft rectangle — the smallest way into a gymnast-style jump lane',
@@ -1238,7 +1234,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: false, medium: true, large: true, longNarrow: true },
     bestFor: 'Families wanting the most popular Force size for all-round performance.',
-    metricScores: { bounce: 10, durability: 9, value: 7, assembly: 6, warranty: 9 },
+    metricScores: { bounce: 10, durability: 9, value: 7, warranty: 9 },
     matchReasons: {
       traditional: 'Performance coil springs tuned for a powerful rectangle bounce',
       shapeRectangle: '8×12ft rectangle — a straight, controlled jump lane for training or play',
@@ -1272,7 +1268,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: false, medium: false, large: true, longNarrow: true },
     bestFor: 'Bigger yards and serious jumpers who want a full-size performance rectangle.',
-    metricScores: { bounce: 10, durability: 9, value: 7, assembly: 6, warranty: 9 },
+    metricScores: { bounce: 10, durability: 9, value: 7, warranty: 9 },
     matchReasons: {
       traditional: 'Performance coil springs tuned for a powerful rectangle bounce',
       shapeRectangle: '9×14ft rectangle — a full-length gymnast-style jump lane',
@@ -1305,7 +1301,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: false, medium: false, large: true, longNarrow: true },
     bestFor: 'Large yards wanting an olympic-length rectangle without the import price tag.',
-    metricScores: { bounce: 10, durability: 9, value: 7, assembly: 5, warranty: 9 },
+    metricScores: { bounce: 10, durability: 9, value: 7, warranty: 9 },
     matchReasons: {
       traditional: 'Performance coil springs tuned for a powerful rectangle bounce',
       shapeRectangle: '10×17ft rectangle — near olympic-length jump lane',
@@ -1338,7 +1334,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: false, medium: false, large: true, longNarrow: false },
     bestFor: 'Huge open yards wanting the biggest jump surface GeeTramp makes.',
-    metricScores: { bounce: 10, durability: 9, value: 6, assembly: 5, warranty: 9 },
+    metricScores: { bounce: 10, durability: 9, value: 6, warranty: 9 },
     matchReasons: {
       traditional: 'Performance coil springs tuned for a powerful rectangle bounce',
       shapeRectangle: '14×16ft near-square rectangle — a massive straight-edged jump area',
@@ -1371,7 +1367,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: false, medium: true, large: true, longNarrow: false },
     bestFor: 'Families wanting a heavy-duty Finnish round built for year-round outdoor use.',
-    metricScores: { bounce: 9, durability: 9, value: 6, assembly: 7, warranty: 8 },
+    metricScores: { bounce: 8, durability: 9, value: 6, warranty: 8 },
     matchReasons: {
       traditional: 'High spring count tuned for a deep, responsive bounce',
       shapeRound: 'Classic round shape with an even, centre-guiding bounce',
@@ -1404,7 +1400,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: false, medium: false, large: true, longNarrow: true },
     bestFor: 'Big families and teens who need a rectangle with a huge weight rating.',
-    metricScores: { bounce: 10, durability: 10, value: 5, assembly: 5, warranty: 8 },
+    metricScores: { bounce: 10, durability: 10, value: 5, warranty: 8 },
     matchReasons: {
       traditional: '140 coil springs give a deep, powerful rectangle bounce',
       shapeRectangle: '10×17ft heavy-duty rectangle — a serious straight jump lane',
@@ -1436,7 +1432,7 @@ const baseTrampolines: Trampoline[] = [
     isVuly: false,
     fitsYard: { small: false, medium: false, large: true, longNarrow: true },
     bestFor: 'Athletes and gymnasts who want ACON\'s flagship performance rectangle.',
-    metricScores: { bounce: 10, durability: 10, value: 3, assembly: 5, warranty: 8 },
+    metricScores: { bounce: 10, durability: 10, value: 3, warranty: 8 },
     matchReasons: {
       traditional: '120 performance springs on a flagship rectangle frame',
       shapeRectangle: '10×17ft flagship rectangle — ACON\'s highest-performance jump lane',

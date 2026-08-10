@@ -10,7 +10,7 @@ import CompareAffiliateToggle from '@/components/CompareAffiliateToggle';
 
 const questions = buildQuestions('AU');
 const usQuestions = buildQuestions('US');
-const priorityKeys = ['bounce', 'durability', 'value', 'assembly', 'warranty'] as const;
+const priorityKeys = ['bounce', 'durability', 'value', 'warranty'] as const;
 
 const scoringSpec = {
   sourceFiles: {
@@ -108,7 +108,7 @@ const scoringSpec = {
     'Signals counted: backyardSize is not not-sure; standards yes; safetyFeatures essential; springType not not-sure; budget does not include flexible; priorities length > 0.',
     'Fallback pool removes hard exclusions, removes negative budget fit, removes standards failures when standards=yes.',
     'Fallback sorts by baseMeritScore descending then priceFrom ascending.',
-    'baseMeritScore = bounce + durability + value + assembly + warranty + 3 if advancedSafety.',
+    'baseMeritScore = bounce + durability + value + warranty + 3 if advancedSafety.',
     'Fallback tries to pick one springless model, one traditional model from a new brand, and then another new-brand model before filling remaining slots.',
   ],
   vulyBias: [
