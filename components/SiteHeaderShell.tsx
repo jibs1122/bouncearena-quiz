@@ -2,13 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import SiteHeader, { type NavItem } from '@/components/SiteHeader';
-
-type SearchItem = {
-  title: string;
-  slug: string;
-  category: 'reviews' | 'comparisons' | 'blog';
-  description: string;
-};
+import type { SearchItem } from '@/lib/search';
 
 function activeNavItem(pathname: string): NavItem | undefined {
   const section = pathname.split('/').filter(Boolean)[0];
@@ -19,7 +13,7 @@ function activeNavItem(pathname: string): NavItem | undefined {
   if (section === 'brands') return 'brands';
   if (section === 'reviews') return 'reviews';
   if (section === 'blog') return 'blog';
-  if (section === 'comparisons') return 'comparisons';
+  if (section === 'comparisons') return 'compare';
   if (section === 'admin') return 'admin';
 
   return undefined;

@@ -235,7 +235,7 @@ export default function QuizPage() {
 
   return (
     <main className="min-h-screen bg-white text-black">
-      <SiteHeader active="quiz" />
+      <SiteHeader active="quiz" showPromo={false} />
 
 
       <section ref={quizContentRef} className="scroll-mt-20 mx-auto w-full max-w-3xl px-5 py-8 sm:px-8">

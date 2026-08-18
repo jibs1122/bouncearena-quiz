@@ -3,38 +3,34 @@
 import Link from 'next/link';
 import { useDeferredValue, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-
-type SearchItem = {
-  title: string;
-  slug: string;
-  category: 'reviews' | 'comparisons' | 'blog';
-  description: string;
-};
+import {
+  getSearchKindLabel,
+  searchSite,
+  type SearchItem,
+} from '@/lib/search';
 
 interface SearchBoxProps {
   items: SearchItem[];
   mobile?: boolean;
+  onNavigate?: () => void;
 }
 
-function getCategoryLabel(category: SearchItem['category']): string {
-  if (category === 'reviews') return 'Review';
-  if (category === 'comparisons') return 'Comparison';
-  return 'Blog';
-}
-
-export default function SearchBox({ items, mobile = false }: SearchBoxProps) {
+export default function SearchBox({ items, mobile = false, onNavigate }: SearchBoxProps) {
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const deferredQuery = useDeferredValue(query);
   const router = useRouter();
   const pathname = usePathname();
   const rootRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const listId = useId();
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
       setOpen(false);
       setQuery('');
+      setActiveIndex(-1);
     }, 0);
     return () => window.clearTimeout(timer);
   }, [pathname]);
@@ -43,12 +39,15 @@ export default function SearchBox({ items, mobile = false }: SearchBoxProps) {
     function onPointerDown(event: MouseEvent) {
       if (rootRef.current && !rootRef.current.contains(event.target as Node)) {
         setOpen(false);
+        setActiveIndex(-1);
       }
     }
 
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
         setOpen(false);
+        setActiveIndex(-1);
+        inputRef.current?.focus();
       }
     }
 
@@ -60,36 +59,63 @@ export default function SearchBox({ items, mobile = false }: SearchBoxProps) {
     };
   }, []);
 
-  const results = useMemo(() => {
-    const normalized = deferredQuery.trim().toLowerCase();
-    if (!normalized) return [];
+  const results = useMemo(
+    () => searchSite(items, deferredQuery, 7),
+    [deferredQuery, items],
+  );
+  const trimmedQuery = query.trim();
+  const showPopular = !trimmedQuery;
 
-    return items
-      .map((item) => {
-        const haystack = `${item.title} ${item.description} ${item.category}`.toLowerCase();
-        const titleStarts = item.title.toLowerCase().startsWith(normalized) ? 3 : 0;
-        const titleIncludes = item.title.toLowerCase().includes(normalized) ? 2 : 0;
-        const bodyIncludes = haystack.includes(normalized) ? 1 : 0;
-        return { item, score: titleStarts + titleIncludes + bodyIncludes };
-      })
-      .filter(({ score }) => score > 0)
-      .sort((a, b) => b.score - a.score || a.item.title.localeCompare(b.item.title))
-      .slice(0, 6);
-  }, [deferredQuery, items]);
+  function navigate(href: string) {
+    setOpen(false);
+    setActiveIndex(-1);
+    onNavigate?.();
+    router.push(href);
+  }
 
   function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const trimmed = query.trim();
-    if (!trimmed) return;
-    setOpen(false);
-    router.push(`/search/?q=${encodeURIComponent(trimmed)}`);
+
+    if (activeIndex >= 0 && results[activeIndex]) {
+      navigate(results[activeIndex].item.href);
+      return;
+    }
+
+    if (!trimmedQuery) {
+      setOpen(true);
+      return;
+    }
+
+    navigate(`/search/?q=${encodeURIComponent(trimmedQuery)}`);
+  }
+
+  function onInputKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      setOpen(true);
+      setActiveIndex((current) => Math.min(current + 1, results.length - 1));
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      setOpen(true);
+      setActiveIndex((current) => (current <= 0 ? results.length - 1 : current - 1));
+    } else if (event.key === 'Enter') {
+      event.preventDefault();
+
+      if (activeIndex >= 0 && results[activeIndex]) {
+        navigate(results[activeIndex].item.href);
+      } else if (trimmedQuery) {
+        navigate(`/search/?q=${encodeURIComponent(trimmedQuery)}`);
+      } else {
+        setOpen(true);
+      }
+    }
   }
 
   return (
     <div ref={rootRef} className={`relative ${mobile ? 'w-full' : 'w-full max-w-md'}`}>
       <form onSubmit={onSubmit} role="search" aria-label="Site search">
         <div
-          className={`flex items-center gap-2 rounded-2xl border border-black/10 bg-[#f7f8f8] px-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] transition-colors focus-within:border-[#38b1ab]/45 focus-within:bg-white ${mobile ? 'h-12' : 'h-11'}`}
+          className={`flex items-center gap-2 rounded-2xl border border-black/10 bg-[#f7f8f8] pl-3 pr-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] transition-colors focus-within:border-[#38b1ab]/45 focus-within:bg-white ${mobile ? 'h-12' : 'h-11'}`}
         >
           <svg
             width="18"
@@ -105,61 +131,125 @@ export default function SearchBox({ items, mobile = false }: SearchBoxProps) {
             <path d="M20 20l-3.5-3.5" />
           </svg>
           <input
+            ref={inputRef}
             type="search"
             role="combobox"
             value={query}
             onChange={(event) => {
               setQuery(event.target.value);
               setOpen(true);
+              setActiveIndex(-1);
             }}
             onFocus={() => setOpen(true)}
-            placeholder="Search reviews, comparisons, and guides"
+            onKeyDown={onInputKeyDown}
+            placeholder="Search brands, models, reviews…"
             aria-autocomplete="list"
             aria-controls={listId}
             aria-expanded={open}
-            className="w-full bg-transparent text-sm text-black placeholder:text-black/35 focus:outline-none"
+            aria-activedescendant={activeIndex >= 0 ? `${listId}-option-${activeIndex}` : undefined}
+            autoComplete="off"
+            className="min-w-0 flex-1 bg-transparent text-sm text-black placeholder:text-black/35 focus:outline-none"
           />
+          <button
+            type="submit"
+            aria-label="Search"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#38b1ab] text-white transition-colors hover:bg-[#2e9a94] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#38b1ab]"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.25"
+              aria-hidden="true"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path d="M20 20l-3.5-3.5" />
+            </svg>
+          </button>
         </div>
       </form>
 
-      {open && query.trim() && (
+      {open && (
         <div
           id={listId}
-          className="absolute left-0 right-0 top-[calc(100%+0.55rem)] z-50 overflow-hidden rounded-2xl border border-black/8 bg-white shadow-[0_22px_54px_-34px_rgba(0,0,0,0.45)]"
+          role="listbox"
+          aria-label={showPopular ? 'Suggested pages' : 'Search suggestions'}
+          className="absolute left-0 right-0 top-[calc(100%+0.55rem)] z-50 overflow-hidden rounded-2xl border border-black/8 bg-white shadow-[0_22px_54px_-24px_rgba(0,0,0,0.3)]"
         >
+          <div className="flex items-center justify-between border-b border-black/6 px-4 py-2.5">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-black/38">
+              {showPopular ? 'Suggested pages' : `${results.length} top ${results.length === 1 ? 'match' : 'matches'}`}
+            </span>
+            {!showPopular && (
+              <span className="text-[11px] text-black/30">↑↓ to choose</span>
+            )}
+          </div>
+
           {results.length > 0 ? (
-            <div className="py-2">
-              {results.map(({ item }) => (
+            <div className="py-1.5">
+              {results.map(({ item }, index) => (
                 <Link
-                  key={item.slug}
-                  href={`/${item.slug}/`}
-                  onClick={() => setOpen(false)}
-                  className="block px-4 py-3 transition-colors hover:bg-[#38b1ab]/6"
+                  id={`${listId}-option-${index}`}
+                  role="option"
+                  aria-selected={activeIndex === index}
+                  key={item.id}
+                  href={item.href}
+                  onMouseMove={() => setActiveIndex(index)}
+                  onClick={() => {
+                    setOpen(false);
+                    setActiveIndex(-1);
+                    onNavigate?.();
+                  }}
+                  className={`block border-l-2 px-4 py-2.5 transition-colors ${
+                    activeIndex === index
+                      ? 'border-[#38b1ab] bg-[#38b1ab]/[0.07]'
+                      : 'border-transparent hover:bg-[#38b1ab]/[0.04]'
+                  }`}
                 >
-                  <div className="text-xs font-semibold uppercase tracking-[0.16em] text-[#38b1ab]">
-                    {getCategoryLabel(item.category)}
+                  <div className="flex items-baseline justify-between gap-3">
+                    <div className="truncate text-sm font-semibold text-black">{item.title}</div>
+                    <div className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.13em] text-[#38b1ab]">
+                      {getSearchKindLabel(item.kind)}
+                    </div>
                   </div>
-                  <div className="mt-1 text-sm font-semibold text-black">{item.title}</div>
                   {item.description && (
-                    <div className="mt-1 line-clamp-2 text-sm leading-6 text-black/52">
+                    <div className="mt-0.5 line-clamp-1 text-xs leading-5 text-black/48">
                       {item.description}
                     </div>
                   )}
                 </Link>
               ))}
-              <div className="border-t border-black/6 px-4 py-3">
-                <Link
-                  href={`/search/?q=${encodeURIComponent(query.trim())}`}
-                  onClick={() => setOpen(false)}
-                  className="text-sm font-medium text-[#38b1ab] transition-colors hover:text-[#2e9a94]"
-                >
-                  See all results for “{query.trim()}”
-                </Link>
-              </div>
+
+              {trimmedQuery && (
+                <div className="mt-1 border-t border-black/6 px-4 pt-2.5 pb-1.5">
+                  <Link
+                    href={`/search/?q=${encodeURIComponent(trimmedQuery)}`}
+                    onClick={() => {
+                      setOpen(false);
+                      onNavigate?.();
+                    }}
+                    className="text-sm font-medium text-[#38b1ab] transition-colors hover:text-[#2e9a94]"
+                  >
+                    See all results for “{trimmedQuery}” →
+                  </Link>
+                </div>
+              )}
             </div>
           ) : (
-            <div className="px-4 py-4 text-sm text-black/48">
-              No matches yet. Try a brand, model, or topic.
+            <div className="px-4 py-4">
+              <p className="text-sm text-black/50">No quick matches yet.</p>
+              <Link
+                href={`/search/?q=${encodeURIComponent(trimmedQuery)}`}
+                onClick={() => {
+                  setOpen(false);
+                  onNavigate?.();
+                }}
+                className="mt-2 inline-block text-sm font-medium text-[#38b1ab] hover:text-[#2e9a94]"
+              >
+                Search the full site for “{trimmedQuery}” →
+              </Link>
             </div>
           )}
         </div>

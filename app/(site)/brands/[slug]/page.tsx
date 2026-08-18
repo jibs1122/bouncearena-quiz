@@ -32,6 +32,7 @@ import {
   type GroupedTrampoline,
 } from '@/lib/compareShared';
 import { buildPromosForBrands } from '@/lib/promoCtas';
+import { toSearchAnchor } from '@/lib/search';
 
 const SITE_URL = 'https://bouncearena.com.au';
 
@@ -144,56 +145,6 @@ function springRangeLabel(rows: Trampoline[]): string {
   if (hasSpringless && hasCoilSprings) return 'Coil-spring and springless models';
   if (hasSpringless) return 'Springless-only models';
   return 'Coil-spring-only models';
-}
-
-function warrantySummary(rows: Trampoline[], brandName: string): string {
-  const warrantyParts = [
-    { label: 'frame', values: rows.map((row) => row.warrantyFrameYrs) },
-    { label: 'mat', values: rows.map((row) => row.warrantyMatYrs) },
-    { label: 'net', values: rows.map((row) => row.warrantyNetYrs) },
-  ].map(({ label, values }) => ({
-    label,
-    values: values.filter((value): value is number => typeof value === 'number'),
-  }));
-
-  const known = warrantyParts.filter(({ values }) => values.length > 0);
-  const missing = warrantyParts
-    .filter(({ values }) => values.length === 0)
-    .map(({ label }) => label);
-
-  if (known.length === 0) {
-    return `Warranty terms for ${brandName} are not currently available in our data.`;
-  }
-
-  const joinList = (items: string[]): string => {
-    if (items.length === 1) return items[0];
-    if (items.length === 2) return `${items[0]} and ${items[1]}`;
-    return `${items.slice(0, -1).join(', ')} and ${items.at(-1)}`;
-  };
-
-  const clauses = known.map(({ label, values }) => {
-    const low = Math.min(...values);
-    const high = Math.max(...values);
-    const term = low === high
-      ? `a ${low}-year ${label} warranty`
-      : `${label} warranties ranging from ${low} to ${high} years`;
-
-    if (values.length === rows.length) return term;
-
-    const coverage = values.length === 1
-      ? `one of ${rows.length} listed sizes`
-      : `${values.length} of ${rows.length} listed sizes`;
-    return `${term} for ${coverage}`;
-  });
-
-  const allKnownTermsCoverEverySize = known.every(({ values }) => values.length === rows.length);
-  const coverage = allKnownTermsCoverEverySize ? ' across the range' : '';
-  const knownSentence = `Our data lists ${joinList(clauses)}${coverage}.`;
-
-  if (missing.length === 0) return knownSentence;
-
-  const subject = `${joinList(missing)} warranty terms`;
-  return `${knownSentence} ${subject[0].toUpperCase()}${subject.slice(1)} are not currently available.`;
 }
 
 function ShopLink({ row }: { row: Trampoline }) {
@@ -318,8 +269,12 @@ function SpecTable({ rows }: { rows: Trampoline[] }) {
           </tr>
         </thead>
         <tbody className="divide-y divide-black/[0.05]">
-          {tableRows.map((row) => (
-            <tr key={`${row.brand}-${row.model}-${row.size}`} className="bg-white align-top">
+          {tableRows.map((row, index) => (
+            <tr
+              key={`${row.brand}-${row.model}-${row.size}`}
+              id={tableRows[index - 1]?.model === row.model ? undefined : toSearchAnchor(row.model)}
+              className="scroll-mt-24 bg-white align-top"
+            >
               <th scope="row" className="sticky left-0 z-10 bg-white px-4 py-3 text-left font-medium text-black">
                 <ModelNameCell row={row} />
               </th>
@@ -395,7 +350,13 @@ export default async function BrandPage({ params }: Props) {
   const featured = featuredGroups(rows);
   const price = priceRangeLabel(rows);
   const largest = largestSize(rows);
-  const certifiedCount = rows.filter((row) => row.meetsAuStd).length;
+  const certifiedModelCount = groups.filter((group) =>
+    group.variants.every((variant) => variant.meetsAuStd)
+  ).length;
+  const partiallyCertifiedModelCount = groups.filter((group) => {
+    const certifiedVariants = group.variants.filter((variant) => variant.meetsAuStd).length;
+    return certifiedVariants > 0 && certifiedVariants < group.variants.length;
+  }).length;
   const springRange = springRangeLabel(rows);
   const promos = buildPromosForBrands([brand.name]);
   const showDisclosure = hasAffiliateLink(rows);
@@ -508,7 +469,7 @@ export default async function BrandPage({ params }: Props) {
         <p className="text-base leading-7 text-black/72">
           {brand.name} sells {groups.length} model{groups.length === 1 ? '' : 's'} in Australia, across{' '}
           {rows.length} size{rows.length === 1 ? '' : 's'} — {shapeSummary(rows).toLowerCase()}
-          {largest ? `, up to ${largest}` : ''}. {standardSummary(rows, brand.name)} {warrantySummary(rows, brand.name)}
+          {largest ? `, up to ${largest}` : ''}. {standardSummary(rows, brand.name)} {brand.warranty}
         </p>
       </section>
 
@@ -528,8 +489,20 @@ export default async function BrandPage({ params }: Props) {
         <li className="flex items-center gap-2">
           <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#38b1ab]" aria-hidden="true" />
           <span>
-            {certifiedCount > 0 ? (
-              <><strong className="font-semibold text-black">{certifiedCount}</strong> {certifiedCount === 1 ? 'size' : 'sizes'} meeting the AU standard</>
+            {certifiedModelCount > 0 ? (
+              <>
+                <strong className="font-semibold text-black">{certifiedModelCount}</strong>{' '}
+                {certifiedModelCount === 1 ? 'model' : 'models'} meeting the AU standard
+                {partiallyCertifiedModelCount > 0 && (
+                  <>; <strong className="font-semibold text-black">{partiallyCertifiedModelCount}</strong>{' '}
+                    {partiallyCertifiedModelCount === 1 ? 'model has' : 'models have'} some sizes confirmed</>
+                )}
+              </>
+            ) : partiallyCertifiedModelCount > 0 ? (
+              <>
+                <strong className="font-semibold text-black">{partiallyCertifiedModelCount}</strong>{' '}
+                {partiallyCertifiedModelCount === 1 ? 'model has' : 'models have'} some sizes confirmed for the AU standard
+              </>
             ) : (
               'AU standard not confirmed'
             )}

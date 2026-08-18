@@ -53,7 +53,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 const CATEGORY_CRUMBS: Record<string, { name: string; path: string }> = {
   reviews: { name: 'Reviews', path: '/reviews/' },
-  comparisons: { name: 'Comparisons', path: '/comparisons/' },
+  comparisons: { name: 'Compare', path: '/compare/' },
   blog: { name: 'Blog', path: '/blog/' },
 };
 

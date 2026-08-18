@@ -96,6 +96,14 @@ const SPRINGFREE_LINK_SLUGS = [
 
 const SPRINGFREE_LINK_SLUG_SET = new Set<string>(SPRINGFREE_LINK_SLUGS);
 
+const SPRINGFREE_CONTENT_REDIRECT_SLUG_SET = new Set<string>([
+  'spring-vs-springless',
+  'how-much-space-do-you-need-for-a-trampoline',
+  'trampoline-standards',
+  'springfree-rectangle-vs-round-trampoline',
+  'springfree-compare-trampoline-models',
+]);
+
 type VulyLinkSlug = (typeof VULY_LINK_SLUGS)[number];
 
 type CountryDestination = {
@@ -409,7 +417,10 @@ export function getLink(slug: string, country?: Country | null): string | null {
 }
 
 export function isAffiliateLink(slug: string): boolean {
-  return links[slug as LinkSlug]?.affiliate ?? false;
+  return (
+    links[slug as LinkSlug]?.affiliate ??
+    SPRINGFREE_CONTENT_REDIRECT_SLUG_SET.has(slug)
+  );
 }
 
 export function isVulyLinkSlug(slug: string): slug is VulyLinkSlug {

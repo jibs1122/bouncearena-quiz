@@ -11,6 +11,26 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: '/comparisons',
+        destination: '/compare/',
+        permanent: true,
+      },
+      {
+        source: '/comparisons/',
+        destination: '/compare/',
+        permanent: true,
+      },
+      {
+        source: '/category/comparisons',
+        destination: '/compare/',
+        permanent: true,
+      },
+      {
+        source: '/category/comparisons/',
+        destination: '/compare/',
+        permanent: true,
+      },
+      {
         source: '/go/springfree',
         destination: SPRINGFREE_AFFILIATE_URL,
         permanent: true,

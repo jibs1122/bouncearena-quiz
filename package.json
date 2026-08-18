@@ -4,12 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "npm run validate:comparisons && npm run validate:affiliate-links",
+    "prebuild": "npm run validate:comparisons && npm run validate:affiliate-links && npm run validate:search",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "validate:comparisons": "tsx scripts/validate-comparisons.ts",
     "validate:affiliate-links": "tsx scripts/validate-affiliate-links.ts",
+    "validate:search": "tsx scripts/validate-search.ts",
     "refresh:compare-data": "node scripts/refresh-compare-data.mjs",
     "fetch:model-images": "tsx scripts/fetch-model-images.ts",
     "update:trampoline-deals": "node scripts/update-trampoline-deals.mjs"

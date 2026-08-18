@@ -8,6 +8,11 @@ export type BrandInfo = {
   slug: string;
   /** One factual sentence. Sourced from site copy or derivable from the spec data. */
   blurb: string;
+  /**
+   * Hand-written warranty summary for the brand's intro paragraph. Written against
+   * the per-model terms in data/trampolines.ts — revisit it when those change.
+   */
+  warranty: string;
   imageDir: string | null;
   affiliate: boolean;
 };
@@ -38,6 +43,8 @@ export const BRANDS: BrandInfo[] = [
     slug: 'vuly',
     blurb:
       'Brisbane-based brand selling round trampolines in two systems: coil-spring Flare and Ultra models, and leaf-spring Thunder models that move the springs out of the jumping area.',
+    warranty:
+      'Vuly lists a 10-year frame warranty on the Thunder 2 and Ultra 2 Pro, 5 years on the Ultra 2 and 3 years on the Flare. Mat cover runs 3 to 5 years, with 1 year on the net across the range.',
     imageDir: 'vuly',
     affiliate: true,
   },
@@ -45,7 +52,9 @@ export const BRANDS: BrandInfo[] = [
     name: 'Springfree',
     slug: 'springfree',
     blurb:
-      'New Zealand brand whose trampolines have no springs at all — flexible fibreglass rods sit beneath the mat, and every model carries a flat 10-year frame, mat and net warranty.',
+      'New Zealand brand whose trampolines have no springs at all — flexible fibreglass rods sit beneath the mat instead of springs around its edge.',
+    warranty:
+      'Springfree covers the frame, mat and net for 10 years on every model.',
     imageDir: 'springfree',
     affiliate: true,
   },
@@ -54,6 +63,8 @@ export const BRANDS: BrandInfo[] = [
     slug: 'jumpflex',
     blurb:
       'New Zealand brand competing on specs and price, with round FLEX and HERO models plus the square and rectangular MEGA range rated to 225 kg per jumper.',
+    warranty:
+      'Jumpflex lists a 10-year frame warranty and a 5-year mat warranty on the HERO and MEGA, dropping to 5 years and 1 year on the FLEX. Net cover is 1 year across the range.',
     imageDir: 'jumpflex',
     affiliate: false,
   },
@@ -62,6 +73,8 @@ export const BRANDS: BrandInfo[] = [
     slug: 'oz-trampolines',
     blurb:
       'Australian retailer offering round and oval coil-spring trampolines built for local conditions, with replacement parts and after-sales support.',
+    warranty:
+      'Oz Trampolines lists a 5-year frame warranty across the range, with 2-year mat and net cover on most sizes.',
     imageDir: 'oz-trampolines',
     affiliate: false,
   },
@@ -70,6 +83,8 @@ export const BRANDS: BrandInfo[] = [
     slug: 'kahuna',
     blurb:
       'Budget-focused range of round and oval coil-spring trampolines, generally the lowest-priced full-size models sold in Australia.',
+    warranty:
+      'Kahuna lists a 1-year warranty on the frame, mat and net across the range.',
     imageDir: 'kahuna',
     affiliate: false,
   },
@@ -78,6 +93,8 @@ export const BRANDS: BrandInfo[] = [
     slug: 'kmart',
     blurb:
       'Budget retailer offering low-cost round and rectangular trampoline options, including a springless-band model, with fewer published warranty and safety-standard details than premium brands.',
+    warranty:
+      'Kmart lists a 2-year frame warranty on the rectangular model.',
     imageDir: 'kmart',
     affiliate: false,
   },
@@ -86,6 +103,8 @@ export const BRANDS: BrandInfo[] = [
     slug: 'lifespan-kids',
     blurb:
       'Australian play-equipment brand with both springless elastic-strap HyperJump models and traditional coil-spring models, often discounted below RRP.',
+    warranty:
+      'Lifespan Kids lists a 10-year frame warranty across the HyperJump range, dropping to 2 years on the Hoppy. Mat cover is 1 to 2 years.',
     imageDir: 'lifespan-kids',
     affiliate: false,
   },
@@ -93,7 +112,9 @@ export const BRANDS: BrandInfo[] = [
     name: 'GeeTramp',
     slug: 'geetramp',
     blurb:
-      'Performance-oriented range of round and rectangular coil-spring trampolines, including in-ground versions, with 10-year frame warranties across the line.',
+      'Performance-oriented range of round and rectangular coil-spring trampolines, including in-ground versions of both shapes.',
+    warranty:
+      'GeeTramp lists a 10-year frame warranty and a 3-year mat warranty across the range. The Force adds a 2-year net warranty.',
     imageDir: 'geetramp',
     affiliate: false,
   },
@@ -102,6 +123,8 @@ export const BRANDS: BrandInfo[] = [
     slug: 'acon',
     blurb:
       'Premium Finnish brand selling round and rectangular coil-spring trampolines built for strong bounce, at the top of the Australian price range.',
+    warranty:
+      'ACON lists a 10-year frame warranty, a 5-year mat warranty and a 1-year net warranty across the range.',
     imageDir: 'acon',
     affiliate: false,
   },
@@ -109,7 +132,9 @@ export const BRANDS: BrandInfo[] = [
     name: 'BERG',
     slug: 'berg',
     blurb:
-      'Dutch brand known for its TwinSpring system and in-ground Champion models, with frame warranties of 10 years and above.',
+      'Dutch brand known for its TwinSpring system and in-ground Champion models.',
+    warranty:
+      'BERG lists a 13-year frame warranty on the Champion and 10 years on the in-ground and Ultim models. Mat and net cover is 2 years across the range.',
     imageDir: 'berg',
     affiliate: false,
   },
@@ -117,7 +142,9 @@ export const BRANDS: BrandInfo[] = [
     name: 'Jump Star',
     slug: 'jump-star',
     blurb:
-      'Perth family-owned business selling budget round coil-spring trampolines with enclosures, backed by a 3-year frame warranty.',
+      'Perth family-owned business selling budget round coil-spring trampolines with enclosures.',
+    warranty:
+      'Jump Star lists a 3-year frame warranty, with 1 year on the mat and net.',
     imageDir: 'jump-star',
     affiliate: false,
   },
@@ -126,6 +153,8 @@ export const BRANDS: BrandInfo[] = [
     slug: 'plum',
     blurb:
       'Entry-level round trampolines aimed at younger children, spanning small junior models up to full-size Springsafe models.',
+    warranty:
+      'Plum lists a 5-year frame warranty on the Deluxe models and 1 year on the Springsafe models. Mat cover runs 1 to 2 years, and the Deluxe adds a 1-year net warranty.',
     imageDir: 'plum',
     affiliate: false,
   },
@@ -134,6 +163,8 @@ export const BRANDS: BrandInfo[] = [
     slug: 'mr-trampoline',
     blurb:
       'Melbourne maker producing handmade rectangular trampolines since 1949, in deck, in-ground and above-ground family configurations.',
+    warranty:
+      'Mr Trampoline lists a 30-year frame warranty and an 8-year mat warranty across the range.',
     imageDir: 'mr-trampoline',
     affiliate: false,
   },
@@ -152,6 +183,7 @@ function fallbackBrandInfo(name: string): BrandInfo {
       .replace(/^-|-$/g, ''),
     blurb:
       `${name} trampoline models are included in the comparison data, with specifications sourced from the current catalog sheet.`,
+    warranty: `Warranty terms for each ${name} size are in the table below.`,
     imageDir: null,
     affiliate: false,
   };

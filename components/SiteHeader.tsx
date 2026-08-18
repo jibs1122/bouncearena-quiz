@@ -5,19 +5,15 @@ import Link from 'next/link';
 import { useState } from 'react';
 import PromoBell from '@/components/PromoBell';
 import SearchBox from '@/components/SearchBox';
+import type { SearchItem } from '@/lib/search';
 
-export type NavItem = 'quiz' | 'reviews' | 'comparisons' | 'compare' | 'models' | 'brands' | 'blog' | 'admin';
-type SearchItem = {
-  title: string;
-  slug: string;
-  category: 'reviews' | 'comparisons' | 'blog';
-  description: string;
-};
+export type NavItem = 'quiz' | 'reviews' | 'compare' | 'models' | 'brands' | 'blog' | 'admin';
 
 interface SiteHeaderProps {
   active?: NavItem;
   searchItems?: SearchItem[];
   sticky?: boolean;
+  showPromo?: boolean;
 }
 
 const NAV_LINKS: { label: string; href: string; id: NavItem }[] = [
@@ -29,7 +25,12 @@ const NAV_LINKS: { label: string; href: string; id: NavItem }[] = [
   { label: 'BLOG', href: '/blog/', id: 'blog' },
 ];
 
-export default function SiteHeader({ active, searchItems = [], sticky = true }: SiteHeaderProps) {
+export default function SiteHeader({
+  active,
+  searchItems = [],
+  sticky = true,
+  showPromo = true,
+}: SiteHeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -93,14 +94,14 @@ export default function SiteHeader({ active, searchItems = [], sticky = true }: 
                 )}
               </svg>
             </button>
-            <PromoBell />
+            {showPromo && <PromoBell />}
           </div>
         </div>
 
         {mobileOpen && (
           <nav className="mt-3 rounded-2xl border border-black/8 bg-white p-2 shadow-[0_18px_36px_-28px_rgba(0,0,0,0.35)] lg:hidden">
             <div className="px-2 pb-2">
-              <SearchBox items={searchItems} mobile />
+              <SearchBox items={searchItems} mobile onNavigate={() => setMobileOpen(false)} />
             </div>
             {NAV_LINKS.map(({ label, href, id }) => (
               <Link

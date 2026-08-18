@@ -528,7 +528,7 @@ export default function ModelsBrowseClient() {
                     <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                       <div className="font-semibold text-black">{priceSummary(group)}</div>
                       {shopUrl && (
-                        <a href={shopUrl} target="_blank" rel={outboundRel(useAffiliate && group.variants.some(isAffiliateRow))}
+                        <a href={shopUrl} target="_blank" rel={outboundRel(group.variants.some(isAffiliateRow))}
                           className="text-[11px] text-[#38b1ab] hover:underline whitespace-nowrap">
                           View best price →
                         </a>
@@ -591,7 +591,7 @@ export default function ModelsBrowseClient() {
                                         <a
                                           href={variantShopUrl}
                                           target="_blank"
-                                          rel={outboundRel(useAffiliate && isAffiliateRow(variant))}
+                                          rel={outboundRel(isAffiliateRow(variant))}
                                           className="whitespace-nowrap text-[#38b1ab] hover:underline"
                                         >
                                           View price →
