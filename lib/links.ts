@@ -416,6 +416,18 @@ export function getLink(slug: string, country?: Country | null): string | null {
   return isSpringfreeLinkSlug(slug) ? `/go/${slug}/` : destination;
 }
 
+export function getLinkRetailerName(slug: string, country?: Country | null): string | null {
+  const destination = getLinkDestination(slug, country);
+  if (!destination) return null;
+
+  try {
+    const hostname = new URL(destination).hostname.replace(/^www\./, '');
+    return hostname === 'webandwarehouse.com.au' ? 'Web and Warehouse' : null;
+  } catch {
+    return null;
+  }
+}
+
 export function isAffiliateLink(slug: string): boolean {
   return (
     links[slug as LinkSlug]?.affiliate ??
