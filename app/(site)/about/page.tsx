@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="mx-auto max-w-2xl px-5 sm:px-8 py-12">
+    <div className="mx-auto max-w-3xl px-5 sm:px-8 py-12">
       <h1 className="text-3xl font-bold text-black mb-8">About Us</h1>
       <div className="prose prose-neutral max-w-none prose-p:text-black/75 prose-p:leading-relaxed prose-a:text-[#38b1ab] prose-headings:text-black">
         <p>
@@ -19,8 +19,8 @@ export default function AboutPage() {
           replacement part availability, and whether the price holds up against alternatives.
         </p>
         <p>
-          The result is a buying guides and tools that reflects what owners experience after year
-          two, not just what looks good when new, covering both springless and spring-based models.
+          The result is a set of buying guides and tools that reflects what owners experience after
+          year two, not just what looks good when new, covering both springless and spring-based models.
         </p>
         <p>
           Not sure where to start?{' '}

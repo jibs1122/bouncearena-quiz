@@ -3,6 +3,30 @@
 import { useState } from 'react';
 import { trackOutboundClick } from '@/lib/gtag';
 
+function CopyCodeButton({
+  code,
+  active,
+  onCopy,
+}: {
+  code: string;
+  active: boolean;
+  onCopy: (code: string) => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onCopy(code)}
+      className={`w-[7.5rem] rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors ${
+        active
+          ? 'border-[#38b1ab] bg-[#38b1ab] text-white'
+          : 'border-black/10 bg-black/[0.03] text-black/65 hover:border-[#38b1ab]/35 hover:text-[#38b1ab]'
+      }`}
+    >
+      <span className="block text-center">{active ? 'Copied' : code}</span>
+    </button>
+  );
+}
+
 export default function PromoBell() {
   const [mobileClosed, setMobileClosed] = useState(false);
   const [desktopClosed, setDesktopClosed] = useState(false);
@@ -18,24 +42,6 @@ export default function PromoBell() {
     } catch {}
   }
 
-  function CopyCodeButton({ code }: { code: string }) {
-    const active = copiedCode === code;
-
-    return (
-      <button
-        type="button"
-        onClick={() => copyCode(code)}
-        className={`w-[7.5rem] rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors ${
-          active
-            ? 'border-[#38b1ab] bg-[#38b1ab] text-white'
-            : 'border-black/10 bg-black/[0.03] text-black/65 hover:border-[#38b1ab]/35 hover:text-[#38b1ab]'
-        }`}
-      >
-        <span className="block text-center">{active ? 'Copied' : code}</span>
-      </button>
-    );
-  }
-
   return (
     <>
       {!desktopClosed && (
@@ -48,8 +54,8 @@ export default function PromoBell() {
               <div className="w-[208px] pr-7">
                 <p className="text-sm font-semibold leading-5 text-black">Vuly promo codes</p>
                 <div className="mt-2 flex flex-wrap justify-start gap-1.5">
-                  <CopyCodeButton code="BOUNCE15" />
-                  <CopyCodeButton code="BOUNCESURGE" />
+                  <CopyCodeButton code="BOUNCE15" active={copiedCode === 'BOUNCE15'} onCopy={copyCode} />
+                  <CopyCodeButton code="BOUNCESURGE" active={copiedCode === 'BOUNCESURGE'} onCopy={copyCode} />
                 </div>
                 <p className="mt-2 text-xs text-black/45">
                   Click a code to copy.
@@ -57,7 +63,7 @@ export default function PromoBell() {
                 <a
                   href="https://www.vulyplay.com/aff/100/"
                   target="_blank"
-                  rel="nofollow noopener noreferrer"
+                  rel="nofollow noopener noreferrer sponsored"
                   onClick={() => trackOutboundClick({ url: 'https://www.vulyplay.com/aff/100/', label: 'Click to shop', location: 'promo_pill_desktop' })}
                   className="mt-3 inline-flex items-center rounded-full bg-[#38b1ab] px-3 py-1.5 text-[11px] font-semibold text-white transition-colors hover:bg-[#2e9a94]"
                 >
@@ -89,7 +95,7 @@ export default function PromoBell() {
                 <a
                   href="https://www.vulyplay.com/aff/100/"
                   target="_blank"
-                  rel="nofollow noopener noreferrer"
+                  rel="nofollow noopener noreferrer sponsored"
                   onClick={() => trackOutboundClick({ url: 'https://www.vulyplay.com/aff/100/', label: 'Click to shop', location: 'promo_pill_mobile' })}
                   className="inline-flex items-center rounded-full bg-[#38b1ab] px-3 py-1.5 text-[11px] font-semibold text-white transition-colors hover:bg-[#2e9a94]"
                 >

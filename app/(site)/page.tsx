@@ -1,11 +1,52 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import BrandLogoAvatar from '@/components/BrandLogoAvatar';
 import PostCard from '@/components/PostCard';
+import JsonLd from '@/components/compare/JsonLd';
+import { getAllBrands, getBrandRows } from '@/lib/brands';
+import { comparePageBrands, getComparePages } from '@/lib/comparePages';
 import { getPostsByCategory } from '@/lib/content';
+import { groupPriceRange, groupRows } from '@/lib/compareShared';
+
+/** Brands we cover most heavily, measured by how many comparisons feature them. */
+function popularBrands(limit = 8) {
+  const pages = getComparePages();
+  const coverage = new Map<string, number>();
+  for (const page of pages) {
+    for (const brand of comparePageBrands(page)) {
+      coverage.set(brand, (coverage.get(brand) ?? 0) + 1);
+    }
+  }
+
+  return getAllBrands()
+    .map((brand) => {
+      const rows = getBrandRows(brand.name);
+      const range = groupPriceRange(rows);
+      return {
+        ...brand,
+        rows,
+        families: groupRows(rows).length,
+        fromPrice: range ? range.low : null,
+        comparisons: coverage.get(brand.name) ?? 0,
+      };
+    })
+    .filter((brand) => brand.families > 0)
+    .sort((a, b) => b.comparisons - a.comparisons || b.families - a.families)
+    .slice(0, limit);
+}
+
+function springTypeLabel(rows: Array<{ springless: boolean }>): string {
+  const hasCoilSprings = rows.some((row) => !row.springless);
+  const hasSpringless = rows.some((row) => row.springless);
+
+  if (hasCoilSprings && hasSpringless) return 'coil spring and springless';
+  if (hasSpringless) return 'springless';
+  return 'coil springs';
+}
 
 export const metadata: Metadata = {
-  title: 'Bounce Arena – Australia\'s Trampoline Review & Comparison Guide',
+  title: { absolute: 'Bounce Arena – Australia\'s Trampoline Review & Comparison Guide' },
   description:
     'Unbiased trampoline reviews, brand comparisons, and buying advice for Australian families. Find the right trampoline with our free quiz.',
   openGraph: {
@@ -14,16 +55,45 @@ export const metadata: Metadata = {
       'Unbiased trampoline reviews, brand comparisons, and buying advice for Australian families.',
     url: 'https://bouncearena.com.au',
     siteName: 'Bounce Arena',
-    images: [{ url: 'https://bouncearena.com.au/images/posts/kids-bouncing-on-trampoline.jpg' }],
+    images: [{
+      url: 'https://bouncearena.com.au/images/posts/kids-bouncing-on-trampoline.jpg',
+      width: 1200,
+      height: 800,
+      alt: 'Children enjoying a backyard trampoline',
+    }],
   },
   alternates: { canonical: 'https://bouncearena.com.au/' },
 };
 
 export default function HomePage() {
   const reviews = getPostsByCategory('reviews').slice(0, 4);
+  const brands = popularBrands();
+  const organization = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Bounce Arena',
+    url: 'https://bouncearena.com.au/',
+    logo: 'https://bouncearena.com.au/BOUNCE-ARENA-LOGO.png',
+    sameAs: [
+      'https://www.facebook.com/people/Bounce-Arena/61558451366389/',
+      'https://www.youtube.com/@BounceArena',
+      'https://www.reddit.com/user/Bounce_Arena_Reviews/',
+      'https://www.tiktok.com/@bouncearena.com.au',
+    ],
+  };
+  const website = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Bounce Arena',
+    url: 'https://bouncearena.com.au/',
+    publisher: { '@type': 'Organization', name: 'Bounce Arena' },
+  };
 
   return (
     <>
+      <JsonLd data={organization} />
+      <JsonLd data={website} />
+
       {/* Hero */}
       <section className="relative overflow-hidden bg-white">
         <div className="mx-auto max-w-6xl px-5 sm:px-8 py-14 sm:py-20 flex flex-col md:flex-row items-center gap-10 md:gap-16">
@@ -42,7 +112,7 @@ export default function HomePage() {
                 Take the free quiz →
               </Link>
               <Link
-                href="/compare/"
+                href="/models/"
                 className="inline-flex items-center justify-center gap-2 rounded-xl border border-black/15 hover:border-black/30 text-black font-medium px-7 py-3.5 transition-colors text-base"
               >
                 Compare all trampolines
@@ -62,6 +132,42 @@ export default function HomePage() {
               />
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Popular brands */}
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 py-12">
+        <div className="mb-2 flex items-baseline justify-between">
+          <h2 className="text-2xl font-bold text-black">Popular brands</h2>
+          <Link href="/brands/" className="text-sm font-medium text-[#38b1ab] hover:underline">
+            All brands →
+          </Link>
+        </div>
+        <p className="mb-6 max-w-2xl text-black/60">
+          Prices, sizes, warranties and safety standards for the trampoline brands sold in Australia.
+        </p>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          {brands.map((brand) => (
+            <Link
+              key={brand.slug}
+              href={`/brands/${brand.slug}/`}
+              className="group flex flex-col rounded-2xl border border-black/[0.08] p-4 transition-colors hover:border-[#38b1ab]/50"
+            >
+              <BrandLogoAvatar
+                name={brand.name}
+                width={180}
+                height={64}
+                fluid
+                className="mb-2"
+                imageClassName="p-1.5"
+              />
+              <span className="text-base font-semibold text-black">{brand.name}</span>
+              <span className="mt-1 text-xs text-black/50">
+                {springTypeLabel(brand.rows)}
+                {brand.fromPrice ? ` · from $${brand.fromPrice.toLocaleString('en-AU')}` : ''}
+              </span>
+            </Link>
+          ))}
         </div>
       </section>
 

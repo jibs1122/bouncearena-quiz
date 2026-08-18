@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
+import { getSupersededSlugs } from '@/lib/supersededPosts';
 
 export type Category = 'reviews' | 'comparisons' | 'blog';
 
@@ -17,6 +18,11 @@ export type Post = PostMeta & { content: string };
 
 const CONTENT_DIR = path.join(process.cwd(), 'content');
 const CATEGORIES: Category[] = ['reviews', 'comparisons', 'blog'];
+
+function excludeSuperseded(posts: PostMeta[]): PostMeta[] {
+  const superseded = new Set(getSupersededSlugs());
+  return posts.filter((post) => !superseded.has(post.slug));
+}
 
 function readCategory(category: Category): PostMeta[] {
   const dir = path.join(CONTENT_DIR, category);
@@ -40,13 +46,13 @@ function readCategory(category: Category): PostMeta[] {
 }
 
 export function getAllPosts(): PostMeta[] {
-  return CATEGORIES.flatMap(readCategory).sort((a, b) =>
+  return excludeSuperseded(CATEGORIES.flatMap(readCategory)).sort((a, b) =>
     b.date.localeCompare(a.date),
   );
 }
 
 export function getPostsByCategory(category: Category): PostMeta[] {
-  return readCategory(category);
+  return excludeSuperseded(readCategory(category));
 }
 
 export function getPost(slug: string): Post | null {
@@ -81,7 +87,7 @@ export function getAllSlugs(): string[] {
 }
 
 export function getRelatedPosts(slug: string, category: Category, count = 3): PostMeta[] {
-  return readCategory(category)
+  return excludeSuperseded(readCategory(category))
     .filter((p) => p.slug !== slug)
     .slice(0, count);
 }

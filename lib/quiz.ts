@@ -20,7 +20,7 @@ export function buildQuestions(country: Country): Question[] {
       ? undefined
       : {
           text: 'Australian Trampoline Standard AS 4989:2015',
-          href: '/go/trampoline-standards/',
+          href: 'https://www.standards.org.au/search-for-a-standard',
           suffix:
             ' is set by Standards Australia and covers voluntary safety and durability guidelines for recreational trampolines covering design, construction, safety padding, warning labels, and testing methods.',
         };
@@ -69,7 +69,7 @@ export function buildQuestions(country: Country): Question[] {
       type: 'single',
       affiliateLink: {
         text: 'Spring vs. Springless Trampolines (An Honest Comparison)',
-        href: '/go/spring-vs-springless',
+        href: '/springless-vs-spring-trampolines/',
         suffix: ' (opens in new tab)',
         showArrow: false,
       },

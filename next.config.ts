@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import { getSupersededSlugs } from './lib/supersededPosts';
 
 const SPRINGFREE_AFFILIATE_URL = 'https://t.cfjump.com/59728/t/87128';
 
@@ -29,6 +30,11 @@ const nextConfig: NextConfig = {
         destination: '/best-trampolines-australia-2025',
         permanent: true,
       },
+      // Articles replaced by a published comparison page at the same slug.
+      ...getSupersededSlugs().flatMap((slug) => [
+        { source: `/${slug}`, destination: `/compare/${slug}/`, permanent: true },
+        { source: `/${slug}/`, destination: `/compare/${slug}/`, permanent: true },
+      ]),
     ];
   },
 };

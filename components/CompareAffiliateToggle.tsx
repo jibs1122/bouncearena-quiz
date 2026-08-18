@@ -9,8 +9,11 @@ export default function CompareAffiliateToggle() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    try { setEnabled(localStorage.getItem(KEY) === '1'); } catch {}
+    const timer = window.setTimeout(() => {
+      setMounted(true);
+      try { setEnabled(localStorage.getItem(KEY) === '1'); } catch {}
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   function toggle() {
@@ -39,8 +42,11 @@ export default function CompareAffiliateToggle() {
         </p>
         <p className="text-xs text-black/50 mt-0.5">
           {enabled
-            ? 'ON — "View best price" links go through /go/ cloaking where available, then fall back to direct URL.'
-            : 'OFF — "View best price" links go directly to manufacturer product pages.'}
+            ? 'ON — other available partner links use tracking URLs.'
+            : 'OFF — non-partner brands link directly to manufacturer product pages.'}
+        </p>
+        <p className="mt-1 text-xs text-black/45">
+          Vuly and Springfree affiliate tracking is always enabled site-wide.
         </p>
         <p className="text-xs text-black/35 mt-1">Setting stored in this browser only (localStorage).</p>
       </div>

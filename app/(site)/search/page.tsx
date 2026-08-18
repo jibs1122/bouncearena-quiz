@@ -6,6 +6,11 @@ export const metadata: Metadata = {
   title: 'Search',
   description: 'Search trampoline reviews, comparisons, and guides on Bounce Arena.',
   alternates: { canonical: 'https://bouncearena.com.au/search/' },
+  robots: {
+    index: false,
+    follow: true,
+    googleBot: { index: false, follow: true },
+  },
 };
 
 function normalize(value: string): string {
@@ -25,7 +30,7 @@ export default async function SearchPage(
     : [];
 
   return (
-    <section className="mx-auto w-full max-w-4xl px-5 py-10 sm:px-8">
+    <section className="mx-auto w-full max-w-3xl px-5 py-10 sm:px-8">
       <div className="mb-8">
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#38b1ab]">
           Search

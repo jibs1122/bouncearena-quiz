@@ -32,8 +32,11 @@ export default function SearchBox({ items, mobile = false }: SearchBoxProps) {
   const listId = useId();
 
   useEffect(() => {
-    setOpen(false);
-    setQuery('');
+    const timer = window.setTimeout(() => {
+      setOpen(false);
+      setQuery('');
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [pathname]);
 
   useEffect(() => {
@@ -103,6 +106,7 @@ export default function SearchBox({ items, mobile = false }: SearchBoxProps) {
           </svg>
           <input
             type="search"
+            role="combobox"
             value={query}
             onChange={(event) => {
               setQuery(event.target.value);

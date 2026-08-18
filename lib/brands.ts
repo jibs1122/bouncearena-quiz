@@ -1,0 +1,255 @@
+import { TRAMPOLINES, type Trampoline } from '@/data/trampolines';
+import generatedImages from '@/lib/model-images.generated.json';
+import { trampolines as quizTrampolines, compareMatchers } from '@/lib/trampolines';
+
+export type BrandInfo = {
+  /** Must match the brand string in data/trampolines.ts exactly. */
+  name: string;
+  slug: string;
+  /** One factual sentence. Sourced from site copy or derivable from the spec data. */
+  blurb: string;
+  imageDir: string | null;
+  affiliate: boolean;
+};
+
+/**
+ * Brand strings that appear elsewhere in the codebase (the quiz uses a different
+ * capitalisation) mapped to the canonical data/trampolines.ts spelling.
+ */
+const BRAND_ALIASES: Record<string, string> = {
+  'oz trampolines': 'Oz Trampolines',
+  'jumpflex': 'Jumpflex',
+  'lifespan kids': 'Lifespan Kids',
+  'jump star': 'Jump Star',
+  'mr trampoline': 'Mr Trampoline',
+  'geetramp': 'GeeTramp',
+  'springfree': 'Springfree',
+  'kahuna': 'Kahuna',
+  'kmart': 'Kmart',
+  'vuly': 'Vuly',
+  'acon': 'ACON',
+  'berg': 'BERG',
+  'plum': 'Plum',
+};
+
+export const BRANDS: BrandInfo[] = [
+  {
+    name: 'Vuly',
+    slug: 'vuly',
+    blurb:
+      'Brisbane-based brand selling round trampolines in two systems: coil-spring Flare and Ultra models, and leaf-spring Thunder models that move the springs out of the jumping area.',
+    imageDir: 'vuly',
+    affiliate: true,
+  },
+  {
+    name: 'Springfree',
+    slug: 'springfree',
+    blurb:
+      'New Zealand brand whose trampolines have no springs at all — flexible fibreglass rods sit beneath the mat, and every model carries a flat 10-year frame, mat and net warranty.',
+    imageDir: 'springfree',
+    affiliate: true,
+  },
+  {
+    name: 'Jumpflex',
+    slug: 'jumpflex',
+    blurb:
+      'New Zealand brand competing on specs and price, with round FLEX and HERO models plus the square and rectangular MEGA range rated to 225 kg per jumper.',
+    imageDir: 'jumpflex',
+    affiliate: false,
+  },
+  {
+    name: 'Oz Trampolines',
+    slug: 'oz-trampolines',
+    blurb:
+      'Australian retailer offering round and oval coil-spring trampolines built for local conditions, with replacement parts and after-sales support.',
+    imageDir: 'oz-trampolines',
+    affiliate: false,
+  },
+  {
+    name: 'Kahuna',
+    slug: 'kahuna',
+    blurb:
+      'Budget-focused range of round and oval coil-spring trampolines, generally the lowest-priced full-size models sold in Australia.',
+    imageDir: 'kahuna',
+    affiliate: false,
+  },
+  {
+    name: 'Kmart',
+    slug: 'kmart',
+    blurb:
+      'Budget retailer offering low-cost round and rectangular trampoline options, including a springless-band model, with fewer published warranty and safety-standard details than premium brands.',
+    imageDir: 'kmart',
+    affiliate: false,
+  },
+  {
+    name: 'Lifespan Kids',
+    slug: 'lifespan-kids',
+    blurb:
+      'Australian play-equipment brand with both springless elastic-strap HyperJump models and traditional coil-spring models, often discounted below RRP.',
+    imageDir: 'lifespan-kids',
+    affiliate: false,
+  },
+  {
+    name: 'GeeTramp',
+    slug: 'geetramp',
+    blurb:
+      'Performance-oriented range of round and rectangular coil-spring trampolines, including in-ground versions, with 10-year frame warranties across the line.',
+    imageDir: 'geetramp',
+    affiliate: false,
+  },
+  {
+    name: 'ACON',
+    slug: 'acon',
+    blurb:
+      'Premium Finnish brand selling round and rectangular coil-spring trampolines built for strong bounce, at the top of the Australian price range.',
+    imageDir: 'acon',
+    affiliate: false,
+  },
+  {
+    name: 'BERG',
+    slug: 'berg',
+    blurb:
+      'Dutch brand known for its TwinSpring system and in-ground Champion models, with frame warranties of 10 years and above.',
+    imageDir: 'berg',
+    affiliate: false,
+  },
+  {
+    name: 'Jump Star',
+    slug: 'jump-star',
+    blurb:
+      'Perth family-owned business selling budget round coil-spring trampolines with enclosures, backed by a 3-year frame warranty.',
+    imageDir: 'jump-star',
+    affiliate: false,
+  },
+  {
+    name: 'Plum',
+    slug: 'plum',
+    blurb:
+      'Entry-level round trampolines aimed at younger children, spanning small junior models up to full-size Springsafe models.',
+    imageDir: 'plum',
+    affiliate: false,
+  },
+  {
+    name: 'Mr Trampoline',
+    slug: 'mr-trampoline',
+    blurb:
+      'Melbourne maker producing handmade rectangular trampolines since 1949, in deck, in-ground and above-ground family configurations.',
+    imageDir: 'mr-trampoline',
+    affiliate: false,
+  },
+];
+
+const BRANDS_BY_SLUG = new Map(BRANDS.map((brand) => [brand.slug, brand]));
+const BRANDS_BY_NAME = new Map(BRANDS.map((brand) => [brand.name.toLowerCase(), brand]));
+const DATA_BRAND_NAMES = [...new Set(TRAMPOLINES.map((row) => row.brand))];
+
+function fallbackBrandInfo(name: string): BrandInfo {
+  return {
+    name,
+    slug: name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, ''),
+    blurb:
+      `${name} trampoline models are included in the comparison data, with specifications sourced from the current catalog sheet.`,
+    imageDir: null,
+    affiliate: false,
+  };
+}
+
+export function getAllBrands(): BrandInfo[] {
+  const seen = new Set<string>();
+  const knownBrands = BRANDS.filter((brand) => {
+    const hasRows = DATA_BRAND_NAMES.includes(brand.name);
+    if (hasRows) seen.add(brand.name);
+    return hasRows;
+  });
+  const fallbackBrands = DATA_BRAND_NAMES
+    .filter((name) => !seen.has(name))
+    .sort((a, b) => a.localeCompare(b))
+    .map(fallbackBrandInfo);
+
+  return [...knownBrands, ...fallbackBrands];
+}
+
+/** Resolves any known spelling of a brand to its canonical data/trampolines.ts name. */
+export function canonicalBrandName(name: string): string {
+  const key = name.trim().toLowerCase();
+  return BRAND_ALIASES[key] ?? BRANDS_BY_NAME.get(key)?.name ?? name.trim();
+}
+
+export function getBrand(name: string): BrandInfo | null {
+  const canonical = canonicalBrandName(name).toLowerCase();
+  return getAllBrands().find((brand) => brand.name.toLowerCase() === canonical) ?? null;
+}
+
+export function getBrandBySlug(slug: string): BrandInfo | null {
+  return BRANDS_BY_SLUG.get(slug) ?? getAllBrands().find((brand) => brand.slug === slug) ?? null;
+}
+
+export function brandSlug(name: string): string {
+  return (
+    getBrand(name)?.slug ??
+    canonicalBrandName(name)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+  );
+}
+
+export function getBrandRows(name: string): Trampoline[] {
+  const canonical = canonicalBrandName(name);
+  return TRAMPOLINES.filter((t) => t.brand === canonical);
+}
+
+/**
+ * Product images live in the quiz dataset. compareMatchers already maps each quiz
+ * model to its brand/model/size in the spec data, so we reuse that bridge rather
+ * than maintaining a second manifest that could drift.
+ */
+const IMAGE_BY_MODEL_KEY: Map<string, string> = (() => {
+  const map = new Map<string, string>();
+
+  for (const quizModel of quizTrampolines) {
+    const matcher = compareMatchers[quizModel.slug];
+    if (!matcher || !quizModel.image) continue;
+
+    const key = `${canonicalBrandName(matcher.brand)}|${matcher.model}`.toLowerCase();
+    if (!map.has(key)) map.set(key, quizModel.image);
+  }
+
+  return map;
+})();
+
+/**
+ * Images sourced from each model's own product page by scripts/fetch-model-images.ts,
+ * covering the families the quiz dataset has no photo for.
+ */
+const GENERATED_IMAGES = new Map(
+  Object.entries(generatedImages as Record<string, string>).map(([key, value]) => [
+    key.toLowerCase(),
+    value,
+  ]),
+);
+
+export function modelImage(brand: string, model: string): string | null {
+  const canonicalBrand = canonicalBrandName(brand);
+  const key = `${canonicalBrand}|${model}`.toLowerCase();
+  const directImage = IMAGE_BY_MODEL_KEY.get(key) ?? GENERATED_IMAGES.get(key);
+  if (directImage) return directImage;
+
+  // Springfree rows are grouped into Round/Oval/Square families on brand and
+  // comparison pages. Use the largest photographed model as the family image.
+  if (canonicalBrand === 'Springfree') {
+    const family = model.match(/^(Round|Oval|Square) Trampoline$/i);
+    if (family) {
+      for (const size of ['Jumbo', 'Large', 'Medium', 'Compact', 'Mini']) {
+        const familyKey = `${canonicalBrand}|${size} ${family[1]} Trampoline`.toLowerCase();
+        const familyImage = IMAGE_BY_MODEL_KEY.get(familyKey) ?? GENERATED_IMAGES.get(familyKey);
+        if (familyImage) return familyImage;
+      }
+    }
+  }
+
+  return null;
+}

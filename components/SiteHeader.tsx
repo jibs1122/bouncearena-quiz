@@ -6,7 +6,7 @@ import { useState } from 'react';
 import PromoBell from '@/components/PromoBell';
 import SearchBox from '@/components/SearchBox';
 
-export type NavItem = 'quiz' | 'reviews' | 'comparisons' | 'compare' | 'blog' | 'admin';
+export type NavItem = 'quiz' | 'reviews' | 'comparisons' | 'compare' | 'models' | 'brands' | 'blog' | 'admin';
 type SearchItem = {
   title: string;
   slug: string;
@@ -23,6 +23,8 @@ interface SiteHeaderProps {
 const NAV_LINKS: { label: string; href: string; id: NavItem }[] = [
   { label: 'QUIZ', href: '/quiz/', id: 'quiz' },
   { label: 'COMPARE', href: '/compare/', id: 'compare' },
+  { label: 'MODELS', href: '/models/', id: 'models' },
+  { label: 'BRANDS', href: '/brands/', id: 'brands' },
   { label: 'REVIEWS', href: '/reviews/', id: 'reviews' },
   { label: 'BLOG', href: '/blog/', id: 'blog' },
 ];
@@ -33,7 +35,7 @@ export default function SiteHeader({ active, searchItems = [], sticky = true }: 
   return (
     <header className={`bg-white border-b border-black/[0.08] ${sticky ? 'sticky top-0 z-40' : 'relative z-40'}`}>
       <div className="mx-auto w-full max-w-6xl px-5 py-3 sm:px-8">
-        <div className="flex items-center justify-between gap-4 lg:grid lg:grid-cols-[auto_minmax(19rem,32rem)_auto] lg:gap-6">
+        <div className="flex items-center justify-between gap-4 lg:grid lg:grid-cols-[188px_minmax(15rem,1fr)_auto] lg:gap-6">
           <Link
             href="/"
             className="flex items-center shrink-0"
@@ -42,9 +44,10 @@ export default function SiteHeader({ active, searchItems = [], sticky = true }: 
             <Image
               src="/BOUNCE-ARENA-LOGO.png"
               alt="Bounce Arena"
-              width={200}
-              height={60}
-              className="h-[60px] sm:h-[72px] w-auto"
+              width={750}
+              height={319}
+              sizes="(max-width: 639px) 156px, 188px"
+              className="h-auto w-[156px] sm:w-[188px]"
               priority
             />
           </Link>
@@ -54,7 +57,7 @@ export default function SiteHeader({ active, searchItems = [], sticky = true }: 
           </div>
 
           <div className="flex items-center gap-1 justify-self-end">
-            <nav className="hidden items-center gap-0.5 text-sm font-medium sm:flex">
+            <nav className="hidden items-center gap-0.5 text-sm font-medium lg:flex">
               {NAV_LINKS.map(({ label, href, id }) => (
                 <Link
                   key={id}
@@ -72,7 +75,7 @@ export default function SiteHeader({ active, searchItems = [], sticky = true }: 
               aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={mobileOpen}
               onClick={() => setMobileOpen((open) => !open)}
-              className="flex h-10 w-10 items-center justify-center rounded-lg text-black/65 transition-colors hover:bg-black/5 hover:text-black sm:hidden"
+              className="flex h-10 w-10 items-center justify-center rounded-lg text-black/65 transition-colors hover:bg-black/5 hover:text-black lg:hidden"
             >
               <span className="sr-only">{mobileOpen ? 'Close menu' : 'Open menu'}</span>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -95,7 +98,7 @@ export default function SiteHeader({ active, searchItems = [], sticky = true }: 
         </div>
 
         {mobileOpen && (
-          <nav className="mt-3 rounded-2xl border border-black/8 bg-white p-2 shadow-[0_18px_36px_-28px_rgba(0,0,0,0.35)] sm:hidden">
+          <nav className="mt-3 rounded-2xl border border-black/8 bg-white p-2 shadow-[0_18px_36px_-28px_rgba(0,0,0,0.35)] lg:hidden">
             <div className="px-2 pb-2">
               <SearchBox items={searchItems} mobile />
             </div>

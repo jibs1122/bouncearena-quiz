@@ -7,6 +7,7 @@ import remarkGfm from 'remark-gfm';
 import { getAllSlugs, getPost, getRelatedPosts, formatDate } from '@/lib/content';
 import PostCard from '@/components/PostCard';
 import ArticleQuizCta from '@/components/ArticleQuizCta';
+import JsonLd from '@/components/compare/JsonLd';
 import SmartLink from '@/components/SmartLink';
 import YouTubeEmbed from '@/components/YouTubeEmbed';
 
@@ -50,6 +51,12 @@ const CATEGORY_LABELS: Record<string, string> = {
   blog: 'Blog',
 };
 
+const CATEGORY_CRUMBS: Record<string, { name: string; path: string }> = {
+  reviews: { name: 'Reviews', path: '/reviews/' },
+  comparisons: { name: 'Comparisons', path: '/comparisons/' },
+  blog: { name: 'Blog', path: '/blog/' },
+};
+
 const AFFILIATE_DISCLOSURE =
   'This page contains affiliate links and we may earn a commission on purchases.';
 
@@ -73,7 +80,10 @@ export async function generateMetadata(
       url: `https://bouncearena.com.au/${slug}/`,
       siteName: 'Bounce Arena',
       images: post.featuredImage
-        ? [{ url: `https://bouncearena.com.au${post.featuredImage}` }]
+        ? [{
+            url: `https://bouncearena.com.au${post.featuredImage}`,
+            alt: displayTitle,
+          }]
         : [],
       type: 'article',
       publishedTime: post.date,
@@ -93,11 +103,53 @@ export default async function PostPage(
   const { body, hasLeadYoutube, hasInlineQuizCta } = processContent(post.content);
   const showFeaturedImage = Boolean(post.featuredImage && !hasLeadYoutube);
   const displayTitle = getDisplayTitle(post);
+  const canonical = `https://bouncearena.com.au/${slug}/`;
+  const categoryCrumb = CATEGORY_CRUMBS[post.category] ?? {
+    name: post.category,
+    path: `/${post.category}/`,
+  };
+  const breadcrumb = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://bouncearena.com.au/' },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: categoryCrumb.name,
+        item: `https://bouncearena.com.au${categoryCrumb.path}`,
+      },
+      { '@type': 'ListItem', position: 3, name: displayTitle, item: canonical },
+    ],
+  };
+  const article = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: displayTitle,
+    description: post.description,
+    mainEntityOfPage: canonical,
+    ...(post.date ? { datePublished: post.date } : {}),
+    ...(post.featuredImage
+      ? { image: [`https://bouncearena.com.au${post.featuredImage}`] }
+      : {}),
+    publisher: {
+      '@type': 'Organization',
+      name: 'Bounce Arena',
+      url: 'https://bouncearena.com.au/',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://bouncearena.com.au/BOUNCE-ARENA-LOGO.png',
+      },
+    },
+  };
 
   return (
     <article className="mx-auto max-w-3xl px-5 sm:px-8 py-10">
+      <JsonLd data={breadcrumb} />
+      <JsonLd data={article} />
+
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-black/40 mb-6">
+      <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-black/40 mb-6">
         <Link href="/" className="hover:text-black transition-colors">Home</Link>
         <span>/</span>
         <Link href={`/${post.category}/`} className="hover:text-black transition-colors capitalize">

@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import { getGoLinkSlug, isAffiliateLink, isRawVulyAffiliateHref } from '@/lib/links';
 
 export interface QuizOption {
   id: string;
@@ -54,6 +55,15 @@ interface QuizQuestionProps {
   onSelectionChange?: (values: string[]) => void;
   newTabDisclaimer?: boolean;
   stepNumber?: number;
+}
+
+function linkRel(href: string): string {
+  const slug = getGoLinkSlug(href);
+  const sponsored = Boolean(slug && isAffiliateLink(slug)) || isRawVulyAffiliateHref(href);
+
+  if (sponsored) return 'nofollow noopener noreferrer sponsored';
+  if (href === '/go' || href.startsWith('/go/')) return 'nofollow noopener noreferrer';
+  return 'noopener noreferrer';
 }
 
 export default function QuizQuestion({
@@ -183,7 +193,7 @@ export default function QuizQuestion({
             <a
               href={question.linkedSubtitle.href}
               target="_blank"
-              rel="nofollow noopener noreferrer"
+              rel={linkRel(question.linkedSubtitle.href)}
               className="font-medium text-[#38b1ab] underline underline-offset-4 transition-colors hover:text-[#2e9a94]"
             >
               {question.linkedSubtitle.text}
@@ -201,7 +211,7 @@ export default function QuizQuestion({
             <a
               href={question.affiliateLink.href}
               target="_blank"
-              rel="nofollow noopener noreferrer"
+              rel={linkRel(question.affiliateLink.href)}
               className="font-medium text-[#38b1ab] underline underline-offset-4 hover:text-[#2e9a94] transition-colors"
             >
               {question.affiliateLink.text}
@@ -222,7 +232,7 @@ export default function QuizQuestion({
                 <a
                   href={link.href}
                   target="_blank"
-                  rel="nofollow noopener noreferrer"
+                  rel={linkRel(link.href)}
                   className="font-medium text-[#38b1ab] underline underline-offset-4 transition-colors hover:text-[#2e9a94]"
                 >
                   {link.text}

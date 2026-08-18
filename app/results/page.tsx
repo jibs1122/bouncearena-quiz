@@ -1,13 +1,14 @@
 'use client';
 
 import { Suspense, useEffect, useMemo, useRef } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import Footer from '@/components/Footer';
+import ModelImage from '@/components/ModelImage';
 import SiteHeader from '@/components/SiteHeader';
 import { trackOutboundClick } from '@/lib/gtag';
 import { getLink, isAffiliateLink, normalizeCountry } from '@/lib/links';
+import { outboundRel } from '@/lib/affiliate';
 import {
   buildSummaryText,
   getRecommendations,
@@ -16,6 +17,7 @@ import {
   type ScoredTrampoline,
   type QuizAnswers,
 } from '@/lib/scoring';
+import { compareMatchers } from '@/lib/trampolines';
 
 // ─── Result card ──────────────────────────────────────────────────────────────
 
@@ -52,17 +54,12 @@ function ResultCard({
       <div className="flex flex-col sm:flex-row">
         {/* Product image */}
         <div className={`relative flex-shrink-0 bg-white flex items-center justify-center ${isTop ? 'h-52 sm:h-auto sm:w-64' : 'h-44 sm:h-auto sm:w-52'}`}>
-          {rec.image ? (
-            <Image
-              src={rec.image}
-              alt={`${rec.brand} ${rec.displayName}`}
-              fill
-              className="object-contain p-5"
-              sizes="(max-width: 640px) 100vw, 256px"
-            />
-          ) : (
-            <span className="text-xs text-black/25 p-5">Image coming soon</span>
-          )}
+          <ModelImage
+            brand={rec.brand}
+            model={compareMatchers[rec.slug]?.model ?? rec.displayName}
+            className="object-contain p-5"
+            sizes="(max-width: 640px) 100vw, 256px"
+          />
         </div>
 
         {/* Content */}
@@ -107,7 +104,7 @@ function ResultCard({
                 <a
                   href={href}
                   target="_blank"
-                  rel="nofollow noopener noreferrer"
+                  rel={outboundRel(isAffiliateLink(rec.slug))}
                   onClick={() => trackOutboundClick({ url: href, label: `View on ${rec.brand}`, location: `results_card_rank_${rank}` })}
                   className="inline-flex items-center gap-2 bg-[#38b1ab] text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-[#2e9a94] transition-colors active:scale-95"
                 >

@@ -119,7 +119,7 @@ const baseTrampolines: Trampoline[] = [
       budget_1000_1500: 'Strong springless option in the $1,000–$1,500 range',
       budget_1500_2500: 'Fits your $1,500–$2,500 budget with strong safety credentials',
       durability: 'High-quality components built for long-term family use',
-      warranty: 'Strong warranty coverage from Vuly',
+      warranty: 'Strong Vuly warranty',
     },
   },
 
@@ -153,7 +153,7 @@ const baseTrampolines: Trampoline[] = [
       budget_1000_1500: 'Premium spring trampoline in the $1,000–$1,500 range',
       budget_1500_2500: 'Fits your budget and delivers premium performance',
       valueForMoney: 'Strong value — premium features at a mid-range price',
-      warranty: 'Good warranty coverage from Vuly',
+      warranty: 'Good Vuly warranty',
     },
   },
 
@@ -186,7 +186,7 @@ const baseTrampolines: Trampoline[] = [
       budget_500_1000: 'Vuly quality in the $500–$1,000 range',
       budget_1000_1500: 'Fits your budget with Vuly\'s quality backing',
       valueForMoney: 'Strong value — Vuly quality at a mid-range price',
-      warranty: 'Good warranty coverage from Vuly',
+      warranty: 'Good Vuly warranty',
     },
   },
 
@@ -218,7 +218,7 @@ const baseTrampolines: Trampoline[] = [
       budget_under_500: 'Starting at $499 — fits your under-$500 budget',
       budget_500_1000: 'Vuly quality in the $500–$1,000 range',
       valueForMoney: 'Entry-level price point with Vuly\'s brand backing',
-      warranty: 'Covered by Vuly\'s warranty program',
+      warranty: 'Backed by Vuly\'s warranty',
     },
   },
 
@@ -790,7 +790,7 @@ const baseTrampolines: Trampoline[] = [
       budget_1500_2500: 'Premium square trampoline within your budget range',
       bounce: 'Square shape and premium spring setup deliver a strong, controlled bounce',
       durability: 'Heavy-duty frame and higher user rating suit demanding family use',
-      warranty: 'Premium Jumpflex frame warranty coverage',
+      warranty: 'Premium Jumpflex frame warranty',
     },
   },
 
@@ -854,7 +854,7 @@ const baseTrampolines: Trampoline[] = [
       budget_2500_plus: 'Top-end square trampoline for families wanting maximum jump area',
       bounce: 'Huge square mat gives a broad, powerful jumping zone',
       durability: 'Heavy-duty build and higher weight limits support demanding use',
-      warranty: 'Premium Jumpflex frame warranty coverage',
+      warranty: 'Premium Jumpflex frame warranty',
     },
   },
 
@@ -887,7 +887,7 @@ const baseTrampolines: Trampoline[] = [
       budget_under_500: 'Low entry price for a springless-style trampoline',
       budget_500_1000: 'Strong value if you want springless on a tighter budget',
       valueForMoney: 'One of the more affordable ways into the springless category',
-      warranty: 'Long frame warranty coverage helps offset the budget positioning',
+      warranty: 'A long frame warranty helps offset the budget positioning',
     },
   },
 
@@ -1451,7 +1451,7 @@ type CompareMatcher = {
   size?: string;
 };
 
-const compareMatchers: Record<string, CompareMatcher> = {
+export const compareMatchers: Record<string, CompareMatcher> = {
   'vuly-thunder-2-pro': { brand: 'Vuly', model: 'Thunder 2 Pro' },
   'vuly-thunder-2': { brand: 'Vuly', model: 'Thunder 2' },
   'vuly-ultra-2-pro': { brand: 'Vuly', model: 'Ultra 2 Pro' },
@@ -1467,6 +1467,7 @@ const compareMatchers: Record<string, CompareMatcher> = {
   'springfree-jumbo-oval': { brand: 'Springfree', model: 'Jumbo Oval Trampoline' },
   'springfree-medium-square': { brand: 'Springfree', model: 'Medium Square Trampoline' },
   'springfree-large-square': { brand: 'Springfree', model: 'Large Square Trampoline' },
+  'springfree-jumbo-square': { brand: 'Springfree', model: 'Jumbo Square Trampoline' },
   'jumpflex-flex-10ft': { brand: 'Jumpflex', model: 'FLEX', size: '10 ft' },
   'jumpflex-flex-12ft': { brand: 'Jumpflex', model: 'FLEX', size: '12 ft' },
   'jumpflex-hero-10ft': { brand: 'Jumpflex', model: 'HERO', size: '10 ft' },

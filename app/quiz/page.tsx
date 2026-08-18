@@ -43,7 +43,10 @@ export default function QuizPage() {
   const [answers, setAnswers] = useState<PartialQuizAnswers>({ country: 'AU', priorities: [] });
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState<'forward' | 'back'>('forward');
-  const [ready, setReady] = useState(false);
+  // Render the first question on the server so crawlers and no-JavaScript users
+  // receive the quiz heading and introductory content. Geolocation refines the
+  // default Australian question set after hydration.
+  const [ready, setReady] = useState(true);
   const [previewPriorities, setPreviewPriorities] = useState<PriorityId[]>([]);
   const quizContentRef = useRef<HTMLElement | null>(null);
   const hasMountedQuestionRef = useRef(false);
