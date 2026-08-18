@@ -114,7 +114,7 @@ export const BRANDS: BrandInfo[] = [
     blurb:
       'Performance-oriented range of round and rectangular coil-spring trampolines, including in-ground versions of both shapes.',
     warranty:
-      'GeeTramp lists a 10-year frame warranty and a 3-year mat warranty across the range. The Force adds a 2-year net warranty.',
+      'GeeTramp lists a 10-year frame warranty and a 3-year mat warranty across the range, with a 2-year net warranty on the above-ground models.',
     imageDir: 'geetramp',
     affiliate: false,
   },
