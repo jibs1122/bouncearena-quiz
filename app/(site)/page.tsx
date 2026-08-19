@@ -49,6 +49,9 @@ export const metadata: Metadata = {
   title: { absolute: 'Bounce Arena – Australia\'s Trampoline Review & Comparison Guide' },
   description:
     'Unbiased trampoline reviews, brand comparisons, and buying advice for Australian families. Find the right trampoline with our free quiz.',
+  verification: {
+    google: 'BFFDRrI-ROvTm6R4VzXogMAZ0cKJNIzHtkP79mDBwQM',
+  },
   openGraph: {
     title: 'Bounce Arena – Australia\'s Trampoline Review & Comparison Guide',
     description:
