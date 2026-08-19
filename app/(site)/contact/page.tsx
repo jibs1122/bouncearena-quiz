@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import ProtectedEmail from '@/components/ProtectedEmail';
 
 export const metadata: Metadata = {
   title: 'Contact',
@@ -14,13 +15,7 @@ export default function ContactPage() {
         Questions or comments? We&apos;d love to hear from you.
       </p>
       <p className="text-black/70">
-        Email us at{' '}
-        <a
-          href="mailto:admin@bouncearena.com.au"
-          className="text-[#38b1ab] hover:underline font-medium"
-        >
-          admin@bouncearena.com.au
-        </a>
+        Email us: <ProtectedEmail />
       </p>
     </div>
   );

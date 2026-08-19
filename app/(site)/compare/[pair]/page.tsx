@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import remarkGfm from 'remark-gfm';
 import ArticleQuizCta from '@/components/ArticleQuizCta';
+import BrandLogoAvatar from '@/components/BrandLogoAvatar';
 import SmartLink from '@/components/SmartLink';
 import ComparePromoCta from '@/components/compare/ComparePromoCta';
 import ComparisonTable from '@/components/compare/ComparisonTable';
@@ -12,6 +13,7 @@ import JsonLd from '@/components/compare/JsonLd';
 import KeyTakeaways from '@/components/compare/KeyTakeaways';
 import RelatedComparisons, { type RelatedLink } from '@/components/compare/RelatedComparisons';
 import { hasAffiliateLink } from '@/lib/affiliate';
+import { brandSlug } from '@/lib/brands';
 import {
   comparePageBrands,
   comparePageHref,
@@ -73,6 +75,18 @@ function splitSections(content: string): Section[] {
 
 function findSection(sections: Section[], heading: string): Section | null {
   return sections.find((section) => section.heading?.toLowerCase() === heading.toLowerCase()) ?? null;
+}
+
+function linkFirstBrandMentions(content: string, sides: [ResolvedSide, ResolvedSide]): string {
+  return sides.reduce((linkedContent, side) => {
+    const escapedBrand = side.brand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const firstMention = new RegExp(`(^|[^A-Za-z0-9])(${escapedBrand})(?=$|[^A-Za-z0-9])`, 'i');
+
+    return linkedContent.replace(
+      firstMention,
+      (_, prefix: string, brand: string) => `${prefix}[${brand}](/brands/${brandSlug(side.brand)}/)`,
+    );
+  }, content);
 }
 
 function Prose({ children }: { children: React.ReactNode }) {
@@ -174,7 +188,8 @@ export default async function ComparePairPage({ params }: { params: Promise<{ pa
   const [sideA, sideB] = sides;
   const allRows = [...sideA.rows, ...sideB.rows];
 
-  const sections = splitSections(page.content);
+  const content = page.type === 'brand' ? linkFirstBrandMentions(page.content, sides) : page.content;
+  const sections = splitSections(content);
   const intro = sections.find((section) => section.heading === null)?.body ?? '';
   const quickVerdict = findSection(sections, 'Quick verdict');
   const specSection = findSection(sections, 'Full spec comparison');
@@ -293,6 +308,27 @@ export default async function ComparePairPage({ params }: { params: Promise<{ pa
         </div>
 
         <h1 className="mb-6 text-3xl font-bold leading-tight text-black sm:text-4xl">{page.title}</h1>
+
+        {page.type === 'brand' && (
+          <div className="mb-6 flex items-center gap-3 sm:gap-5" aria-label={`${sideA.brand} and ${sideB.brand} logos`}>
+            <BrandLogoAvatar
+              name={sideA.brand}
+              width={240}
+              height={104}
+              fluid
+              imageClassName="p-3 sm:p-4"
+              priority
+            />
+            <BrandLogoAvatar
+              name={sideB.brand}
+              width={240}
+              height={104}
+              fluid
+              imageClassName="p-3 sm:p-4"
+              priority
+            />
+          </div>
+        )}
 
         {showDisclosure && (
           <p className="mb-6 text-sm leading-relaxed text-black/45">{AFFILIATE_DISCLOSURE}</p>

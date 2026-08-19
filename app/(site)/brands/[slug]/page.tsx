@@ -444,7 +444,7 @@ export default async function BrandPage({ params }: Props) {
         <span className="text-black/60">{brand.name}</span>
       </nav>
 
-      <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+      <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <div className="mb-3 flex flex-wrap items-center gap-2">
             <span className="text-xs font-semibold uppercase tracking-wide text-[#38b1ab]">Brand guide</span>
