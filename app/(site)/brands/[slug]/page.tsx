@@ -78,16 +78,40 @@ function shapeSummary(rows: Trampoline[]): string {
   return shapes.length > 0 ? shapes.join(', ') : 'varied shapes';
 }
 
-function standardSummary(rows: Trampoline[], brandName: string): string {
-  const meets = rows.filter((row) => row.meetsAuStd).length;
+function modelStandardCoverage(groups: GroupedTrampoline[]) {
+  const certified = groups.filter((group) =>
+    group.variants.every((variant) => variant.meetsAuStd)
+  ).length;
+  const partiallyCertified = groups.filter((group) => {
+    const certifiedVariants = group.variants.filter((variant) => variant.meetsAuStd).length;
+    return certifiedVariants > 0 && certifiedVariants < group.variants.length;
+  }).length;
 
-  if (meets === 0) {
-    return `No ${brandName} size is listed as meeting the Australian Trampoline Standard AS 4989:2015.`;
+  return { certified, partiallyCertified };
+}
+
+function standardSummary(groups: GroupedTrampoline[], brandName: string): string {
+  const { certified, partiallyCertified } = modelStandardCoverage(groups);
+  const total = groups.length;
+  const standard = 'the Australian Trampoline Standard AS 4989:2015';
+
+  if (certified === 0 && partiallyCertified === 0) {
+    return `No ${brandName} model is listed as meeting ${standard}.`;
   }
-  if (meets === rows.length) {
-    return `Every size is listed as meeting the Australian Trampoline Standard AS 4989:2015.`;
+  if (certified === total) {
+    return `Every model is listed as meeting ${standard}.`;
   }
-  return `${meets} of the ${rows.length} sizes are listed as meeting the Australian Trampoline Standard AS 4989:2015, so check that row against the model you are considering.`;
+  if (partiallyCertified === 0) {
+    return `${certified} of the ${total} models ${certified === 1 ? 'is' : 'are'} listed as meeting ${standard}.`;
+  }
+
+  const partialSummary = `${partiallyCertified} other ${partiallyCertified === 1 ? 'model has' : 'models have'} only some sizes confirmed`;
+
+  if (certified === 0) {
+    return `No ${brandName} model is confirmed across every size; ${partiallyCertified} of the ${total} ${partiallyCertified === 1 ? 'models has' : 'models have'} only some sizes listed as meeting ${standard}.`;
+  }
+
+  return `${certified} of the ${total} models ${certified === 1 ? 'is' : 'are'} listed as meeting ${standard}; ${partialSummary}.`;
 }
 
 function largestSize(rows: Trampoline[]): string | null {
@@ -350,13 +374,10 @@ export default async function BrandPage({ params }: Props) {
   const featured = featuredGroups(rows);
   const price = priceRangeLabel(rows);
   const largest = largestSize(rows);
-  const certifiedModelCount = groups.filter((group) =>
-    group.variants.every((variant) => variant.meetsAuStd)
-  ).length;
-  const partiallyCertifiedModelCount = groups.filter((group) => {
-    const certifiedVariants = group.variants.filter((variant) => variant.meetsAuStd).length;
-    return certifiedVariants > 0 && certifiedVariants < group.variants.length;
-  }).length;
+  const {
+    certified: certifiedModelCount,
+    partiallyCertified: partiallyCertifiedModelCount,
+  } = modelStandardCoverage(groups);
   const springRange = springRangeLabel(rows);
   const promos = buildPromosForBrands([brand.name]);
   const showDisclosure = hasAffiliateLink(rows);
@@ -469,7 +490,7 @@ export default async function BrandPage({ params }: Props) {
         <p className="text-base leading-7 text-black/72">
           {brand.name} sells {groups.length} model{groups.length === 1 ? '' : 's'} in Australia, across{' '}
           {rows.length} size{rows.length === 1 ? '' : 's'} — {shapeSummary(rows).toLowerCase()}
-          {largest ? `, up to ${largest}` : ''}. {standardSummary(rows, brand.name)} {brand.warranty}
+          {largest ? `, up to ${largest}` : ''}. {standardSummary(groups, brand.name)} {brand.warranty}
         </p>
       </section>
 
