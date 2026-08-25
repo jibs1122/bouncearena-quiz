@@ -81,6 +81,29 @@ export function compareSizeLabel(t: Trampoline): string {
   return t.size.replace(/\s*x\s*/i, ' × ');
 }
 
+/**
+ * The source sheet also records broader Australian product standards such as
+ * AS/NZS 8124. The site's AU-standard filter is specifically about the
+ * trampoline standard AS 4989:2015, so an explicitly different numbered
+ * standard must not be treated as equivalent.
+ */
+export function meetsAs4989(t: Trampoline): boolean {
+  if (!t.meetsAuStd) return false;
+  if (!t.auStdDetail) return true;
+  if (/AS\s*4989:2015/i.test(t.auStdDetail)) return true;
+
+  const namesAnotherNumberedStandard = /\bAS(?:\/NZS)?\s*\d/i.test(t.auStdDetail);
+  return !namesAnotherNumberedStandard;
+}
+
+export function australianStandardLabel(t: Trampoline): string {
+  const detail = t.auStdDetail?.replace(/AS\s*4989:2015/i, 'AS 4989:2015');
+
+  if (meetsAs4989(t)) return detail ?? 'AS 4989:2015';
+  if (detail) return `${detail} (not AS 4989:2015)`;
+  return 'Not confirmed';
+}
+
 export function sizeStringToMaxDimensionCm(size: string): number | null {
   const normalized = size.toLowerCase().replace(/×/g, 'x');
   const matches = [...normalized.matchAll(/(\d+(?:\.\d+)?)/g)].map((match) => Number(match[1]));

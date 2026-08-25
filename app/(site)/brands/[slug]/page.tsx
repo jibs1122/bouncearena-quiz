@@ -27,6 +27,7 @@ import {
   groupPriceRange,
   groupRows,
   longestFootprintCm,
+  meetsAs4989,
   productUrl,
   sizeLabel,
   type GroupedTrampoline,
@@ -80,10 +81,10 @@ function shapeSummary(rows: Trampoline[]): string {
 
 function modelStandardCoverage(groups: GroupedTrampoline[]) {
   const certified = groups.filter((group) =>
-    group.variants.every((variant) => variant.meetsAuStd)
+    group.variants.every(meetsAs4989)
   ).length;
   const partiallyCertified = groups.filter((group) => {
-    const certifiedVariants = group.variants.filter((variant) => variant.meetsAuStd).length;
+    const certifiedVariants = group.variants.filter(meetsAs4989).length;
     return certifiedVariants > 0 && certifiedVariants < group.variants.length;
   }).length;
 
@@ -137,9 +138,12 @@ function warrantyLabel(value: number | null): string {
   return formatWarrantyYears(value);
 }
 
-function standardLabel(row: Trampoline): string {
-  if (!row.meetsAuStd) return 'Not confirmed';
-  return row.auStdDetail?.replace(/AS\s*4989:2015/i, 'AS 4989:2015') ?? 'AS 4989:2015';
+function standardCell(row: Trampoline) {
+  return meetsAs4989(row) ? (
+    <span className="font-semibold text-emerald-600" aria-label="Meets AS 4989:2015">✓</span>
+  ) : (
+    <span className="text-black/30" aria-label="Does not meet AS 4989:2015">✗</span>
+  );
 }
 
 function priceCell(row: Trampoline) {
@@ -315,7 +319,7 @@ function SpecTable({ rows }: { rows: Trampoline[] }) {
               <td className="px-4 py-3 text-black/60">{warrantyLabel(row.warrantyFrameYrs)}</td>
               <td className="px-4 py-3 text-black/60">{warrantyLabel(row.warrantyMatYrs)}</td>
               <td className="px-4 py-3 text-black/60">{warrantyLabel(row.warrantyNetYrs)}</td>
-              <td className="px-4 py-3 text-black/60">{standardLabel(row)}</td>
+              <td className="px-4 py-3">{standardCell(row)}</td>
               <td className="px-4 py-3 text-xs"><ShopLink row={row} /></td>
             </tr>
           ))}

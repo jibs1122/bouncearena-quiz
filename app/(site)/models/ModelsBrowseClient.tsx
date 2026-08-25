@@ -8,6 +8,7 @@ import { isAffiliateRow, outboundRel } from '@/lib/affiliate';
 import {
   BRAND_COLORS,
   FALLBACK_BRAND_COLOR,
+  australianStandardLabel,
   type GroupedTrampoline,
   compareSizeLabel,
   cmToFeet,
@@ -19,6 +20,7 @@ import {
   groupRows,
   groupShopUrl,
   longestFootprintCm,
+  meetsAs4989,
   overallSizeSummary,
   productUrl,
   sizeLabel,
@@ -274,7 +276,7 @@ export default function ModelsBrowseClient() {
       if (brands.length && !brands.includes(t.brand)) return false;
       if (shapes.length && !shapes.includes(t.shape)) return false;
       if (springlessOnly && !t.springless) return false;
-      if (auStdOnly && !t.meetsAuStd) return false;
+      if (auStdOnly && !meetsAs4989(t)) return false;
       if (t.priceAud !== null && t.priceAud < minPrice) return false;
       if (t.priceAud !== null && t.priceAud > maxPrice) return false;
       // Trampoline size filter: use longest overall dimension, converted to feet.
@@ -497,7 +499,7 @@ export default function ModelsBrowseClient() {
               const brandColor = BRAND_COLORS[group.brand] ?? FALLBACK_BRAND_COLOR;
               const shopUrl = groupShopUrl(group, useAffiliate);
               const review = groupReview(group);
-              const allMeetAuStd = group.variants.every((variant) => variant.meetsAuStd);
+              const allMeetAuStd = group.variants.every(meetsAs4989);
 
               return (
                 <React.Fragment key={group.key}>
@@ -584,7 +586,7 @@ export default function ModelsBrowseClient() {
                                       {formatWarrantyYears(variant.warrantyFrameYrs, 'short')}
                                     </td>
                                     <td className="py-2.5 pr-4 text-black/60">
-                                      {variant.meetsAuStd ? (variant.auStdDetail ?? 'Yes') : 'Not confirmed'}
+                                      {australianStandardLabel(variant)}
                                     </td>
                                     <td className="py-2.5 pr-0">
                                       {variantShopUrl ? (

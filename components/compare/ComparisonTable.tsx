@@ -2,10 +2,12 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import type { Trampoline } from '@/data/trampolines';
 import {
+  australianStandardLabel,
   compareSizeLabel,
   formatWarrantyRange,
   groupRows,
   longestFootprintCm,
+  meetsAs4989,
   PRICE_FOOTNOTE,
   sizeLabel,
   type GroupedTrampoline,
@@ -121,12 +123,14 @@ function heightValue(group: GroupedTrampoline): string {
 }
 
 function standardValue(group: GroupedTrampoline): string {
-  const certified = group.variants.filter((variant) => variant.meetsAuStd);
+  const certified = group.variants.filter(meetsAs4989);
 
-  if (certified.length === 0) return 'Not confirmed';
+  if (certified.length === 0) {
+    const otherStandard = group.variants.find((variant) => variant.auStdDetail);
+    return otherStandard ? australianStandardLabel(otherStandard) : 'Not confirmed';
+  }
 
-  const detail = certified.find((variant) => variant.auStdDetail)?.auStdDetail;
-  const label = detail?.replace(/AS\s*4989:2015/i, 'AS 4989:2015') ?? 'AS 4989:2015';
+  const label = australianStandardLabel(certified[0]);
 
   if (certified.length === group.variants.length) return label;
   return `${label} (${certified.length} of ${group.variants.length} sizes)`;

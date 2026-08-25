@@ -104,7 +104,7 @@ export const BRANDS: BrandInfo[] = [
     blurb:
       'Australian play-equipment brand with both springless elastic-strap HyperJump models and traditional coil-spring models, often discounted below RRP.',
     warranty:
-      'Lifespan Kids lists a 10-year frame warranty across the HyperJump range, dropping to 2 years on the Hoppy. Mat cover is 1 to 2 years.',
+      'Lifespan Kids lists a 10-year frame warranty across the HyperJump range, 5 years on the BounceZone range and 2 years on the Hoppy. Mat cover is 1 to 2 years where terms are published.',
     imageDir: 'lifespan-kids',
     affiliate: false,
   },
