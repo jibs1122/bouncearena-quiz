@@ -28,7 +28,7 @@ import {
 import { AFFILIATE_DISCLOSURE, productUrl } from '@/lib/compareShared';
 import { buildCompareTakeaways } from '@/lib/compareTakeaways';
 import { formatDate, getAllPosts, getPost } from '@/lib/content';
-import { buildPromosForBrands } from '@/lib/promoCtas';
+import { buildPromosForBrands, hasAffiliatePromo } from '@/lib/promoCtas';
 
 export const revalidate = 86400;
 
@@ -200,9 +200,9 @@ export default async function ComparePairPage({ params }: { params: Promise<{ pa
   );
 
   const reviews = getReviewLinks(allRows);
-  const showDisclosure = hasAffiliateLink(allRows);
   const brands = comparePageBrands(page);
   const promos = buildPromosForBrands(brands);
+  const showDisclosure = hasAffiliateLink(allRows) || hasAffiliatePromo(promos);
   const { published, modified } = pageDates(page);
   const canonical = `${SITE_URL}${comparePageHref(page.slug)}`;
 

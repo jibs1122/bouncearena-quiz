@@ -106,7 +106,7 @@ export const BRANDS: BrandInfo[] = [
     warranty:
       'Lifespan Kids lists a 10-year frame warranty across the HyperJump range, 5 years on the BounceZone range and 2 years on the Hoppy. Mat cover is 1 to 2 years where terms are published.',
     imageDir: 'lifespan-kids',
-    affiliate: false,
+    affiliate: true,
   },
   {
     name: 'GeeTramp',

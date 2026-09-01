@@ -2,6 +2,9 @@
 
 import { useState } from 'react';
 import { trackOutboundClick } from '@/lib/gtag';
+import { getAllPromos } from '@/lib/promoCtas';
+
+const PROMOS = getAllPromos();
 
 function CopyCodeButton({
   code,
@@ -24,6 +27,20 @@ function CopyCodeButton({
     >
       <span className="block text-center">{active ? 'Copied' : code}</span>
     </button>
+  );
+}
+
+function ShopLink({ href, location }: { href: string; location: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="nofollow noopener noreferrer sponsored"
+      onClick={() => trackOutboundClick({ url: href, label: 'Click to shop', location })}
+      className="inline-flex items-center rounded-full bg-[#38b1ab] px-3 py-1.5 text-[11px] font-semibold text-white transition-colors hover:bg-[#2e9a94]"
+    >
+      Click to shop
+    </a>
   );
 }
 
@@ -52,23 +69,32 @@ export default function PromoBell() {
                 Promo Codes
               </span>
               <div className="w-[208px] pr-7">
-                <p className="text-sm font-semibold leading-5 text-black">Vuly promo codes</p>
-                <div className="mt-2 flex flex-wrap justify-start gap-1.5">
-                  <CopyCodeButton code="BOUNCE15" active={copiedCode === 'BOUNCE15'} onCopy={copyCode} />
-                  <CopyCodeButton code="BOUNCESURGE" active={copiedCode === 'BOUNCESURGE'} onCopy={copyCode} />
+                <p className="text-sm font-semibold leading-5 text-black">Promo codes</p>
+                <div className="mt-3 space-y-3">
+                  {PROMOS.map((promo) => (
+                    <div key={promo.brand}>
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-black/45">
+                        {promo.brand}
+                      </p>
+                      <div className="mt-1.5 flex flex-wrap justify-start gap-1.5">
+                        {promo.codes.map((code) => (
+                          <CopyCodeButton
+                            key={code}
+                            code={code}
+                            active={copiedCode === code}
+                            onCopy={copyCode}
+                          />
+                        ))}
+                      </div>
+                      <div className="mt-2">
+                        <ShopLink href={promo.href} location="promo_pill_desktop" />
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <p className="mt-2 text-xs text-black/45">
+                <p className="mt-3 text-xs text-black/45">
                   Click a code to copy.
                 </p>
-                <a
-                  href="https://www.vulyplay.com/aff/100/"
-                  target="_blank"
-                  rel="nofollow noopener noreferrer sponsored"
-                  onClick={() => trackOutboundClick({ url: 'https://www.vulyplay.com/aff/100/', label: 'Click to shop', location: 'promo_pill_desktop' })}
-                  className="mt-3 inline-flex items-center rounded-full bg-[#38b1ab] px-3 py-1.5 text-[11px] font-semibold text-white transition-colors hover:bg-[#2e9a94]"
-                >
-                  Click to shop
-                </a>
               </div>
             </div>
             <button
@@ -91,32 +117,28 @@ export default function PromoBell() {
           <div className="rounded-2xl border border-black/10 bg-white/96 px-4 py-3 shadow-[0_14px_34px_-22px_rgba(0,0,0,0.45)] backdrop-blur">
             <div className="flex items-center justify-between gap-3">
               <span className="text-sm font-semibold text-[#38b1ab]">Promo codes</span>
-              <div className="flex items-center gap-2">
-                <a
-                  href="https://www.vulyplay.com/aff/100/"
-                  target="_blank"
-                  rel="nofollow noopener noreferrer sponsored"
-                  onClick={() => trackOutboundClick({ url: 'https://www.vulyplay.com/aff/100/', label: 'Click to shop', location: 'promo_pill_mobile' })}
-                  className="inline-flex items-center rounded-full bg-[#38b1ab] px-3 py-1.5 text-[11px] font-semibold text-white transition-colors hover:bg-[#2e9a94]"
-                >
-                  Click to shop
-                </a>
-                <button
-                  type="button"
-                  aria-label="Close promo codes"
-                  onClick={() => setMobileClosed(true)}
-                  className="flex h-7 w-7 items-center justify-center rounded-full text-black/40 transition-colors hover:bg-black/5 hover:text-black/70"
-                >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                    <path d="M6 6l12 12" />
-                    <path d="M18 6L6 18" />
-                  </svg>
-                </button>
-              </div>
+              <button
+                type="button"
+                aria-label="Close promo codes"
+                onClick={() => setMobileClosed(true)}
+                className="flex h-7 w-7 items-center justify-center rounded-full text-black/40 transition-colors hover:bg-black/5 hover:text-black/70"
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M6 6l12 12" />
+                  <path d="M18 6L6 18" />
+                </svg>
+              </button>
             </div>
-            <p className="mt-1.5 text-[11px] font-semibold text-black/55">
-              Vuly: BOUNCE15 · BOUNCESURGE
-            </p>
+            <div className="mt-1.5 space-y-2">
+              {PROMOS.map((promo) => (
+                <div key={promo.brand} className="flex items-center justify-between gap-3">
+                  <p className="text-[11px] font-semibold text-black/55">
+                    {promo.brand}: {promo.codes.join(' · ')}
+                  </p>
+                  <ShopLink href={promo.href} location="promo_pill_mobile" />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}

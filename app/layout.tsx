@@ -58,7 +58,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en-AU" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body>
+      {/* Extensions such as Grammarly add attributes to body before React hydrates. */}
+      <body suppressHydrationWarning>
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_TAG_ID}`}
           strategy="afterInteractive"

@@ -295,21 +295,21 @@ export const links: Record<LinkSlug, LinkConfig> = {
     affiliate: false,
     destination: { AU: 'https://www.jumpflex.com.au/products/mega-19ft-trampoline' },
   },
-  // ─── Lifespan Kids (non-affiliate, AU only) ───────────────────────────────
+  // ─── Lifespan Kids (affiliate, AU only) ───────────────────────────────
   'lifespan-hyperjump-3-10ft': {
     label: 'Lifespan HyperJump 3 Springless 10ft',
-    affiliate: false,
-    destination: { AU: 'https://www.lifespankids.com.au/collections/kids-springless-trampolines' },
+    affiliate: true,
+    destination: { AU: 'https://www.lifespankids.com.au/collections/kids-springless-trampolines?rfsn=9306020.3d9f288' },
   },
   'lifespan-hyperjump-4-12ft': {
     label: 'Lifespan HyperJump 4 Spring 12ft',
-    affiliate: false,
-    destination: { AU: 'https://www.lifespankids.com.au/collections/kids-trampolines' },
+    affiliate: true,
+    destination: { AU: 'https://www.lifespankids.com.au/collections/kids-trampolines?rfsn=9306020.3d9f288' },
   },
   'lifespan-hyperjump-r-8x12': {
     label: 'Lifespan HyperJump R Rectangle 8x12',
-    affiliate: false,
-    destination: { AU: 'https://www.lifespankids.com.au/collections/kids-rectangle-trampolines' },
+    affiliate: true,
+    destination: { AU: 'https://www.lifespankids.com.au/collections/kids-rectangle-trampolines?rfsn=9306020.3d9f288' },
   },
   // ─── Kahuna (non-affiliate, AU only) ──────────────────────────────────────
   'kahuna-classic-12ft': {
@@ -452,6 +452,17 @@ export function isRawVulyAffiliateHref(href: string): boolean {
     const url = new URL(href);
     const isVulyHost = url.hostname === 'www.vulyplay.com' || url.hostname === 'vulyplay.com';
     return isVulyHost && (url.pathname === '/aff/100' || url.pathname === '/aff/100/');
+  } catch {
+    return false;
+  }
+}
+
+export function isRawLifespanAffiliateHref(href: string): boolean {
+  try {
+    const url = new URL(href);
+    const isLifespanHost =
+      url.hostname === 'www.lifespankids.com.au' || url.hostname === 'lifespankids.com.au';
+    return isLifespanHost && url.searchParams.get('rfsn') === '9306020.3d9f288';
   } catch {
     return false;
   }

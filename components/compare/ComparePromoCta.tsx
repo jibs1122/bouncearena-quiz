@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import type { ComparePromo } from '@/lib/promoCtas';
+import type { BrandPromo } from '@/lib/promoCtas';
 
-export default function ComparePromoCta({ promos }: { promos: ComparePromo[] }) {
+export default function ComparePromoCta({ promos }: { promos: BrandPromo[] }) {
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   if (promos.length === 0) return null;
@@ -37,7 +37,8 @@ export default function ComparePromoCta({ promos }: { promos: ComparePromo[] }) 
 
         <div className="flex flex-shrink-0 flex-col gap-3">
           {promos.map((promo) => {
-            const copied = copiedCode === promo.code;
+            const [code] = promo.codes;
+            const copied = copiedCode === code;
 
             return (
               <div
@@ -49,18 +50,18 @@ export default function ComparePromoCta({ promos }: { promos: ComparePromo[] }) 
                     {promo.brand}
                   </span>
                   <span className="font-mono text-base font-bold tracking-widest text-[#c94327]">
-                    {promo.code}
+                    {code}
                   </span>
                 </div>
 
                 <div className="flex flex-shrink-0 items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => copyCode(promo.code)}
+                    onClick={() => copyCode(code)}
                     className={`rounded-lg px-3 py-2 text-xs font-bold transition-colors ${
                       copied ? 'bg-emerald-600 text-white' : 'bg-[#df5033] text-white hover:bg-[#c94327]'
                     }`}
-                    aria-label={`Copy ${promo.brand} promo code ${promo.code}`}
+                    aria-label={`Copy ${promo.brand} promo code ${code}`}
                   >
                     {copied ? 'Copied' : 'Copy code'}
                   </button>
@@ -69,7 +70,7 @@ export default function ComparePromoCta({ promos }: { promos: ComparePromo[] }) 
                     target="_blank"
                     rel="noopener noreferrer nofollow sponsored"
                     className="rounded-lg border border-[#e78369] px-3 py-2 text-xs font-bold text-[#c94327] transition-colors hover:border-[#c94327]"
-                    aria-label={`Shop ${promo.brand} with promo code ${promo.code}`}
+                    aria-label={`Shop ${promo.brand} with promo code ${code}`}
                   >
                     Shop
                   </a>

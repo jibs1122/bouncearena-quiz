@@ -3,6 +3,7 @@
  * - every rendered Vuly destination uses /aff/100/
  * - every rendered Springfree destination is a local /go/.../ URL
  * - every registered Springfree /go/.../ URL resolves to Commission Factory
+ * - every Lifespan Kids destination includes the required rfsn affiliate ID
  */
 
 import fs from 'fs';
@@ -18,7 +19,7 @@ import {
 } from '../lib/links';
 
 const ROOT = process.cwd();
-const SOURCE_DIRS = ['app', 'components', 'content', 'lib'];
+const SOURCE_DIRS = ['app', 'components', 'content', 'data', 'lib'];
 const SOURCE_EXTENSIONS = new Set(['.ts', '.tsx', '.mdx']);
 const errors: string[] = [];
 let sourceUrlsChecked = 0;
@@ -59,6 +60,13 @@ for (const file of SOURCE_DIRS.flatMap(sourceFiles)) {
 
     if (url.hostname === 't.cfjump.com' && file !== 'lib/links.ts') {
       report(file, `Commission Factory URL is only allowed in the redirect registry: ${url.href}`);
+    }
+
+    if (
+      /^(?:www\.)?lifespankids\.com\.au$/i.test(url.hostname) &&
+      url.searchParams.get('rfsn') !== '9306020.3d9f288'
+    ) {
+      report(file, `Lifespan Kids URL is missing the required rfsn affiliate ID: ${url.href}`);
     }
   }
 }

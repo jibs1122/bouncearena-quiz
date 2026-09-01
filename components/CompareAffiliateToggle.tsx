@@ -46,7 +46,7 @@ export default function CompareAffiliateToggle() {
             : 'OFF — non-partner brands link directly to manufacturer product pages.'}
         </p>
         <p className="mt-1 text-xs text-black/45">
-          Vuly and Springfree affiliate tracking is always enabled site-wide.
+          Vuly, Springfree and Lifespan Kids affiliate tracking is always enabled site-wide.
         </p>
         <p className="text-xs text-black/35 mt-1">Setting stored in this browser only (localStorage).</p>
       </div>

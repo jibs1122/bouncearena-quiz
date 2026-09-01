@@ -32,7 +32,7 @@ import {
   sizeLabel,
   type GroupedTrampoline,
 } from '@/lib/compareShared';
-import { buildPromosForBrands } from '@/lib/promoCtas';
+import { buildPromosForBrands, hasAffiliatePromo } from '@/lib/promoCtas';
 import { toSearchAnchor } from '@/lib/search';
 
 const SITE_URL = 'https://bouncearena.com.au';
@@ -384,7 +384,7 @@ export default async function BrandPage({ params }: Props) {
   } = modelStandardCoverage(groups);
   const springRange = springRangeLabel(rows);
   const promos = buildPromosForBrands([brand.name]);
-  const showDisclosure = hasAffiliateLink(rows);
+  const showDisclosure = hasAffiliateLink(rows) || hasAffiliatePromo(promos);
   const title = brandTitle(brand.name);
   const canonical = `${SITE_URL}/brands/${brand.slug}/`;
 
