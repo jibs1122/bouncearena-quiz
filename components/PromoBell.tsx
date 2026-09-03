@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import BrandLogoAvatar from '@/components/BrandLogoAvatar';
 import { trackOutboundClick } from '@/lib/gtag';
 import { getAllPromos } from '@/lib/promoCtas';
 
@@ -19,10 +20,11 @@ function CopyCodeButton({
     <button
       type="button"
       onClick={() => onCopy(code)}
-      className={`w-[7.5rem] rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors ${
+      aria-label={active ? `${code} copied` : `Copy promo code ${code}`}
+      className={`min-h-9 w-full rounded-lg border px-3 py-2 font-mono text-xs font-bold tracking-[0.08em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38b1ab] focus-visible:ring-offset-2 ${
         active
           ? 'border-[#38b1ab] bg-[#38b1ab] text-white'
-          : 'border-black/10 bg-black/[0.03] text-black/65 hover:border-[#38b1ab]/35 hover:text-[#38b1ab]'
+          : 'border-black/10 bg-black/[0.03] text-black/75 hover:border-[#38b1ab]/45 hover:bg-[#38b1ab]/[0.06] hover:text-[#278984]'
       }`}
     >
       <span className="block text-center">{active ? 'Copied' : code}</span>
@@ -30,16 +32,29 @@ function CopyCodeButton({
   );
 }
 
-function ShopLink({ href, location }: { href: string; location: string }) {
+function ShopLink({
+  brand,
+  href,
+  location,
+  compact = false,
+}: {
+  brand: string;
+  href: string;
+  location: string;
+  compact?: boolean;
+}) {
   return (
     <a
       href={href}
       target="_blank"
       rel="nofollow noopener noreferrer sponsored"
-      onClick={() => trackOutboundClick({ url: href, label: 'Click to shop', location })}
-      className="inline-flex items-center rounded-full bg-[#38b1ab] px-3 py-1.5 text-[11px] font-semibold text-white transition-colors hover:bg-[#2e9a94]"
+      onClick={() => trackOutboundClick({ url: href, label: `Shop ${brand}`, location })}
+      aria-label={`Shop ${brand} with the listed promo code`}
+      className={`${
+        compact ? 'shrink-0 px-3' : 'w-full justify-center px-3.5'
+      } inline-flex min-h-9 items-center rounded-lg bg-[#38b1ab] py-2 text-xs font-bold text-white transition-colors hover:bg-[#2e9a94] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38b1ab] focus-visible:ring-offset-2`}
     >
-      Click to shop
+      {compact ? 'Shop' : `Shop ${brand}`}
     </a>
   );
 }
@@ -62,21 +77,34 @@ export default function PromoBell() {
   return (
     <>
       {!desktopClosed && (
-        <div className="fixed right-0 top-1/2 z-30 hidden -translate-y-1/2 lg:block">
+        <aside
+          aria-label="Promo codes"
+          className="fixed right-0 top-1/2 z-30 hidden -translate-y-1/2 lg:block"
+        >
           <div className="relative">
-            <div className="flex items-center gap-3 rounded-l-2xl border border-r-0 border-black/10 bg-white/96 px-3 py-3 shadow-[0_16px_40px_-22px_rgba(0,0,0,0.45)] backdrop-blur transition-transform hover:-translate-x-1">
-              <span className="[writing-mode:vertical-rl] rotate-180 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#38b1ab]">
-                Promo Codes
-              </span>
+            <div className="rounded-l-2xl border border-r-0 border-black/10 bg-white/96 px-3.5 py-3.5 shadow-[0_16px_40px_-22px_rgba(0,0,0,0.45)] backdrop-blur transition-transform hover:-translate-x-1">
               <div className="w-[208px] pr-7">
-                <p className="text-sm font-semibold leading-5 text-black">Promo codes</p>
-                <div className="mt-3 space-y-3">
+                <p className="text-base font-bold leading-5 text-black">Current promo codes</p>
+                <p className="mt-1 text-xs leading-4 text-black/55">Tap a code to copy.</p>
+                <div className="mt-3 space-y-2.5">
                   {PROMOS.map((promo) => (
-                    <div key={promo.brand}>
-                      <p className="text-[11px] font-semibold uppercase tracking-wide text-black/45">
-                        {promo.brand}
-                      </p>
-                      <div className="mt-1.5 flex flex-wrap justify-start gap-1.5">
+                    <div
+                      key={promo.brand}
+                      className="rounded-xl border border-black/[0.08] bg-[#fbfdfd] p-3"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <span aria-hidden="true">
+                          <BrandLogoAvatar
+                            name={promo.brand}
+                            width={42}
+                            height={34}
+                            className="rounded-lg"
+                            imageClassName="p-1.5"
+                          />
+                        </span>
+                        <p className="text-sm font-bold leading-4 text-black">{promo.brand}</p>
+                      </div>
+                      <div className="mt-2.5 space-y-1.5">
                         {promo.codes.map((code) => (
                           <CopyCodeButton
                             key={code}
@@ -87,21 +115,28 @@ export default function PromoBell() {
                         ))}
                       </div>
                       <div className="mt-2">
-                        <ShopLink href={promo.href} location="promo_pill_desktop" />
+                        <ShopLink
+                          brand={promo.brand}
+                          href={promo.href}
+                          location="promo_pill_desktop"
+                        />
                       </div>
                     </div>
                   ))}
                 </div>
-                <p className="mt-3 text-xs text-black/45">
-                  Click a code to copy.
+                <p className="mt-3 text-[11px] leading-4 text-black/55">
+                  Affiliate links. We may earn a commission.
                 </p>
+                <span className="sr-only" aria-live="polite">
+                  {copiedCode ? `${copiedCode} copied` : ''}
+                </span>
               </div>
             </div>
             <button
               type="button"
               aria-label="Close promo codes"
               onClick={() => setDesktopClosed(true)}
-              className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full text-black/40 transition-colors hover:bg-black/5 hover:text-black/70"
+              className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full text-black/50 transition-colors hover:bg-black/5 hover:text-black/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38b1ab]"
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <path d="M6 6l12 12" />
@@ -109,19 +144,19 @@ export default function PromoBell() {
               </svg>
             </button>
           </div>
-        </div>
+        </aside>
       )}
 
       {!mobileClosed && (
-        <div className="fixed inset-x-0 bottom-3 z-30 px-3 lg:hidden">
+        <aside aria-label="Promo codes" className="fixed inset-x-0 bottom-3 z-30 px-3 lg:hidden">
           <div className="rounded-2xl border border-black/10 bg-white/96 px-4 py-3 shadow-[0_14px_34px_-22px_rgba(0,0,0,0.45)] backdrop-blur">
             <div className="flex items-center justify-between gap-3">
-              <span className="text-sm font-semibold text-[#38b1ab]">Promo codes</span>
+              <span className="text-sm font-bold text-[#278984]">Current promo codes</span>
               <button
                 type="button"
                 aria-label="Close promo codes"
                 onClick={() => setMobileClosed(true)}
-                className="flex h-7 w-7 items-center justify-center rounded-full text-black/40 transition-colors hover:bg-black/5 hover:text-black/70"
+                className="flex h-9 w-9 items-center justify-center rounded-full text-black/50 transition-colors hover:bg-black/5 hover:text-black/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38b1ab]"
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                   <path d="M6 6l12 12" />
@@ -132,15 +167,35 @@ export default function PromoBell() {
             <div className="mt-1.5 space-y-2">
               {PROMOS.map((promo) => (
                 <div key={promo.brand} className="flex items-center justify-between gap-3">
-                  <p className="text-[11px] font-semibold text-black/55">
-                    {promo.brand}: {promo.codes.join(' · ')}
-                  </p>
-                  <ShopLink href={promo.href} location="promo_pill_mobile" />
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span aria-hidden="true">
+                      <BrandLogoAvatar
+                        name={promo.brand}
+                        width={34}
+                        height={28}
+                        className="rounded-md"
+                        imageClassName="p-1"
+                      />
+                    </span>
+                    <p className="min-w-0 text-xs text-black/70">
+                      <span className="font-bold text-black">{promo.brand}</span>
+                      <span className="font-mono">: {promo.codes.join(' · ')}</span>
+                    </p>
+                  </div>
+                  <ShopLink
+                    brand={promo.brand}
+                    href={promo.href}
+                    location="promo_pill_mobile"
+                    compact
+                  />
                 </div>
               ))}
             </div>
+            <p className="mt-2 text-[10px] leading-4 text-black/50">
+              Affiliate links. We may earn a commission.
+            </p>
           </div>
-        </div>
+        </aside>
       )}
     </>
   );
