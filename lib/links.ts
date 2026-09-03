@@ -42,8 +42,8 @@ export type LinkSlug =
   | 'jumpflex-mega-19ft'
   // Lifespan Kids
   | 'lifespan-hyperjump-3-10ft'
-  | 'lifespan-hyperjump-4-12ft'
-  | 'lifespan-hyperjump-r-8x12'
+  | 'lifespan-bouncezone-12ft'
+  | 'lifespan-bouncezone-m-7x10'
   // Kahuna
   | 'kahuna-classic-12ft'
   | 'kahuna-blizzard-10ft'
@@ -299,17 +299,17 @@ export const links: Record<LinkSlug, LinkConfig> = {
   'lifespan-hyperjump-3-10ft': {
     label: 'Lifespan HyperJump 3 Springless 10ft',
     affiliate: true,
-    destination: { AU: 'https://www.lifespankids.com.au/collections/kids-springless-trampolines?rfsn=9306020.3d9f288' },
+    destination: { AU: 'https://www.lifespankids.com.au/products/10ft-hyperjump-3-springless-trampoline?rfsn=9306020.3d9f288' },
   },
-  'lifespan-hyperjump-4-12ft': {
-    label: 'Lifespan HyperJump 4 Spring 12ft',
+  'lifespan-bouncezone-12ft': {
+    label: 'Lifespan BounceZone Round Spring 12ft',
     affiliate: true,
-    destination: { AU: 'https://www.lifespankids.com.au/collections/kids-trampolines?rfsn=9306020.3d9f288' },
+    destination: { AU: 'https://www.lifespankids.com.au/products/bouncezone-round-spring-trampoline-l?rfsn=9306020.3d9f288' },
   },
-  'lifespan-hyperjump-r-8x12': {
-    label: 'Lifespan HyperJump R Rectangle 8x12',
+  'lifespan-bouncezone-m-7x10': {
+    label: 'Lifespan BounceZone M Rectangular Spring 7x10',
     affiliate: true,
-    destination: { AU: 'https://www.lifespankids.com.au/collections/kids-rectangle-trampolines?rfsn=9306020.3d9f288' },
+    destination: { AU: 'https://www.lifespankids.com.au/products/bouncezone-m-rectangular-spring-trampoline-set?rfsn=9306020.3d9f288' },
   },
   // ─── Kahuna (non-affiliate, AU only) ──────────────────────────────────────
   'kahuna-classic-12ft': {

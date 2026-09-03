@@ -80,6 +80,16 @@ const nextConfig: NextConfig = {
         destination: '/best-trampolines-australia-2025/',
         permanent: true,
       },
+      {
+        source: '/compare/lifespan-hyperjump-3-vs-hyperjump-4',
+        destination: '/compare/lifespan-hyperjump-3-vs-bouncezone/',
+        permanent: true,
+      },
+      {
+        source: '/compare/lifespan-hyperjump-3-vs-hyperjump-4/',
+        destination: '/compare/lifespan-hyperjump-3-vs-bouncezone/',
+        permanent: true,
+      },
       // Articles replaced by a published comparison page at the same slug.
       ...getSupersededSlugs().flatMap((slug) => [
         { source: `/${slug}`, destination: `/compare/${slug}/`, permanent: true },

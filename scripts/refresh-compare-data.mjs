@@ -127,6 +127,20 @@ function formatVulyAffiliateUrl(url) {
   }
 }
 
+function formatLifespanAffiliateUrl(url) {
+  if (!url) return null;
+
+  try {
+    const parsed = new URL(url);
+    if (!/^(?:www\.)?lifespankids\.com\.au$/i.test(parsed.hostname)) return url;
+
+    parsed.searchParams.set('rfsn', '9306020.3d9f288');
+    return parsed.toString();
+  } catch {
+    return url;
+  }
+}
+
 function canonicalKey(brand, model, size) {
   return [brand, model, size].map((part) => part.trim().toLowerCase()).join('||');
 }
@@ -196,7 +210,9 @@ async function main() {
           ? SPRINGFREE_TRAMPOLINES_GO_URL
           : brand === 'Vuly'
             ? formatVulyAffiliateUrl(rawSourceUrl)
-            : rawSourceUrl;
+            : brand === 'Lifespan Kids'
+              ? formatLifespanAffiliateUrl(rawSourceUrl)
+              : rawSourceUrl;
       const springSystem = readNullableString(entry.spring_system);
       const auStdDetail =
         readNullableString(entry.au_standard_details) ??
