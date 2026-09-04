@@ -8,7 +8,9 @@ import { isAffiliateRow, outboundRel } from '@/lib/affiliate';
 import {
   BRAND_COLORS,
   FALLBACK_BRAND_COLOR,
+  PRICE_FOOTNOTE,
   australianStandardLabel,
+  australianStandardSummary,
   type GroupedTrampoline,
   compareSizeLabel,
   cmToFeet,
@@ -19,12 +21,14 @@ import {
   groupReview,
   groupRows,
   groupShopUrl,
+  isFromPrice,
   longestFootprintCm,
   meetsAs4989,
   overallSizeSummary,
   productUrl,
   sizeLabel,
   variantKey,
+  variantPriceLabel,
 } from '@/lib/compareShared';
 
 type SortKey = 'priceAud' | 'overallDiamCm' | 'maxWeightKg' | 'warrantyFrameYrs';
@@ -125,12 +129,42 @@ function Tip({ text }: { text: string }) {
   );
 }
 
-function Cell({ val, unit }: { val: number | string | null | boolean; unit?: string }) {
+function Cell({ val, unit }: { val: number | string | null; unit?: string }) {
   if (val === null || val === undefined || val === '') return <span className="text-black/25">—</span>;
-  if (typeof val === 'boolean') {
-    return val ? <span className="font-semibold text-emerald-600">✓</span> : <span className="text-black/30">✗</span>;
-  }
   return <span>{val}{unit ? <span className="text-black/40 text-xs ml-0.5">{unit}</span> : null}</span>;
+}
+
+function StandardCell({ group }: { group: GroupedTrampoline }) {
+  const summary = australianStandardSummary(group.variants);
+
+  if (summary.meets === summary.total) {
+    return (
+      <span className="font-semibold text-emerald-600" title={summary.label}>
+        <span aria-hidden="true">✓</span>
+        <span className="sr-only">{summary.label}</span>
+      </span>
+    );
+  }
+
+  if (summary.doesNotMeet === summary.total) {
+    return (
+      <span className="font-semibold text-red-600" title={summary.label}>
+        <span aria-hidden="true">✗</span>
+        <span className="sr-only">{summary.label}</span>
+      </span>
+    );
+  }
+
+  if (summary.notConfirmed === summary.total) {
+    return (
+      <span className="font-semibold text-black/35" title={summary.label}>
+        <span aria-hidden="true">?</span>
+        <span className="sr-only">{summary.label}</span>
+      </span>
+    );
+  }
+
+  return <span className="text-xs leading-5 text-black/55">{summary.label}</span>;
 }
 
 function formatTrampolineSize(valueFt: number): string {
@@ -184,13 +218,17 @@ function priceSummary(group: GroupedTrampoline) {
   }
 
   const { low, high, hasFromPrice } = range;
+  const allFromPrices = group.variants.every(isFromPrice);
 
   return (
     <>
+      {low === high && hasFromPrice ? 'From ' : allFromPrices ? 'Starting prices ' : ''}
       ${low.toLocaleString()}
-      {(low !== high || hasFromPrice) ? (
+      {low !== high || (hasFromPrice && !allFromPrices) ? (
         <span className="ml-0.5 text-[10px] font-normal text-black/30">
-          {low !== high ? `to $${high.toLocaleString()}` : 'from'}
+          {low !== high
+            ? `to $${high.toLocaleString()}${hasFromPrice && !allFromPrices ? ' (includes from prices)' : ''}`
+            : 'includes a from price'}
         </span>
       ) : null}
     </>
@@ -486,7 +524,7 @@ export default function ModelsBrowseClient() {
               <SortTh label="Overall size" sortKey="overallDiamCm" tip="Overall footprint — diameter for round, longest dimension for other shapes. Manufacturers generally recommend 1–2 m clearance on all sides." active={sortKey === 'overallDiamCm'} sortDir={sortDir} onSort={toggleSort} />
               <SortTh label="Frame warranty" sortKey="warrantyFrameYrs" tip="Manufacturer's frame warranty in years." active={sortKey === 'warrantyFrameYrs'} sortDir={sortDir} onSort={toggleSort} />
               <th scope="col" className={TABLE_HEAD_CELL_CLASS}>
-                AU Std<Tip text="Meets AS4989:2015, the Australian trampoline safety standard." />
+                AU Std<Tip text="Whether the model is listed as meeting AS 4989:2015. A question mark means the status is not confirmed." />
               </th>
             </tr>
           </thead>
@@ -499,8 +537,6 @@ export default function ModelsBrowseClient() {
               const brandColor = BRAND_COLORS[group.brand] ?? FALLBACK_BRAND_COLOR;
               const shopUrl = groupShopUrl(group, useAffiliate);
               const review = groupReview(group);
-              const allMeetAuStd = group.variants.every(meetsAs4989);
-
               return (
                 <React.Fragment key={group.key}>
                   <tr
@@ -547,7 +583,7 @@ export default function ModelsBrowseClient() {
                       <Cell val={formatWarrantyRange(group.variants.map((variant) => variant.warrantyFrameYrs), 'short')} />
                     </td>
                     {/* AU Std */}
-                    <td className="px-4 py-3"><Cell val={allMeetAuStd} /></td>
+                    <td className="px-4 py-3"><StandardCell group={group} /></td>
                   </tr>
 
                   {/* Expanded detail row */}
@@ -576,7 +612,7 @@ export default function ModelsBrowseClient() {
                                   <tr key={variantKey(group, variant)}>
                                     <th scope="row" className="min-w-[100px] whitespace-nowrap py-2.5 pr-4 text-left font-medium text-black/70">{compareSizeLabel(variant)}</th>
                                     <td className="py-2.5 pr-4 text-black/70">
-                                      {variant.priceAud ? `$${variant.priceAud.toLocaleString()}` : '—'}
+                                      {variantPriceLabel(variant)}
                                     </td>
                                     <td className="py-2.5 pr-4 text-black/60">{sizeLabel(variant)}</td>
                                     <td className="py-2.5 pr-4 text-black/60">
@@ -627,7 +663,7 @@ export default function ModelsBrowseClient() {
       </div>
 
       <p className="mt-4 text-xs text-black/35">
-        Prices sourced from manufacturer websites and may change. Model rows combine all sizes that match your filters. Click any row to expand size-specific specs.
+        {PRICE_FOOTNOTE} Model rows combine all sizes that match your filters. Click any row to expand size-specific specs.
       </p>
 
       {/* Quiz CTA */}

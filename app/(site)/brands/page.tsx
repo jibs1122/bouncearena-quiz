@@ -12,6 +12,7 @@ import {
   compareSizeLabel,
   groupPriceRange,
   groupRows,
+  isFromPrice,
   longestFootprintCm,
 } from '@/lib/compareShared';
 
@@ -48,10 +49,16 @@ function priceLabel(rows: Trampoline[]) {
   const range = groupPriceRange(rows);
   if (!range) return 'Price varies';
   if (range.low === range.high) return range.hasFromPrice ? `From ${formatAud(range.low)}` : formatAud(range.low);
+
+  const allFromPrices = rows.every(isFromPrice);
   return (
     <>
+      {allFromPrices ? 'Starting prices ' : ''}
       {formatAud(range.low)}
-      <span className="ml-1 text-[10px] font-normal text-black/35">to {formatAud(range.high)}</span>
+      <span className="ml-1 text-[10px] font-normal text-black/35">
+        to {formatAud(range.high)}
+        {range.hasFromPrice && !allFromPrices ? ' (includes from prices)' : ''}
+      </span>
     </>
   );
 }
@@ -191,7 +198,7 @@ export default function BrandsPage() {
       <h1 className="mb-3 text-3xl font-bold text-black sm:text-4xl">Australian Trampoline Brands</h1>
       <p className="mb-6 max-w-2xl text-black/60">
         Every major trampoline brand sold in Australia, with prices, models, sizes, weight ratings,
-        warranties and whether each model meets the Australian Trampoline Standard AS 4989:2015.
+        warranties and whether each model is listed as meeting the Australian Trampoline Standard AS 4989:2015.
       </p>
 
       <div className="mb-10 rounded-2xl border border-[#38b1ab]/20 bg-[#38b1ab]/[0.06] p-5 sm:flex sm:items-center sm:justify-between sm:gap-6">

@@ -8,6 +8,7 @@ import {
   compareSizeLabel,
   groupPriceRange,
   groupRows,
+  isFromPrice,
   productUrl,
   type GroupedTrampoline,
 } from '@/lib/compareShared';
@@ -39,12 +40,16 @@ function priceLabel(rows: Trampoline[]) {
   if (!range) return null;
 
   const { low, high, hasFromPrice } = range;
+  const allFromPrices = rows.every(isFromPrice);
   return (
     <>
+      {low === high && hasFromPrice ? 'From ' : allFromPrices ? 'Starting prices ' : ''}
       ${low.toLocaleString('en-AU')}
-      {(low !== high || hasFromPrice) && (
+      {(low !== high || (hasFromPrice && !allFromPrices)) && (
         <span className="ml-1 text-[10px] font-normal text-black/35">
-          {low !== high ? `to $${high.toLocaleString('en-AU')}` : 'from'}
+          {low !== high
+            ? `to $${high.toLocaleString('en-AU')}${hasFromPrice && !allFromPrices ? ' (includes from prices)' : ''}`
+            : 'includes a from price'}
         </span>
       )}
     </>

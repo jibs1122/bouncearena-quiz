@@ -22,15 +22,18 @@ import {
   BRAND_COLORS,
   FALLBACK_BRAND_COLOR,
   PRICE_FOOTNOTE,
+  australianStandardLabel,
   compareSizeLabel,
   formatWarrantyYears,
   groupPriceRange,
   groupRows,
+  isFromPrice,
   longestFootprintCm,
   meetsAs4989,
   productUrl,
   sizeLabel,
   type GroupedTrampoline,
+  variantPriceLabel,
 } from '@/lib/compareShared';
 import { buildPromosForBrands, hasAffiliatePromo } from '@/lib/promoCtas';
 import { toSearchAnchor } from '@/lib/search';
@@ -57,7 +60,12 @@ function priceRangeLabel(rows: Trampoline[]): string | null {
     return range.hasFromPrice ? `From ${formatAud(range.low)}` : formatAud(range.low);
   }
 
-  return `${formatAud(range.low)}-${formatAud(range.high)}`;
+  const qualifier = range.hasFromPrice
+    ? rows.every(isFromPrice)
+      ? ' (model-family starting prices)'
+      : ' (includes model-family starting prices)'
+    : '';
+  return `${formatAud(range.low)}-${formatAud(range.high)}${qualifier}`;
 }
 
 function groupTopPrice(group: GroupedTrampoline): number {
@@ -139,15 +147,29 @@ function warrantyLabel(value: number | null): string {
 }
 
 function standardCell(row: Trampoline) {
-  return meetsAs4989(row) ? (
-    <span className="font-semibold text-emerald-600" aria-label="Meets AS 4989:2015">✓</span>
-  ) : (
-    <span className="text-black/30" aria-label="Does not meet AS 4989:2015">✗</span>
+  const label = australianStandardLabel(row);
+  const glyph = row.auStdStatus === 'meets' ? '✓' : row.auStdStatus === 'does-not-meet' ? '✗' : '?';
+  const className =
+    row.auStdStatus === 'meets'
+      ? 'font-semibold text-emerald-600'
+      : row.auStdStatus === 'does-not-meet'
+        ? 'font-semibold text-red-600'
+        : 'font-semibold text-black/35';
+
+  return (
+    <span className={className} title={label}>
+      <span aria-hidden="true">{glyph}</span>
+      <span className="sr-only">{label}</span>
+    </span>
   );
 }
 
 function priceCell(row: Trampoline) {
-  return <span className="font-semibold text-black">{row.priceAud ? formatAud(row.priceAud) : '-'}</span>;
+  return (
+    <span className={row.priceAud === null ? 'text-black/25' : 'font-semibold text-black'}>
+      {variantPriceLabel(row)}
+    </span>
+  );
 }
 
 function PriceRange({ rows }: { rows: Trampoline[] }) {
@@ -156,10 +178,11 @@ function PriceRange({ rows }: { rows: Trampoline[] }) {
 
   return (
     <>
+      {range.low === range.high && range.hasFromPrice ? 'From ' : ''}
       {formatAud(range.low)}
-      {(range.low !== range.high || range.hasFromPrice) && (
+      {range.low !== range.high && (
         <span className="ml-1 text-[10px] font-normal text-black/35">
-          {range.low !== range.high ? `to ${formatAud(range.high)}` : 'from'}
+          {`to ${formatAud(range.high)}${range.hasFromPrice ? ' (includes starting prices)' : ''}`}
         </span>
       )}
     </>
@@ -343,7 +366,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const subject = brandTitle(brand.name);
   const title = `${subject}: Models, Prices and Specs`;
   const description =
-    `Compare ${subject}${price ? ` from ${price}` : ''}. ` +
+    `Compare ${subject}${price ? ` with listed prices ${price}` : ''}. ` +
     `See sizes, spring type, warranty, weight ratings and Australian standard details.`;
 
   return {
@@ -441,7 +464,7 @@ export default async function BrandPage({ params }: Props) {
           '@type': 'Product',
           name: `${row.brand} ${row.model} ${row.size}`,
           brand: { '@type': 'Brand', name: row.brand },
-          ...(row.priceAud
+          ...(row.priceAud !== null && !isFromPrice(row)
             ? {
                 offers: {
                   '@type': 'Offer',

@@ -1,6 +1,9 @@
 import type { Country } from '@/lib/geolocation';
 import { resolveQuizCountry } from '@/lib/geolocation';
-import { TRAMPOLINES as COMPARE_ROWS } from '@/data/trampolines';
+import {
+  TRAMPOLINES as COMPARE_ROWS,
+  type Trampoline as CompareTrampoline,
+} from '@/data/trampolines';
 
 export type SpringType = 'springless' | 'traditional';
 export type Shape = 'round' | 'oval' | 'square' | 'rectangle';
@@ -18,15 +21,19 @@ export interface MatchReasonBank {
   mediumYard?: string;
   largeYard?: string;
   longNarrowYard?: string;
-  budget_under_500?: string;
-  budget_500_1000?: string;
-  budget_1000_1500?: string;
-  budget_1500_2500?: string;
-  budget_2500_plus?: string;
   bounce?: string;
   durability?: string;
   valueForMoney?: string;
   warranty?: string;
+}
+
+export interface QuizSizeOption {
+  /** Approximate footprint in feet, used only to choose a yard-size recommendation. */
+  approximateFt: number;
+  /** Catalogue label shown to the user, including metric context where useful. */
+  displayLabel: string;
+  priceAud: number;
+  meetsAUStandards: boolean;
 }
 
 export interface Trampoline {
@@ -42,6 +49,8 @@ export interface Trampoline {
   priceFrom: number;
   sizes: number[]; // ft (approximate for metric models); used for multi-size selection
   displaySize: string; // shown on results card e.g. "12ft" or "2.4m × 3.4m oval"
+  /** Authoritative per-size facts for model families whose variants differ materially. */
+  sizeOptions?: QuizSizeOption[];
   image: string; // path under /images/
   slug: string;
   isVuly: boolean;
@@ -51,7 +60,9 @@ export interface Trampoline {
   matchReasons: MatchReasonBank;
 }
 
-const baseTrampolines: Trampoline[] = [
+type QuizTrampolineSeed = Omit<Trampoline, 'priceFrom' | 'meetsAUStandards' | 'sizeOptions'>;
+
+const baseTrampolines: QuizTrampolineSeed[] = [
 
   // ─── Vuly ──────────────────────────────────────────────────────────────────
 
@@ -62,10 +73,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'springless',
     shape: 'round',
     advancedSafety: true,
-    meetsAUStandards: true,
     meetsUSStandards: true,
     availableIn: ['AU', 'US'],
-    priceFrom: 2099,
     sizes: [10, 12, 14],
     displaySize: '10ft, 12ft or 14ft',
     image: '/images/vuly/thunder-2-pro.webp',
@@ -82,8 +91,6 @@ const baseTrampolines: Trampoline[] = [
       smallYard: 'Available in 10ft — fits your smaller backyard (allow 1m clearance on all sides)',
       mediumYard: 'Available in 12ft — the ideal size for a medium-sized backyard',
       largeYard: 'Available up to 14ft — makes the most of your large backyard',
-      budget_1500_2500: 'Fits comfortably within the $1,500–$2,500 premium range',
-      budget_2500_plus: 'A top-tier investment piece for long-term family use',
       durability: '10-year frame warranty — built for years of heavy family use',
       warranty: 'Backed by Vuly\'s 10-year frame warranty',
     },
@@ -96,10 +103,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'springless',
     shape: 'round',
     advancedSafety: true,
-    meetsAUStandards: true,
     meetsUSStandards: true,
     availableIn: ['AU', 'US'],
-    priceFrom: 1399,
     sizes: [10, 12, 14, 16],
     displaySize: '10ft, 12ft, 14ft or 16ft',
     image: '/images/vuly/thunder-2.webp',
@@ -116,8 +121,6 @@ const baseTrampolines: Trampoline[] = [
       smallYard: 'Available in 10ft — fits smaller backyards',
       mediumYard: 'Available in 12ft — ideal for a medium-sized backyard',
       largeYard: 'Available up to 14ft for your large backyard',
-      budget_1000_1500: 'Strong springless option in the $1,000–$1,500 range',
-      budget_1500_2500: 'Fits your $1,500–$2,500 budget with strong safety credentials',
       durability: 'High-quality components built for long-term family use',
       warranty: 'Strong Vuly warranty',
     },
@@ -130,10 +133,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'traditional',
     shape: 'round',
     advancedSafety: true,
-    meetsAUStandards: true,
     meetsUSStandards: true,
     availableIn: ['AU', 'US'],
-    priceFrom: 1199,
     sizes: [10, 12, 14],
     displaySize: '10ft, 12ft or 14ft',
     image: '/images/vuly/ultra-2-pro.webp',
@@ -150,8 +151,6 @@ const baseTrampolines: Trampoline[] = [
       smallYard: 'Available in 10ft — fits your smaller backyard',
       mediumYard: 'Available in 12ft — ideal for a medium-sized backyard',
       largeYard: 'Available up to 14ft for your large backyard',
-      budget_1000_1500: 'Premium spring trampoline in the $1,000–$1,500 range',
-      budget_1500_2500: 'Fits your budget and delivers premium performance',
       valueForMoney: 'Strong value — premium features at a mid-range price',
       warranty: 'Good Vuly warranty',
     },
@@ -164,10 +163,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'traditional',
     shape: 'round',
     advancedSafety: true,
-    meetsAUStandards: true,
     meetsUSStandards: true,
     availableIn: ['AU', 'US'],
-    priceFrom: 799,
     sizes: [8, 10, 12, 14],
     displaySize: '8ft, 10ft, 12ft or 14ft',
     image: '/images/vuly/ultra-2.webp',
@@ -183,8 +180,6 @@ const baseTrampolines: Trampoline[] = [
       smallYard: 'Available in 10ft — fits smaller backyards',
       mediumYard: 'Available in 12ft — ideal for a medium-sized backyard',
       largeYard: 'Available up to 14ft for your large backyard',
-      budget_500_1000: 'Vuly quality in the $500–$1,000 range',
-      budget_1000_1500: 'Fits your budget with Vuly\'s quality backing',
       valueForMoney: 'Strong value — Vuly quality at a mid-range price',
       warranty: 'Good Vuly warranty',
     },
@@ -197,12 +192,10 @@ const baseTrampolines: Trampoline[] = [
     springType: 'traditional',
     shape: 'round',
     advancedSafety: false,
-    meetsAUStandards: true,
     meetsUSStandards: true,
     availableIn: ['AU', 'US'],
-    priceFrom: 499,
-    sizes: [10, 12, 14],
-    displaySize: '10ft, 12ft or 14ft',
+    sizes: [11, 13],
+    displaySize: 'M or L',
     image: '/images/vuly/flare.webp',
     slug: 'vuly-flare',
     isVuly: true,
@@ -212,11 +205,9 @@ const baseTrampolines: Trampoline[] = [
     matchReasons: {
       traditional: 'Traditional spring system — good bounce, familiar feel',
       meetsStandards: 'Meets Australian AS 4989:2015 safety standard',
-      smallYard: 'Available in 10ft — fits smaller backyards',
-      mediumYard: 'Available in 12ft — ideal for a medium-sized backyard',
-      largeYard: 'Available up to 14ft for your large backyard',
-      budget_under_500: 'Starting at $499 — fits your under-$500 budget',
-      budget_500_1000: 'Vuly quality in the $500–$1,000 range',
+      smallYard: 'The Medium size has a 340cm overall diameter',
+      mediumYard: 'Available in Medium (340cm overall) or Large (386cm overall)',
+      largeYard: 'The Large size has a 386cm overall diameter',
       valueForMoney: 'Entry-level price point with Vuly\'s brand backing',
       warranty: 'Backed by Vuly\'s warranty',
     },
@@ -231,10 +222,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'springless',
     shape: 'round',
     advancedSafety: true,
-    meetsAUStandards: true,
     meetsUSStandards: true,
     availableIn: ['AU'],
-    priceFrom: 899,
     sizes: [6],
     displaySize: '6ft (1.8m)',
     image: '/images/springfree/mini-round.webp',
@@ -261,10 +250,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'springless',
     shape: 'round',
     advancedSafety: true,
-    meetsAUStandards: true,
     meetsUSStandards: true,
     availableIn: ['AU'],
-    priceFrom: 1199,
     sizes: [8],
     displaySize: '8ft (2.5m)',
     image: '/images/springfree/compact-round.webp',
@@ -279,7 +266,6 @@ const baseTrampolines: Trampoline[] = [
       safetyNiceToHave: 'Excellent safety — composite rods replace metal springs entirely',
       meetsStandards: 'Meets Australian AS 4989:2015 safety standard',
       smallYard: '8ft (2.5m) — fits small backyards while maximising the jump zone',
-      budget_1000_1500: 'Maximum safety in the $1,000–$1,500 range',
       durability: '10-year warranty on all components',
       warranty: 'Industry-leading 10-year warranty on all components',
     },
@@ -292,10 +278,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'springless',
     shape: 'round',
     advancedSafety: true,
-    meetsAUStandards: true,
     meetsUSStandards: true,
     availableIn: ['AU'],
-    priceFrom: 2099,
     sizes: [10],
     displaySize: '10ft (3m)',
     image: '/images/springfree/medium-round.jpg',
@@ -311,8 +295,6 @@ const baseTrampolines: Trampoline[] = [
       meetsStandards: 'Meets Australian AS 4989:2015 safety standard',
       smallYard: '10ft (3m) — a good springless fit for smaller to medium yards',
       mediumYard: '10ft (3m) — great fit for medium-sized backyards',
-      budget_1500_2500: 'Maximum safety in the $1,500–$2,500 range',
-      budget_2500_plus: 'Premium investment for maximum safety',
       durability: '10-year warranty on all components',
       warranty: 'Industry-leading 10-year warranty on all components',
     },
@@ -325,10 +307,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'springless',
     shape: 'round',
     advancedSafety: true,
-    meetsAUStandards: true,
     meetsUSStandards: true,
     availableIn: ['AU'],
-    priceFrom: 3199,
     sizes: [13],
     displaySize: '13ft (4m)',
     image: '/images/springfree/jumbo-round.webp',
@@ -344,7 +324,6 @@ const baseTrampolines: Trampoline[] = [
       meetsStandards: 'Meets Australian AS 4989:2015 safety standard',
       mediumYard: '13ft (4m) — best suited to medium-large yards',
       largeYard: '13ft (4m) — ideal for large backyards and whole-family use',
-      budget_2500_plus: 'Premium whole-family springless trampoline',
       durability: '10-year warranty on all components',
       warranty: 'Industry-leading 10-year warranty on all components',
     },
@@ -357,10 +336,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'springless',
     shape: 'oval',
     advancedSafety: true,
-    meetsAUStandards: true,
     meetsUSStandards: true,
     availableIn: ['AU'],
-    priceFrom: 1599,
     sizes: [7],
     displaySize: '1.9m × 2.7m',
     image: '/images/springfree/compact-oval.webp',
@@ -376,7 +353,6 @@ const baseTrampolines: Trampoline[] = [
       meetsStandards: 'Meets Australian AS 4989:2015 safety standard',
       smallYard: '1.9m × 2.7m — compact enough for smaller yards',
       longNarrowYard: 'Oval shape (1.9m × 2.7m) — designed specifically for long, narrow backyard layouts',
-      budget_1500_2500: 'Maximum safety in your budget range',
       durability: '10-year warranty on all components',
       warranty: 'Industry-leading 10-year warranty on all components',
     },
@@ -389,10 +365,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'springless',
     shape: 'oval',
     advancedSafety: true,
-    meetsAUStandards: true,
     meetsUSStandards: true,
     availableIn: ['AU'],
-    priceFrom: 1999,
     sizes: [9],
     displaySize: '2.4m × 3.4m',
     image: '/images/springfree/medium-oval.webp',
@@ -408,8 +382,6 @@ const baseTrampolines: Trampoline[] = [
       meetsStandards: 'Meets Australian AS 4989:2015 safety standard',
       mediumYard: '2.4m × 3.4m — great fit for medium-sized backyards',
       longNarrowYard: 'Oval shape (2.4m × 3.4m) — perfect for long, narrow yards',
-      budget_1500_2500: 'Maximum safety in the $1,500–$2,500 range',
-      budget_2500_plus: 'Premium springless oval',
       durability: '10-year warranty on all components',
       warranty: 'Industry-leading 10-year warranty on all components',
     },
@@ -422,10 +394,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'springless',
     shape: 'oval',
     advancedSafety: true,
-    meetsAUStandards: true,
     meetsUSStandards: true,
     availableIn: ['AU'],
-    priceFrom: 2299,
     sizes: [11],
     displaySize: '2.4m × 4m',
     image: '/images/springfree/large-oval.webp',
@@ -442,8 +412,6 @@ const baseTrampolines: Trampoline[] = [
       mediumYard: '2.4m × 4m — good fit for medium to large yards',
       largeYard: '2.4m × 4m — extra-long jumping surface for larger backyards',
       longNarrowYard: 'Oval shape (2.4m × 4m) — designed for long, narrow backyard layouts',
-      budget_1500_2500: 'Top-tier springless safety in your budget',
-      budget_2500_plus: 'Premium oval for serious family use',
       durability: '10-year warranty on all components',
       warranty: 'Industry-leading 10-year warranty on all components',
     },
@@ -456,10 +424,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'springless',
     shape: 'oval',
     advancedSafety: true,
-    meetsAUStandards: true,
     meetsUSStandards: true,
     availableIn: ['AU'],
-    priceFrom: 4399,
     sizes: [15],
     displaySize: '3.8m × 5.7m',
     image: '/images/springfree/jumbo-oval.webp',
@@ -475,7 +441,6 @@ const baseTrampolines: Trampoline[] = [
       meetsStandards: 'Meets Australian AS 4989:2015 safety standard',
       largeYard: '3.8m × 5.7m — designed for large open yards and serious family use',
       longNarrowYard: 'Jumbo oval (3.8m × 5.7m) — built for generous long, narrow yard spaces',
-      budget_2500_plus: 'Premium jumbo investment for the whole family',
       durability: '10-year warranty on all components',
       warranty: 'Industry-leading 10-year warranty on all components',
     },
@@ -488,10 +453,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'springless',
     shape: 'square',
     advancedSafety: true,
-    meetsAUStandards: true,
     meetsUSStandards: true,
     availableIn: ['AU'],
-    priceFrom: 2099,
     sizes: [9],
     displaySize: '2.7m × 2.7m',
     image: '/images/springfree/medium-square.jpg',
@@ -508,7 +471,6 @@ const baseTrampolines: Trampoline[] = [
       shapeRectangle: 'Square 2.7m × 2.7m mat — straight-edged jump area in a springless design',
       smallYard: '2.7m × 2.7m square — fits small to medium backyards with maximum usable jump area',
       mediumYard: '2.7m × 2.7m square — maximises usable jump area for medium backyards',
-      budget_1500_2500: 'Maximum safety in your budget range',
       durability: '10-year warranty on all components',
       warranty: 'Industry-leading 10-year warranty on all components',
     },
@@ -521,10 +483,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'springless',
     shape: 'square',
     advancedSafety: true,
-    meetsAUStandards: true,
     meetsUSStandards: true,
     availableIn: ['AU'],
-    priceFrom: 2699,
     sizes: [11],
     displaySize: '3.4m × 3.4m',
     image: '/images/springfree/large-square.webp',
@@ -541,39 +501,6 @@ const baseTrampolines: Trampoline[] = [
       shapeRectangle: 'Square 3.4m × 3.4m mat — big straight-edged jump area in a springless design',
       mediumYard: '3.4m × 3.4m square — maximises jump area in a medium to large yard',
       largeYard: '3.4m × 3.4m — excellent for larger backyards',
-      budget_2500_plus: 'Premium large square — worth the investment',
-      durability: '10-year warranty on all components',
-      warranty: 'Industry-leading 10-year warranty on all components',
-    },
-  },
-
-  {
-    id: 'springfree-jumbo-square',
-    displayName: 'Jumbo Square',
-    brand: 'Springfree',
-    springType: 'springless',
-    shape: 'square',
-    advancedSafety: true,
-    meetsAUStandards: true,
-    meetsUSStandards: true,
-    availableIn: ['AU'],
-    priceFrom: 3499,
-    sizes: [13],
-    displaySize: '4m × 4m',
-    image: '/images/springfree/jumbo-square.webp',
-    slug: 'springfree-jumbo-square',
-    isVuly: false,
-    fitsYard: { small: false, medium: false, large: true, longNarrow: false },
-    bestFor: 'Large yards wanting the biggest possible square Springfree.',
-    metricScores: { bounce: 8, durability: 10, value: 3, warranty: 10 },
-    matchReasons: {
-      springless: 'Composite rod system — no exposed springs',
-      safetyEssential: 'Maximum safety at jumbo scale — composite rods and SoftEdge mat',
-      safetyNiceToHave: 'Excellent safety from Springfree\'s composite rod system',
-      meetsStandards: 'Meets Australian AS 4989:2015 safety standard',
-      shapeRectangle: 'Square 4m × 4m mat — the biggest straight-edged springless jump area available',
-      largeYard: '4m × 4m — the biggest Springfree square, built for large backyards',
-      budget_2500_plus: 'Jumbo premium square for serious families',
       durability: '10-year warranty on all components',
       warranty: 'Industry-leading 10-year warranty on all components',
     },
@@ -588,10 +515,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'traditional',
     shape: 'round',
     advancedSafety: false,
-    meetsAUStandards: false,
     meetsUSStandards: true,
     availableIn: ['AU'],
-    priceFrom: 599,
     sizes: [10],
     displaySize: '10ft',
     image: '/images/jumpflex/flex.png',
@@ -603,8 +528,6 @@ const baseTrampolines: Trampoline[] = [
     matchReasons: {
       traditional: 'Traditional spring system — straightforward bounce',
       smallYard: '10ft size — fits smaller backyards well',
-      budget_500_1000: 'Budget-friendly option at $599',
-      budget_under_500: 'Just above $500 — competitive budget spring trampoline',
       valueForMoney: 'Good value for a basic family trampoline',
     },
   },
@@ -616,10 +539,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'traditional',
     shape: 'round',
     advancedSafety: false,
-    meetsAUStandards: false,
     meetsUSStandards: true,
     availableIn: ['AU'],
-    priceFrom: 799,
     sizes: [12],
     displaySize: '12ft',
     image: '/images/jumpflex/flex.png',
@@ -631,8 +552,6 @@ const baseTrampolines: Trampoline[] = [
     matchReasons: {
       traditional: 'Traditional spring system — dependable bounce',
       mediumYard: '12ft — ideal size for a medium-sized backyard',
-      budget_500_1000: 'Good value at $799 for a 12ft model',
-      budget_1000_1500: 'Well priced at the lower end of the $1,000–$1,500 range',
       valueForMoney: 'Good value for a standard family trampoline',
     },
   },
@@ -644,10 +563,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'traditional',
     shape: 'round',
     advancedSafety: true,
-    meetsAUStandards: false,
     meetsUSStandards: true,
     availableIn: ['AU'],
-    priceFrom: 999,
     sizes: [10],
     displaySize: '10ft',
     image: '/images/jumpflex/hero.png',
@@ -661,8 +578,6 @@ const baseTrampolines: Trampoline[] = [
       safetyEssential: 'High safety — curved poles, DualRing reinforced frame, and TightWeave enclosure net',
       safetyNiceToHave: 'Strong safety features — curved poles and reinforced DualRing frame',
       smallYard: '10ft — good for smaller backyards without sacrificing quality',
-      budget_500_1000: 'Premium safety in the $500–$1,000 range',
-      budget_1000_1500: 'Strong value for the safety specification included',
       durability: 'Reinforced DualRing frame with 10-year warranty',
       warranty: '10-year frame warranty from Jumpflex',
       valueForMoney: 'High-safety spring trampoline at a competitive price',
@@ -676,10 +591,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'traditional',
     shape: 'round',
     advancedSafety: true,
-    meetsAUStandards: false,
     meetsUSStandards: true,
     availableIn: ['AU'],
-    priceFrom: 1299,
     sizes: [12],
     displaySize: '12ft',
     image: '/images/jumpflex/hero.png',
@@ -693,8 +606,6 @@ const baseTrampolines: Trampoline[] = [
       safetyEssential: 'High safety — curved poles, DualRing reinforced frame, TightWeave enclosure net',
       safetyNiceToHave: 'Strong safety features — curved poles and reinforced DualRing frame',
       mediumYard: '12ft — ideal for a medium-sized backyard',
-      budget_1000_1500: 'High-safety spring trampoline in the $1,000–$1,500 range',
-      budget_1500_2500: 'Good value relative to premium springless options',
       durability: 'Reinforced DualRing frame with 10-year warranty',
       warranty: '10-year frame warranty from Jumpflex',
       valueForMoney: 'High-safety spring trampoline at a competitive price',
@@ -708,10 +619,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'traditional',
     shape: 'round',
     advancedSafety: true,
-    meetsAUStandards: false,
     meetsUSStandards: true,
     availableIn: ['AU'],
-    priceFrom: 1599,
     sizes: [14],
     displaySize: '14ft',
     image: '/images/jumpflex/hero.png',
@@ -725,7 +634,6 @@ const baseTrampolines: Trampoline[] = [
       safetyEssential: 'High safety — curved poles, DualRing frame, TightWeave enclosure net',
       safetyNiceToHave: 'Strong safety features — curved poles and reinforced DualRing frame',
       largeYard: '14ft — makes the most of your large backyard',
-      budget_1500_2500: 'Large high-safety spring trampoline in your budget range',
       durability: 'Reinforced DualRing frame with 10-year warranty',
       warranty: '10-year frame warranty from Jumpflex',
     },
@@ -738,10 +646,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'traditional',
     shape: 'round',
     advancedSafety: true,
-    meetsAUStandards: false,
     meetsUSStandards: true,
     availableIn: ['AU'],
-    priceFrom: 1299,
     sizes: [15],
     displaySize: '15ft',
     image: '/images/jumpflex/hero.png',
@@ -755,8 +661,6 @@ const baseTrampolines: Trampoline[] = [
       safetyEssential: 'High safety — curved poles, DualRing frame, and TightWeave net',
       safetyNiceToHave: 'Strong safety features for a spring trampoline',
       largeYard: '15ft — fills a large backyard with more jumping space',
-      budget_1000_1500: 'Large premium spring option in the $1,000–$1,500 range',
-      budget_1500_2500: 'Competitive large-format trampoline versus pricier premium models',
       durability: 'Reinforced frame backed by a 10-year warranty',
       warranty: '10-year frame warranty from Jumpflex',
     },
@@ -769,10 +673,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'traditional',
     shape: 'square',
     advancedSafety: true,
-    meetsAUStandards: false,
     meetsUSStandards: true,
     availableIn: ['AU'],
-    priceFrom: 2099,
     sizes: [14],
     displaySize: '14ft square',
     image: '/images/jumpflex/mega-14ft.jpg',
@@ -787,7 +689,6 @@ const baseTrampolines: Trampoline[] = [
       safetyEssential: 'Premium safety layout with Jumpflex enclosure and heavy-duty frame',
       safetyNiceToHave: 'Premium frame and enclosure package for larger users',
       largeYard: '14ft square format — needs a large open yard but maximises usable jumping space',
-      budget_1500_2500: 'Premium square trampoline within your budget range',
       bounce: 'Square shape and premium spring setup deliver a strong, controlled bounce',
       durability: 'Heavy-duty frame and higher user rating suit demanding family use',
       warranty: 'Premium Jumpflex frame warranty',
@@ -801,10 +702,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'traditional',
     shape: 'rectangle',
     advancedSafety: true,
-    meetsAUStandards: false,
     meetsUSStandards: true,
     availableIn: ['AU'],
-    priceFrom: 2399,
     sizes: [17],
     displaySize: '17ft rectangle',
     image: '/images/jumpflex/mega-17ft.jpg',
@@ -820,7 +719,6 @@ const baseTrampolines: Trampoline[] = [
       safetyNiceToHave: 'Strong safety design in a competition-style rectangle layout',
       largeYard: '17ft rectangle — suits very large backyards',
       longNarrowYard: 'Rectangle format makes better use of long, wide yard layouts than a giant round model',
-      budget_1500_2500: 'Premium rectangle trampoline inside your target range',
       bounce: 'Rectangle geometry gives a more performance-oriented bounce feel',
       durability: 'Heavy-duty frame built for high loads and frequent use',
     },
@@ -833,10 +731,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'traditional',
     shape: 'square',
     advancedSafety: true,
-    meetsAUStandards: false,
     meetsUSStandards: true,
     availableIn: ['AU'],
-    priceFrom: 2799,
     sizes: [19],
     displaySize: '19ft square',
     image: '/images/jumpflex/mega-19ft.jpg',
@@ -851,7 +747,6 @@ const baseTrampolines: Trampoline[] = [
       safetyEssential: 'High-end safety package built around a heavy-duty square frame',
       safetyNiceToHave: 'Premium safety package for a very large-format trampoline',
       largeYard: '19ft square — only makes sense in a large open yard',
-      budget_2500_plus: 'Top-end square trampoline for families wanting maximum jump area',
       bounce: 'Huge square mat gives a broad, powerful jumping zone',
       durability: 'Heavy-duty build and higher weight limits support demanding use',
       warranty: 'Premium Jumpflex frame warranty',
@@ -867,10 +762,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'springless',
     shape: 'round',
     advancedSafety: true,
-    meetsAUStandards: false,
     meetsUSStandards: false,
     availableIn: ['AU'],
-    priceFrom: 849,
     sizes: [10],
     displaySize: '10ft',
     image: '/images/lifespan-kids/hyperjump3-10-ft.webp',
@@ -884,7 +777,6 @@ const baseTrampolines: Trampoline[] = [
       safetyEssential: 'Safer than basic spring models thanks to the springless setup and enclosed jump area',
       safetyNiceToHave: 'Springless design helps reduce common pinch-point risks',
       smallYard: '10ft footprint suits smaller backyards',
-      budget_500_1000: 'Strong value if you want springless on a tighter budget',
       valueForMoney: 'One of the more affordable ways into the springless category',
       warranty: 'A long frame warranty helps offset the budget positioning',
     },
@@ -897,10 +789,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'traditional',
     shape: 'round',
     advancedSafety: false,
-    meetsAUStandards: false,
     meetsUSStandards: false,
     availableIn: ['AU'],
-    priceFrom: 1099,
     sizes: [12],
     displaySize: '12ft',
     image: '/images/lifespan-kids/bouncezone-round-spring.jpg',
@@ -912,7 +802,6 @@ const baseTrampolines: Trampoline[] = [
     matchReasons: {
       traditional: 'Traditional spring layout with a familiar bounce feel',
       mediumYard: '12ft footprint suits medium-sized family backyards',
-      budget_1000_1500: 'Family-size spring trampoline in the $1,000–$1,500 range',
       valueForMoney: 'Solid value for families who want a straightforward backyard trampoline',
       warranty: '5-year frame warranty with 2 years on the mat and 1 year on the net',
     },
@@ -925,10 +814,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'traditional',
     shape: 'rectangle',
     advancedSafety: false,
-    meetsAUStandards: false,
     meetsUSStandards: false,
     availableIn: ['AU'],
-    priceFrom: 1299,
     sizes: [10],
     displaySize: '7×10ft rectangle',
     image: '/images/lifespan-kids/bouncezone-m-rectangular-spring.jpg',
@@ -943,7 +830,6 @@ const baseTrampolines: Trampoline[] = [
       mediumYard: '7×10ft rectangle fits many medium backyards with better length use',
       largeYard: 'Rectangle footprint opens up more jumping length in a bigger yard',
       longNarrowYard: 'Rectangle format is a natural fit for long, narrow yard shapes',
-      budget_1000_1500: 'Rectangle trampoline within the $1,000–$1,500 range',
       bounce: 'Rectangle geometry gives a more controlled, performance-style bounce',
       warranty: '5-year frame warranty with 2 years on the mat and 1 year on the net',
     },
@@ -958,10 +844,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'traditional',
     shape: 'round',
     advancedSafety: false,
-    meetsAUStandards: false,
     meetsUSStandards: false,
     availableIn: ['AU'],
-    priceFrom: 509,
     sizes: [12],
     displaySize: '12ft',
     image: '/images/kahuna/classic-12ft.jpg',
@@ -973,7 +857,6 @@ const baseTrampolines: Trampoline[] = [
     matchReasons: {
       traditional: 'Traditional spring setup with a straightforward family bounce',
       mediumYard: '12ft — the classic medium-yard family size',
-      budget_500_1000: 'Low-cost 12ft option in the $500–$1,000 range',
       valueForMoney: 'Strong value if your main goal is a cheap family-size trampoline',
     },
   },
@@ -985,10 +868,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'traditional',
     shape: 'round',
     advancedSafety: false,
-    meetsAUStandards: false,
     meetsUSStandards: false,
     availableIn: ['AU'],
-    priceFrom: 509,
     sizes: [10],
     displaySize: '10ft',
     image: '/images/kahuna/blizzard-10ft.jpg',
@@ -1000,7 +881,6 @@ const baseTrampolines: Trampoline[] = [
     matchReasons: {
       traditional: 'Traditional spring setup keeps the bounce familiar and simple',
       smallYard: '10ft — a practical size for smaller backyards',
-      budget_500_1000: 'Affordable 10ft option without moving into premium pricing',
       valueForMoney: 'Budget-first value for a simple round family trampoline',
     },
   },
@@ -1012,10 +892,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'traditional',
     shape: 'oval',
     advancedSafety: false,
-    meetsAUStandards: false,
     meetsUSStandards: false,
     availableIn: ['AU'],
-    priceFrom: 899,
     sizes: [15],
     displaySize: '10×15ft oval',
     image: '/images/kahuna/oval-10x15.jpg',
@@ -1028,7 +906,6 @@ const baseTrampolines: Trampoline[] = [
       traditional: 'Traditional spring setup in an oval footprint',
       largeYard: '10×15ft oval suits larger yards that have the length to spare',
       longNarrowYard: 'Oval format uses long, narrow yard space better than a large round trampoline',
-      budget_500_1000: 'Large-format shape without premium pricing',
       bounce: 'Oval layout gives a longer jumping lane for active kids',
     },
   },
@@ -1042,10 +919,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'traditional',
     shape: 'round',
     advancedSafety: false,
-    meetsAUStandards: true,
     meetsUSStandards: false,
     availableIn: ['AU'],
-    priceFrom: 299,
     sizes: [8],
     displaySize: '8ft',
     image: '/images/oz-trampolines/summit.jpeg',
@@ -1058,7 +933,6 @@ const baseTrampolines: Trampoline[] = [
       traditional: 'Traditional spring setup — familiar bounce',
       meetsStandards: 'Meets Australian AS 4989:2015 standard',
       smallYard: '8ft — one of the smallest options available, perfect for tight spaces',
-      budget_under_500: 'Fits comfortably under $500',
       valueForMoney: 'Most affordable way to get an AU-standards-compliant trampoline into a small yard',
     },
   },
@@ -1070,10 +944,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'traditional',
     shape: 'round',
     advancedSafety: false,
-    meetsAUStandards: true,
     meetsUSStandards: false,
     availableIn: ['AU'],
-    priceFrom: 399,
     sizes: [10],
     displaySize: '10ft',
     image: '/images/oz-trampolines/summit.jpeg',
@@ -1086,7 +958,6 @@ const baseTrampolines: Trampoline[] = [
       traditional: 'Traditional spring setup — familiar bounce',
       meetsStandards: 'Meets Australian AS 4989:2015 standard',
       smallYard: '10ft — fits small to medium yards',
-      budget_under_500: 'Under $500 — budget-first option for smaller yards',
       valueForMoney: 'Most affordable 10ft option from an AU-standards-compliant brand',
     },
   },
@@ -1098,10 +969,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'traditional',
     shape: 'round',
     advancedSafety: false,
-    meetsAUStandards: true,
     meetsUSStandards: false,
     availableIn: ['AU'],
-    priceFrom: 499,
     sizes: [12],
     displaySize: '12ft',
     image: '/images/oz-trampolines/summit.jpeg',
@@ -1114,8 +983,6 @@ const baseTrampolines: Trampoline[] = [
       traditional: 'Traditional spring setup — familiar bounce',
       meetsStandards: 'Meets Australian AS 4989:2015 standard',
       mediumYard: '12ft — fits medium-sized backyards at the lowest price point',
-      budget_under_500: 'Under $500 for a 12ft family trampoline',
-      budget_500_1000: 'Well within the $500–$1,000 budget range',
       valueForMoney: 'Most affordable 12ft option that meets AU standards',
     },
   },
@@ -1127,10 +994,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'traditional',
     shape: 'round',
     advancedSafety: false,
-    meetsAUStandards: true,
     meetsUSStandards: false,
     availableIn: ['AU'],
-    priceFrom: 599,
     sizes: [14],
     displaySize: '14ft',
     image: '/images/oz-trampolines/summit.jpeg',
@@ -1143,7 +1008,6 @@ const baseTrampolines: Trampoline[] = [
       traditional: 'Traditional spring setup',
       meetsStandards: 'Meets Australian AS 4989:2015 standard',
       largeYard: '14ft — large size at the lowest price point',
-      budget_500_1000: 'Large 14ft trampoline in the $500–$1,000 range',
       valueForMoney: 'Most affordable 14ft option that meets AU standards',
     },
   },
@@ -1157,10 +1021,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'traditional',
     shape: 'round',
     advancedSafety: false,
-    meetsAUStandards: true,
     meetsUSStandards: false,
     availableIn: ['AU'],
-    priceFrom: 599,
     sizes: [10, 12],
     displaySize: '10ft or 12ft',
     image: '/images/geetramp/curve-12-ft.webp',
@@ -1175,8 +1037,6 @@ const baseTrampolines: Trampoline[] = [
       meetsStandards: 'Meets Australian AS 4989:2015 safety standard',
       smallYard: 'Available in 10ft — fits smaller backyards',
       mediumYard: 'Available in 12ft — ideal for a medium-sized backyard',
-      budget_500_1000: 'Starts at $599 — strong build quality in the $500–$1,000 range',
-      budget_1000_1500: 'Well under your budget, leaving room for accessories',
       valueForMoney: '10-year frame warranty at a budget-round price',
       durability: 'Heavier-gauge frame than most budget rounds, backed by a 10-year frame warranty',
       warranty: '10-year frame and 3-year mat warranty from GeeTramp',
@@ -1190,10 +1050,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'traditional',
     shape: 'rectangle',
     advancedSafety: false,
-    meetsAUStandards: true,
     meetsUSStandards: false,
     availableIn: ['AU'],
-    priceFrom: 1199,
     sizes: [10],
     displaySize: '7×10ft rectangle',
     image: '/images/geetramp/force-7-x-10-ft.webp',
@@ -1209,8 +1067,6 @@ const baseTrampolines: Trampoline[] = [
       smallYard: '7×10ft footprint — the rare rectangle that fits a smaller backyard',
       mediumYard: '7×10ft rectangle leaves plenty of clearance in a medium yard',
       longNarrowYard: 'Rectangle format is a natural fit for long, narrow yard shapes',
-      budget_1000_1500: 'Entry point to the Force range at $1,199',
-      budget_1500_2500: 'Sits below your range — performance rectangle with budget to spare',
       bounce: 'GeeTramp Force is known for one of the best bounces in its class',
       durability: 'Heavy-duty frame with a 10-year warranty',
       warranty: '10-year frame, 3-year mat and 2-year net warranty',
@@ -1224,10 +1080,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'traditional',
     shape: 'rectangle',
     advancedSafety: false,
-    meetsAUStandards: true,
     meetsUSStandards: false,
     availableIn: ['AU'],
-    priceFrom: 1499,
     sizes: [12],
     displaySize: '8×12ft rectangle',
     image: '/images/geetramp/force-8-x-12-ft.webp',
@@ -1243,8 +1097,6 @@ const baseTrampolines: Trampoline[] = [
       mediumYard: '8×12ft rectangle uses a medium yard\'s length efficiently',
       largeYard: 'Leaves room to spare in a large yard while maximising bounce quality',
       longNarrowYard: 'Rectangle format is a natural fit for long, narrow yard shapes',
-      budget_1000_1500: 'The most popular Force size at $1,499',
-      budget_1500_2500: 'Fits your budget with performance-rectangle credentials',
       bounce: 'GeeTramp Force is known for one of the best bounces in its class',
       durability: 'Heavy-duty frame with a 10-year warranty',
       warranty: '10-year frame, 3-year mat and 2-year net warranty',
@@ -1258,10 +1110,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'traditional',
     shape: 'rectangle',
     advancedSafety: false,
-    meetsAUStandards: true,
     meetsUSStandards: false,
     availableIn: ['AU'],
-    priceFrom: 1799,
     sizes: [14],
     displaySize: '9×14ft rectangle',
     image: '/images/geetramp/force-9-x-14-ft.webp',
@@ -1276,8 +1126,6 @@ const baseTrampolines: Trampoline[] = [
       meetsStandards: 'Meets Australian AS 4989:2015 safety standard',
       largeYard: '9×14ft rectangle makes the most of a large backyard',
       longNarrowYard: 'Rectangle format is a natural fit for long, narrow yard shapes',
-      budget_1500_2500: 'Full-size performance rectangle at $1,799',
-      budget_2500_plus: 'Leaves budget headroom versus premium imported rectangles',
       bounce: 'GeeTramp Force is known for one of the best bounces in its class',
       durability: 'Heavy-duty frame with a 10-year warranty',
       warranty: '10-year frame, 3-year mat and 2-year net warranty',
@@ -1291,10 +1139,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'traditional',
     shape: 'rectangle',
     advancedSafety: false,
-    meetsAUStandards: true,
     meetsUSStandards: false,
     availableIn: ['AU'],
-    priceFrom: 2349,
     sizes: [17],
     displaySize: '10×17ft rectangle',
     image: '/images/geetramp/force-10-x-17-ft.webp',
@@ -1309,8 +1155,6 @@ const baseTrampolines: Trampoline[] = [
       meetsStandards: 'Meets Australian AS 4989:2015 safety standard',
       largeYard: '10×17ft needs a big yard but delivers a huge jumping surface',
       longNarrowYard: '17ft of length puts a long, narrow yard to perfect use',
-      budget_1500_2500: 'Olympic-length rectangle within your range at $2,349',
-      budget_2500_plus: 'Serious jump lane for well under premium import pricing',
       bounce: 'GeeTramp Force is known for one of the best bounces in its class',
       durability: 'Heavy-duty frame with a 10-year warranty',
       warranty: '10-year frame, 3-year mat and 2-year net warranty',
@@ -1324,10 +1168,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'traditional',
     shape: 'rectangle',
     advancedSafety: false,
-    meetsAUStandards: true,
     meetsUSStandards: false,
     availableIn: ['AU'],
-    priceFrom: 3199,
     sizes: [16],
     displaySize: '14×16ft rectangle',
     image: '/images/geetramp/force-14-x-16-ft.webp',
@@ -1341,7 +1183,6 @@ const baseTrampolines: Trampoline[] = [
       shapeRectangle: '14×16ft near-square rectangle — a massive straight-edged jump area',
       meetsStandards: 'Meets Australian AS 4989:2015 safety standard',
       largeYard: '14×16ft is the biggest Force — built for genuinely large yards',
-      budget_2500_plus: 'Maximum jump area per dollar in the premium tier',
       bounce: 'GeeTramp Force is known for one of the best bounces in its class',
       durability: 'Heavy-duty frame with a 10-year warranty',
       warranty: '10-year frame, 3-year mat and 2-year net warranty',
@@ -1357,10 +1198,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'traditional',
     shape: 'round',
     advancedSafety: false,
-    meetsAUStandards: true,
     meetsUSStandards: false,
     availableIn: ['AU'],
-    priceFrom: 1599,
     sizes: [12, 14, 15],
     displaySize: '12ft, 14ft or 15ft',
     image: '/images/acon/air-gen2-14-ft.webp',
@@ -1375,8 +1214,6 @@ const baseTrampolines: Trampoline[] = [
       meetsStandards: 'ACON states Australian certification for the 14ft and 15ft sizes',
       mediumYard: 'Available in 12ft — ideal for a medium-sized backyard',
       largeYard: 'Available up to 15ft for your large backyard',
-      budget_1500_2500: 'Heavy-duty round in the $1,500–$2,500 range',
-      budget_2500_plus: 'Premium build quality with budget left over',
       bounce: 'ACON\'s high spring count delivers one of the best round-trampoline bounces',
       durability: 'Built for harsh Finnish winters — designed to stay outside year-round',
       warranty: '10-year frame and 5-year mat warranty',
@@ -1390,17 +1227,15 @@ const baseTrampolines: Trampoline[] = [
     springType: 'traditional',
     shape: 'rectangle',
     advancedSafety: false,
-    meetsAUStandards: true,
     meetsUSStandards: false,
     availableIn: ['AU'],
-    priceFrom: 3599,
     sizes: [17],
     displaySize: '10×17ft rectangle',
     image: '/images/acon/16-hd-10-x-17-ft.webp',
     slug: 'acon-16-hd-10x17',
     isVuly: false,
     fitsYard: { small: false, medium: false, large: true, longNarrow: true },
-    bestFor: 'Big families and teens who need a rectangle with a huge weight rating.',
+    bestFor: 'Families and teens wanting a heavy-duty rectangle for a large backyard.',
     metricScores: { bounce: 10, durability: 10, value: 5, warranty: 8 },
     matchReasons: {
       traditional: '140 coil springs give a deep, powerful rectangle bounce',
@@ -1408,9 +1243,8 @@ const baseTrampolines: Trampoline[] = [
       meetsStandards: 'ACON states Australian certification for the 16 HD',
       largeYard: '10×17ft footprint suits large open backyards',
       longNarrowYard: '17ft of length puts a long, narrow yard to perfect use',
-      budget_2500_plus: 'Premium rectangle engineered for heavy multi-user sessions',
       bounce: 'One of the most powerful bounces of any backyard rectangle',
-      durability: '750kg combined weight rating — the strongest build in this quiz',
+      durability: 'Heavy-duty frame backed by a 10-year frame warranty',
       warranty: '10-year frame and 5-year mat warranty',
     },
   },
@@ -1422,10 +1256,8 @@ const baseTrampolines: Trampoline[] = [
     springType: 'traditional',
     shape: 'rectangle',
     advancedSafety: false,
-    meetsAUStandards: false,
     meetsUSStandards: false,
     availableIn: ['AU'],
-    priceFrom: 6499,
     sizes: [17],
     displaySize: '10×17ft rectangle',
     image: '/images/acon/x-10-x-17-ft.webp',
@@ -1438,7 +1270,6 @@ const baseTrampolines: Trampoline[] = [
       traditional: '120 performance springs on a flagship rectangle frame',
       shapeRectangle: '10×17ft flagship rectangle — ACON\'s highest-performance jump lane',
       largeYard: '10×17ft footprint needs — and rewards — a large open yard',
-      budget_2500_plus: 'Top-of-the-line investment for training-level bounce at home',
       bounce: 'Flagship performance bounce approaching gym-level rebound',
       durability: 'Overbuilt frame designed for daily athletic training',
       warranty: '10-year frame and 5-year mat warranty',
@@ -1468,7 +1299,6 @@ export const compareMatchers: Record<string, CompareMatcher> = {
   'springfree-jumbo-oval': { brand: 'Springfree', model: 'Jumbo Oval Trampoline' },
   'springfree-medium-square': { brand: 'Springfree', model: 'Medium Square Trampoline' },
   'springfree-large-square': { brand: 'Springfree', model: 'Large Square Trampoline' },
-  'springfree-jumbo-square': { brand: 'Springfree', model: 'Jumbo Square Trampoline' },
   'jumpflex-flex-10ft': { brand: 'Jumpflex', model: 'FLEX', size: '10 ft' },
   'jumpflex-flex-12ft': { brand: 'Jumpflex', model: 'FLEX', size: '12 ft' },
   'jumpflex-hero-10ft': { brand: 'Jumpflex', model: 'HERO', size: '10 ft' },
@@ -1499,25 +1329,83 @@ export const compareMatchers: Record<string, CompareMatcher> = {
   'acon-x-10x17': { brand: 'ACON', model: 'X', size: '10 x 17 ft' },
 };
 
-function getComparePrice(slug: string): number | null {
+function getCompareRows(slug: string): CompareTrampoline[] {
   const matcher = compareMatchers[slug];
-  if (!matcher) return null;
+  if (!matcher) return [];
 
-  const rows = COMPARE_ROWS.filter((row) => {
+  return COMPARE_ROWS.filter((row) => {
     if (row.brand !== matcher.brand) return false;
     if (row.model !== matcher.model) return false;
     if (matcher.size && row.size !== matcher.size) return false;
-    return row.priceAud !== null;
+    return true;
   });
-
-  if (rows.length === 0) return null;
-  return Math.min(...rows.map((row) => row.priceAud as number));
 }
 
-export const trampolines: Trampoline[] = baseTrampolines.map((trampoline) => ({
-  ...trampoline,
-  priceFrom: getComparePrice(trampoline.slug) ?? trampoline.priceFrom,
-}));
+const SIZE_AWARE_SLUGS = new Set(['vuly-flare', 'acon-air-gen2']);
+
+function approximateFeet(row: CompareTrampoline): number | null {
+  const feetMatch = row.size.match(/^(\d+(?:\.\d+)?)\s*ft$/i);
+  if (feetMatch) return Number(feetMatch[1]);
+  if (row.overallDiamCm !== null) return Math.round(row.overallDiamCm / 30.48);
+  return null;
+}
+
+function sizeDisplayLabel(row: CompareTrampoline): string {
+  const compactSize = row.size.replace(/\s+ft$/i, 'ft');
+  if (/^[SMLX]+$/i.test(row.size) && row.overallDiamCm !== null) {
+    return `${row.size} (${row.overallDiamCm}cm overall)`;
+  }
+  return compactSize;
+}
+
+function joinSizeLabels(labels: string[]): string {
+  if (labels.length <= 1) return labels[0] ?? '';
+  if (labels.length === 2) return `${labels[0]} or ${labels[1]}`;
+  return `${labels.slice(0, -1).join(', ')} or ${labels.at(-1)}`;
+}
+
+function getSizeOptions(rows: CompareTrampoline[]): QuizSizeOption[] {
+  return rows.flatMap((row) => {
+    const approximateFt = approximateFeet(row);
+    if (approximateFt === null || row.priceAud === null) return [];
+    return [{
+      approximateFt,
+      displayLabel: sizeDisplayLabel(row),
+      priceAud: row.priceAud,
+      meetsAUStandards: row.meetsAuStd,
+    }];
+  });
+}
+
+export const trampolines: Trampoline[] = baseTrampolines.map((trampoline) => {
+  const rows = getCompareRows(trampoline.slug);
+  if (rows.length === 0) {
+    throw new Error(`Quiz model "${trampoline.slug}" has no matching Aus-tab catalogue rows`);
+  }
+
+  const prices = rows.flatMap((row) => row.priceAud === null ? [] : [row.priceAud]);
+  if (prices.length === 0) {
+    throw new Error(`Quiz model "${trampoline.slug}" has no Aus-tab catalogue price`);
+  }
+
+  const sizeOptions = SIZE_AWARE_SLUGS.has(trampoline.slug) ? getSizeOptions(rows) : undefined;
+  if (SIZE_AWARE_SLUGS.has(trampoline.slug) && sizeOptions?.length !== rows.length) {
+    throw new Error(`Quiz model "${trampoline.slug}" has incomplete Aus-tab size facts`);
+  }
+
+  return {
+    ...trampoline,
+    priceFrom: Math.min(...prices),
+    meetsAUStandards: rows.every((row) => row.meetsAuStd),
+    ...(sizeOptions
+      ? {
+          sizes: sizeOptions.map((option) => option.approximateFt),
+          displaySize: joinSizeLabels(sizeOptions.map((option) => option.displayLabel)),
+          sizeOptions,
+        }
+      : {}),
+  };
+});
 
 export function getEligibleTrampolines(country: Country) {
   const resolvedCountry = resolveQuizCountry(country);

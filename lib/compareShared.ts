@@ -12,7 +12,8 @@ export type GroupedTrampoline = {
 export const AFFILIATE_DISCLOSURE =
   'This page contains affiliate links and we may earn a commission on purchases.';
 
-export const PRICE_FOOTNOTE = 'Prices sourced from manufacturer websites and may change.';
+export const PRICE_FOOTNOTE =
+  'Prices sourced from manufacturer websites and may change. “From” prices are model-family starting prices, not size-specific prices.';
 
 export const BRAND_COLORS: Record<string, string> = {
   Vuly: 'bg-[#f15a01]/10 text-[#c44900] border-[#f15a01]/30',
@@ -81,27 +82,72 @@ export function compareSizeLabel(t: Trampoline): string {
   return t.size.replace(/\s*x\s*/i, ' × ');
 }
 
-/**
- * The source sheet also records broader Australian product standards such as
- * AS/NZS 8124. The site's AU-standard filter is specifically about the
- * trampoline standard AS 4989:2015, so an explicitly different numbered
- * standard must not be treated as equivalent.
- */
 export function meetsAs4989(t: Trampoline): boolean {
-  if (!t.meetsAuStd) return false;
-  if (!t.auStdDetail) return true;
-  if (/AS\s*4989:2015/i.test(t.auStdDetail)) return true;
-
-  const namesAnotherNumberedStandard = /\bAS(?:\/NZS)?\s*\d/i.test(t.auStdDetail);
-  return !namesAnotherNumberedStandard;
+  return t.auStdStatus === 'meets';
 }
 
 export function australianStandardLabel(t: Trampoline): string {
   const detail = t.auStdDetail?.replace(/AS\s*4989:2015/i, 'AS 4989:2015');
 
   if (meetsAs4989(t)) return detail ?? 'AS 4989:2015';
-  if (detail) return `${detail} (not AS 4989:2015)`;
+  if (t.auStdStatus === 'does-not-meet') return 'Does not meet AS 4989:2015';
   return 'Not confirmed';
+}
+
+export type AustralianStandardSummary = {
+  meets: number;
+  doesNotMeet: number;
+  notConfirmed: number;
+  total: number;
+  label: string;
+};
+
+/** Summarises size-level source-sheet statuses without treating blanks as failures. */
+export function australianStandardSummary(variants: Trampoline[]): AustralianStandardSummary {
+  const meets = variants.filter((variant) => variant.auStdStatus === 'meets').length;
+  const doesNotMeet = variants.filter(
+    (variant) => variant.auStdStatus === 'does-not-meet',
+  ).length;
+  const notConfirmed = variants.length - meets - doesNotMeet;
+  const total = variants.length;
+
+  if (total === 0) {
+    return { meets, doesNotMeet, notConfirmed, total, label: 'Not confirmed' };
+  }
+
+  if (meets === total) {
+    return { meets, doesNotMeet, notConfirmed, total, label: australianStandardLabel(variants[0]) };
+  }
+
+  if (doesNotMeet === total) {
+    return { meets, doesNotMeet, notConfirmed, total, label: 'Does not meet AS 4989:2015' };
+  }
+
+  if (notConfirmed === total) {
+    return { meets, doesNotMeet, notConfirmed, total, label: 'Not confirmed' };
+  }
+
+  const parts: string[] = [];
+  if (meets > 0) parts.push(`${meets} of ${total} sizes confirmed`);
+  if (doesNotMeet > 0) parts.push(`${doesNotMeet} ${doesNotMeet === 1 ? 'size does' : 'sizes do'} not meet`);
+  if (notConfirmed > 0) parts.push(`${notConfirmed} not confirmed`);
+
+  return { meets, doesNotMeet, notConfirmed, total, label: parts.join('; ') };
+}
+
+export function isFromPrice(t: Trampoline): boolean {
+  return /\bfrom\b/i.test(t.priceBasis);
+}
+
+export function formatAudPrice(value: number): string {
+  return `$${value.toLocaleString('en-AU')}`;
+}
+
+/** Formats one row without presenting a model-family starting price as size-specific. */
+export function variantPriceLabel(t: Trampoline): string {
+  if (t.priceAud === null) return '—';
+  const price = formatAudPrice(t.priceAud);
+  return isFromPrice(t) ? `From ${price}` : price;
 }
 
 export function sizeStringToMaxDimensionCm(size: string): number | null {
@@ -240,7 +286,7 @@ export function groupPriceRange(
   return {
     low: Math.min(...prices),
     high: Math.max(...prices),
-    hasFromPrice: variants.some((variant) => variant.priceBasis.toLowerCase().includes('from')),
+    hasFromPrice: variants.some(isFromPrice),
   };
 }
 

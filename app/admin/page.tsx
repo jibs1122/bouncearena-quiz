@@ -97,7 +97,8 @@ const scoringSpec = {
     'Standards failure is not a hard exclusion in the main scorer; it applies -50 and may still pass if the total remains > 0.',
   ],
   normalRanking: [
-    'Eligible models are models from getEligibleTrampolines(country), filtered by availableIn after resolving country.',
+    'Eligible models come from getEligibleTrampolines(country), filtered by availableIn after resolving country. Prices and Australian-standard status are derived from the Aus-tab comparison rows.',
+    'For Australian users who require the standard, mixed-status families are narrowed to their confirmed size options before scoring.',
     'rawScore = scoreSize + scoreStandards + scoreSafety + scoreSpringType + scoreBudget + scorePriorities.',
     'After scoring, keep only models where rawScore > 0.',
     'Sort by rawScore descending, then priceFrom ascending.',
@@ -124,6 +125,7 @@ const scoringSpec = {
   ],
   recommendedSizeDisplay: [
     'Single-size models return displaySize.',
+    'Size-aware families use their Aus-tab size labels and choose the closest confirmed option when the standard is required.',
     'Multi-size models choose closest numeric size in trampoline.sizes to target feet.',
     'Targets: small=8ft, medium=12ft, large=14ft, long-narrow=12ft, not-sure=12ft.',
   ],
@@ -137,6 +139,7 @@ const scoringSpec = {
   matchReasonSelection: [
     'selectMatchReasons returns up to 4 reasons.',
     'Order: spring type preference, backyard size fit, safety preference, standards compliance, budget fit, selected priorities.',
+    'Budget reasons are generated from the current Aus-tab price and are omitted when a recommendation is over the selected maximum.',
     'Priority reason keys map value -> valueForMoney; other priorities map directly where available.',
   ],
 };
@@ -182,6 +185,7 @@ function summarizeModelPool() {
     priceFrom: trampoline.priceFrom,
     sizesFt: trampoline.sizes,
     displaySize: trampoline.displaySize,
+    sizeOptions: trampoline.sizeOptions ?? null,
     fitsYard: trampoline.fitsYard,
     metricScores: trampoline.metricScores,
     bestFor: trampoline.bestFor,

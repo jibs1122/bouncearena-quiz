@@ -2,12 +2,12 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import type { Trampoline } from '@/data/trampolines';
 import {
-  australianStandardLabel,
+  australianStandardSummary,
   compareSizeLabel,
   formatWarrantyRange,
   groupRows,
+  isFromPrice,
   longestFootprintCm,
-  meetsAs4989,
   PRICE_FOOTNOTE,
   sizeLabel,
   type GroupedTrampoline,
@@ -64,16 +64,18 @@ function priceValue(group: GroupedTrampoline): ReactNode {
 
   const low = Math.min(...prices);
   const high = Math.max(...prices);
-  const fromOnly = group.variants.some((variant) =>
-    variant.priceBasis.toLowerCase().includes('from'),
-  );
+  const hasFromPrice = group.variants.some(isFromPrice);
+  const allFromPrices = group.variants.every(isFromPrice);
 
   return (
     <>
+      {low === high && hasFromPrice ? 'From ' : allFromPrices ? 'Starting prices ' : ''}
       ${low.toLocaleString('en-AU')}
-      {(low !== high || fromOnly) && (
+      {(low !== high || (hasFromPrice && !allFromPrices)) && (
         <span className="ml-1 text-[10px] font-normal text-black/35">
-          {low !== high ? `to $${high.toLocaleString('en-AU')}` : 'from'}
+          {low !== high
+            ? `to $${high.toLocaleString('en-AU')}${hasFromPrice && !allFromPrices ? ' (includes from prices)' : ''}`
+            : 'includes a from price'}
         </span>
       )}
     </>
@@ -123,17 +125,7 @@ function heightValue(group: GroupedTrampoline): string {
 }
 
 function standardValue(group: GroupedTrampoline): string {
-  const certified = group.variants.filter(meetsAs4989);
-
-  if (certified.length === 0) {
-    const otherStandard = group.variants.find((variant) => variant.auStdDetail);
-    return otherStandard ? australianStandardLabel(otherStandard) : 'Not confirmed';
-  }
-
-  const label = australianStandardLabel(certified[0]);
-
-  if (certified.length === group.variants.length) return label;
-  return `${label} (${certified.length} of ${group.variants.length} sizes)`;
+  return australianStandardSummary(group.variants).label;
 }
 
 function springlessValue(group: GroupedTrampoline): string {
@@ -158,10 +150,12 @@ const SPEC_ROWS: SpecRow[] = [
   { label: 'Total height', getValue: heightValue },
   { label: 'Max single jumper', getValue: (g) => kgRange(g.variants.map((v) => v.maxWeightKg)) },
   { label: 'Combined weight limit', getValue: (g) => kgRange(g.variants.map((v) => v.combinedWeightKg)) },
+  { label: 'Static weight rating', getValue: (g) => kgRange(g.variants.map((v) => v.staticWeightKg)) },
   { label: 'Spring count', getValue: (g) => countRange(g.variants.map((v) => v.springCount)) },
   { label: 'Frame warranty', getValue: (g) => formatWarrantyRange(g.variants.map((v) => v.warrantyFrameYrs)) },
   { label: 'Mat warranty', getValue: (g) => formatWarrantyRange(g.variants.map((v) => v.warrantyMatYrs)) },
   { label: 'Net warranty', getValue: (g) => formatWarrantyRange(g.variants.map((v) => v.warrantyNetYrs)) },
+  { label: 'General parts warranty', getValue: (g) => formatWarrantyRange(g.variants.map((v) => v.warrantyPartsYrs)) },
   { label: 'Australian standard', getValue: standardValue },
 ];
 
@@ -215,6 +209,9 @@ export default function ComparisonTable({
   if (diffRows.length === 0 && sharedRows.length === 0) return null;
 
   const hiddenTotal = a.hidden + b.hidden;
+  const hasStaticWeightRating = groups.some((group) =>
+    group.variants.some((variant) => variant.staticWeightKg !== null),
+  );
 
   return (
     <div className="not-prose mx-auto w-fit max-w-full space-y-3">
@@ -295,6 +292,11 @@ export default function ComparisonTable({
       )}
 
       <p className="text-xs text-black/35">{PRICE_FOOTNOTE}</p>
+      {hasStaticWeightRating && (
+        <p className="text-xs text-black/35">
+          Static weight ratings are test loads, not combined-user weight limits.
+        </p>
+      )}
     </div>
   );
 }

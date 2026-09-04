@@ -143,6 +143,46 @@ function getBudgetRange(budget: BudgetSelection): [number, number] {
   );
 }
 
+function joinSizeOptionLabels(labels: string[]): string {
+  if (labels.length <= 1) return labels[0] ?? '';
+  if (labels.length === 2) return `${labels[0]} or ${labels[1]}`;
+  return `${labels.slice(0, -1).join(', ')} or ${labels.at(-1)}`;
+}
+
+/**
+ * Narrows mixed-certification model families only when an Australian user says
+ * confirmed compliance is required. Other users retain the complete family.
+ */
+export function resolveTrampolineForAnswers(
+  trampoline: Trampoline,
+  answers: QuizAnswers,
+): Trampoline {
+  const country = resolveQuizCountry(answers.country);
+  if (country !== 'AU' || answers.standards !== 'yes' || !trampoline.sizeOptions) {
+    return trampoline;
+  }
+
+  const confirmedOptions = trampoline.sizeOptions.filter((option) => option.meetsAUStandards);
+  if (confirmedOptions.length === 0 || confirmedOptions.length === trampoline.sizeOptions.length) {
+    return trampoline;
+  }
+
+  return {
+    ...trampoline,
+    meetsAUStandards: true,
+    priceFrom: Math.min(...confirmedOptions.map((option) => option.priceAud)),
+    sizes: confirmedOptions.map((option) => option.approximateFt),
+    displaySize: joinSizeOptionLabels(confirmedOptions.map((option) => option.displayLabel)),
+    sizeOptions: confirmedOptions,
+  };
+}
+
+function getScoringPool(answers: QuizAnswers): Trampoline[] {
+  return getEligibleTrampolines(answers.country).map((trampoline) =>
+    resolveTrampolineForAnswers(trampoline, answers),
+  );
+}
+
 function scoreBudget(trampoline: Trampoline, budget: BudgetSelection): number {
   if (budget.length === 0 || budget.includes('flexible')) return 0;
   const [min, max] = getBudgetRange(budget);
@@ -207,7 +247,7 @@ function baseMeritScore(trampoline: Trampoline): number {
 
 function getDiverseRecommendations(answers: QuizAnswers): ScoredTrampoline[] {
   const country = resolveQuizCountry(answers.country);
-  const pool = getEligibleTrampolines(answers.country)
+  const pool = getScoringPool(answers)
     .filter((trampoline) => !isHardExcluded(trampoline, answers))
     .filter((trampoline) => scoreBudget(trampoline, answers.budget) >= 0)
     .filter((trampoline) => scoreStandards(trampoline, answers.standards, country) > -50)
@@ -259,15 +299,25 @@ export function getRecommendedSizeDisplay(
   trampoline: Trampoline,
   backyardSize: QuizAnswers['backyardSize'],
 ): string {
-  // Single-size models always use their displaySize
-  if (trampoline.sizes.length === 1) return trampoline.displaySize;
-
-  // Multi-size models (Vuly): pick the closest ft size to the target
   let targetFt: number;
   if (backyardSize === 'small') targetFt = 8;
   else if (backyardSize === 'medium') targetFt = 12;
   else if (backyardSize === 'large') targetFt = 14;
   else targetFt = 12; // not-sure or long-narrow → default 12ft
+
+  if (trampoline.sizeOptions?.length) {
+    const closest = trampoline.sizeOptions.reduce((best, option) =>
+      Math.abs(option.approximateFt - targetFt) < Math.abs(best.approximateFt - targetFt)
+        ? option
+        : best,
+    );
+    return closest.displayLabel;
+  }
+
+  // Single-size models always use their displaySize
+  if (trampoline.sizes.length === 1) return trampoline.displaySize;
+
+  // Multi-size models: pick the closest approximate ft size to the target
 
   const closest = trampoline.sizes.reduce((best, size) =>
     Math.abs(size - targetFt) < Math.abs(best - targetFt) ? size : best,
@@ -279,7 +329,7 @@ export function getRecommendedSizeDisplay(
 
 function scoreAll(answers: QuizAnswers): ScoredTrampoline[] {
   const country = resolveQuizCountry(answers.country);
-  return getEligibleTrampolines(answers.country).map((trampoline) => {
+  return getScoringPool(answers).map((trampoline) => {
     if (isHardExcluded(trampoline, answers)) {
       return {
         ...trampoline,
@@ -356,7 +406,7 @@ export function getRecommendations(answers: QuizAnswers): ScoredTrampoline[] {
 
 export function getBestVulyMatch(answers: QuizAnswers): ScoredTrampoline | null {
   const country = resolveQuizCountry(answers.country);
-  const scored = getEligibleTrampolines(answers.country)
+  const scored = getScoringPool(answers)
     .filter((t) => t.isVuly)
     .map((trampoline) => {
       const rawScore =
@@ -400,8 +450,9 @@ export function selectMatchReasons(
 
   // 3. Backyard size fit (always include)
   const sizeKey = answers.backyardSize;
-  const sizeSnippet =
-    sizeKey === 'small'
+  const sizeSnippet = rec.sizeOptions && sizeKey !== 'not-sure'
+    ? `Recommended size: ${rec.recommendedSizeDisplay} for your selected ${sizeKey.replace('-', ' ')} yard`
+    : sizeKey === 'small'
       ? mr.smallYard
       : sizeKey === 'medium'
         ? mr.mediumYard
@@ -426,19 +477,15 @@ export function selectMatchReasons(
   }
 
   // 6. Budget fit
-  const budgetKeyMap: Partial<Record<BudgetId, keyof MatchReasonBank>> = {
-    'under-500': 'budget_under_500',
-    '500-1000': 'budget_500_1000',
-    '1000-1500': 'budget_1000_1500',
-    '1500-2500': 'budget_1500_2500',
-    '2500-plus': 'budget_2500_plus',
-  };
-  for (const budget of answers.budget.slice(0, 2)) {
-    const budgetKey = budgetKeyMap[budget];
-    const budgetSnippet = budgetKey ? mr[budgetKey] : undefined;
-    if (budgetSnippet) {
-      reasons.push(budgetSnippet);
-      break;
+  if (answers.budget.length > 0 && !answers.budget.includes('flexible')) {
+    const [min, max] = getBudgetRange(answers.budget);
+    if (rec.priceFrom <= max) {
+      const price = `$${rec.priceFrom.toLocaleString('en-AU')} AUD`;
+      reasons.push(
+        rec.priceFrom < min
+          ? `From ${price} — below your selected budget range`
+          : `From ${price} — within your selected budget range`,
+      );
     }
   }
 

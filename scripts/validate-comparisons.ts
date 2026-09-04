@@ -10,7 +10,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { TRAMPOLINES } from '../data/trampolines';
+import { TRAMPOLINES, type Trampoline } from '../data/trampolines';
 import { getAllComparePages, resolveSideRows, type ComparePage } from '../lib/comparePages';
 import { getAllSlugs } from '../lib/content';
 
@@ -85,10 +85,12 @@ function checkProseNumbers(page: ComparePage, file: string) {
       row.priceAud,
       row.maxWeightKg,
       row.combinedWeightKg,
+      row.staticWeightKg,
       row.springCount,
       row.warrantyFrameYrs,
       row.warrantyMatYrs,
       row.warrantyNetYrs,
+      row.warrantyPartsYrs,
       row.overallDiamCm,
       row.overallLenCm,
       row.overallWidCm,
@@ -141,6 +143,98 @@ function checkProseNumbers(page: ComparePage, file: string) {
       file,
       `prose mentions "${claim[0].trim()}" but no resolved spec row (or difference between rows) has that value — verify it against data/trampolines.ts`,
     );
+  }
+}
+
+type NumericSpecField =
+  | 'maxWeightKg'
+  | 'combinedWeightKg'
+  | 'staticWeightKg'
+  | 'warrantyFrameYrs'
+  | 'warrantyMatYrs'
+  | 'warrantyNetYrs'
+  | 'warrantyPartsYrs';
+
+function checkTypedNumericClaims(page: ComparePage, file: string) {
+  let rows: Trampoline[];
+  try {
+    rows = page.sides.flatMap(resolveSideRows);
+  } catch {
+    return;
+  }
+
+  const valuesFor = (field: NumericSpecField) =>
+    new Set(
+      rows
+        .map((row) => row[field])
+        .filter((value): value is number => typeof value === 'number'),
+    );
+
+  const claimGroups: Array<{
+    field: NumericSpecField;
+    label: string;
+    patterns: RegExp[];
+  }> = [
+    {
+      field: 'combinedWeightKg',
+      label: 'combined weight limit',
+      patterns: [
+        /(\d+(?:\.\d+)?)\s?(?:kg|kilograms?)\s+(?:combined|total user)\b/gi,
+        /(?:combined|total user)\s+(?:weight|capacity|rating|limit)[^.!?\n]{0,40}?(\d+(?:\.\d+)?)\s?(?:kg|kilograms?)/gi,
+      ],
+    },
+    {
+      field: 'staticWeightKg',
+      label: 'static weight rating',
+      patterns: [
+        /(\d+(?:\.\d+)?)\s?(?:kg|kilograms?)\s+(?:static|frame[- ]tested|test load)\b/gi,
+        /(?:static|frame[- ]tested|test load)[^.!?\n]{0,40}?(\d+(?:\.\d+)?)\s?(?:kg|kilograms?)/gi,
+      ],
+    },
+    {
+      field: 'maxWeightKg',
+      label: 'single-jumper limit',
+      patterns: [
+        /(\d+(?:\.\d+)?)\s?(?:kg|kilograms?)\s+(?:per|for (?:a |one )?)\s*jumper\b/gi,
+      ],
+    },
+  ];
+
+  for (const { field, label, patterns } of claimGroups) {
+    const known = valuesFor(field);
+    for (const pattern of patterns) {
+      for (const match of page.content.matchAll(pattern)) {
+        const value = Number(match[1]);
+        if (!known.has(value)) {
+          error(
+            file,
+            `prose assigns ${value} to the ${label}, but no resolved ${field} value has that number`,
+          );
+        }
+      }
+    }
+  }
+
+  const warrantyFields: Record<string, NumericSpecField> = {
+    frame: 'warrantyFrameYrs',
+    mat: 'warrantyMatYrs',
+    net: 'warrantyNetYrs',
+    part: 'warrantyPartsYrs',
+    parts: 'warrantyPartsYrs',
+  };
+
+  for (const match of page.content.matchAll(
+    /(\d+(?:\.\d+)?)[-\s]year\s+(frame|mat|net|parts?)\s+warrant(?:y|ies)/gi,
+  )) {
+    const value = Number(match[1]);
+    const component = match[2].toLowerCase();
+    const field = warrantyFields[component];
+    if (!valuesFor(field).has(value)) {
+      error(
+        file,
+        `prose assigns a ${value}-year ${component} warranty, but no resolved ${field} value has that number`,
+      );
+    }
   }
 }
 
@@ -232,6 +326,7 @@ function validatePage(page: ComparePage, file: string, seenSlugs: Map<string, st
   }
 
   checkProseNumbers(page, file);
+  checkTypedNumericClaims(page, file);
 }
 
 function main() {

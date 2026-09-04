@@ -36,6 +36,18 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 # Bounce Arena Quiz
 
+## Comparison data source
+
+The `Aus` tab in the [Bounce Arena comparison spreadsheet](https://docs.google.com/spreadsheets/d/1CLjH67Sf9o2diBMUwiG9zmkhs47N90GmL4LxQ6TYsZk/edit?usp=sharing) is the source of truth for Australian trampoline specifications. Do not override its facts in page copy or in a second hand-maintained catalogue.
+
+Refresh the generated site data after editing that tab:
+
+```sh
+npm run refresh:compare-data
+```
+
+The refresh script targets the `Aus` tab explicitly and regenerates `data/trampolines.ts`.
+
 ## Monthly trampoline deals update
 
 The `update-trampoline-deals` script reads `.env.local` from the repo root before running. Keep your Anthropic key there for local use only.

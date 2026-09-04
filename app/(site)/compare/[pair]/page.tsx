@@ -25,7 +25,7 @@ import {
   type ComparePage,
   type ResolvedSide,
 } from '@/lib/comparePages';
-import { AFFILIATE_DISCLOSURE, productUrl } from '@/lib/compareShared';
+import { AFFILIATE_DISCLOSURE, isFromPrice, productUrl } from '@/lib/compareShared';
 import { buildCompareTakeaways } from '@/lib/compareTakeaways';
 import { formatDate, getAllPosts, getPost } from '@/lib/content';
 import { buildPromosForBrands, hasAffiliatePromo } from '@/lib/promoCtas';
@@ -128,11 +128,12 @@ function offersFor(side: ResolvedSide): Record<string, unknown> | null {
 
   const cheapest = priced.reduce((low, row) => (row.priceAud! < low.priceAud! ? row : low));
   const url = productUrl(cheapest, true);
+  const hasFromPrice = priced.some(isFromPrice);
 
   return {
-    '@type': 'Offer',
+    '@type': hasFromPrice ? 'AggregateOffer' : 'Offer',
     priceCurrency: 'AUD',
-    price: cheapest.priceAud,
+    ...(hasFromPrice ? { lowPrice: cheapest.priceAud } : { price: cheapest.priceAud }),
     ...(url ? { url: url.startsWith('/') ? `${SITE_URL}${url}` : url } : {}),
   };
 }

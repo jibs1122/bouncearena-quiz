@@ -22,4 +22,9 @@ assertMatch('Ultra 2', '/brands/vuly/#ultra-2', 'model');
 assertMatch('springfre', '/brands/springfree/', 'brand');
 assertMatch('safety', '/trampolines-with-safety-nets/', 'guide');
 
+const ozBrand = items.find((item) => item.id === 'brand-oz-trampolines');
+if (ozBrand?.title !== 'Oz Trampolines') {
+  throw new Error(`Oz Trampolines search title is duplicated: ${ozBrand?.title ?? 'missing'}`);
+}
+
 console.log(`Validated ${items.length} search entries across brands, models, comparisons and guides.`);

@@ -77,10 +77,11 @@ function getBrandItems(): SearchItem[] {
   return getAllBrands().flatMap((brand, index) => {
     const rows = getBrandRows(brand.name);
     if (rows.length === 0) return [];
+    const title = /trampolines$/i.test(brand.name) ? brand.name : `${brand.name} Trampolines`;
 
     return [{
       id: `brand-${brand.slug}`,
-      title: `${brand.name} Trampolines`,
+      title,
       href: `/brands/${brand.slug}/`,
       kind: 'brand' as const,
       description: brand.blurb,

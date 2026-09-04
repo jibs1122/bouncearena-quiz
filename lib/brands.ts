@@ -72,7 +72,7 @@ export const BRANDS: BrandInfo[] = [
     name: 'Oz Trampolines',
     slug: 'oz-trampolines',
     blurb:
-      'Australian retailer offering round and oval coil-spring trampolines built for local conditions, with replacement parts and after-sales support.',
+      'Australian retailer offering round, oval and rectangular coil-spring trampolines built for local conditions, with replacement parts and after-sales support.',
     warranty:
       'Oz Trampolines lists a 5-year frame warranty across the range, with 2-year mat and net cover on most sizes.',
     imageDir: 'oz-trampolines',
@@ -82,9 +82,9 @@ export const BRANDS: BrandInfo[] = [
     name: 'Kahuna',
     slug: 'kahuna',
     blurb:
-      'Budget-focused range of round and oval coil-spring trampolines, generally the lowest-priced full-size models sold in Australia.',
+      'Budget-focused range spanning round, oval and rectangular models, including coil-spring ranges and the springless Twister.',
     warranty:
-      'Kahuna lists a 1-year warranty on the frame, mat and net across the range.',
+      'Kahuna lists a general 1-year parts warranty across the range; separate frame, mat and net periods are not listed in the comparison data.',
     imageDir: 'kahuna',
     affiliate: false,
   },
