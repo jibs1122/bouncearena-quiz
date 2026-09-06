@@ -311,7 +311,10 @@ export default async function ComparePairPage({ params }: { params: Promise<{ pa
         <h1 className="mb-6 text-3xl font-bold leading-tight text-black sm:text-4xl">{page.title}</h1>
 
         {page.type === 'brand' && (
-          <div className="mb-6 flex items-center gap-3 sm:gap-5" aria-label={`${sideA.brand} and ${sideB.brand} logos`}>
+          <div
+            className="mb-6 flex flex-col items-center gap-3 sm:flex-row sm:gap-5"
+            aria-label={`${sideA.brand} and ${sideB.brand} logos`}
+          >
             <BrandLogoAvatar
               name={sideA.brand}
               width={240}
