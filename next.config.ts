@@ -1,5 +1,5 @@
 import type { NextConfig } from 'next';
-import { getSupersededSlugs } from './lib/supersededPosts';
+import { getSupersededPostRedirects } from './lib/supersededPosts';
 
 const SPRINGFREE_AFFILIATE_URL = 'https://t.cfjump.com/59728/t/87128';
 
@@ -90,10 +90,18 @@ const nextConfig: NextConfig = {
         destination: '/compare/lifespan-hyperjump-3-vs-bouncezone/',
         permanent: true,
       },
-      // Articles replaced by a published comparison page at the same slug.
-      ...getSupersededSlugs().flatMap((slug) => [
-        { source: `/${slug}`, destination: `/compare/${slug}/`, permanent: true },
-        { source: `/${slug}/`, destination: `/compare/${slug}/`, permanent: true },
+      // Articles replaced by published comparison pages.
+      ...getSupersededPostRedirects().flatMap(({ sourceSlug, destinationSlug }) => [
+        {
+          source: `/${sourceSlug}`,
+          destination: `/compare/${destinationSlug}/`,
+          permanent: true,
+        },
+        {
+          source: `/${sourceSlug}/`,
+          destination: `/compare/${destinationSlug}/`,
+          permanent: true,
+        },
       ]),
     ];
   },
