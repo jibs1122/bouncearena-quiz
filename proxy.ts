@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
 const GEO_COOKIE = 'ba_country';
+const BOT_RE = /bot|crawl|slurp|spider|mediapartners/i;
 const SPRINGFREE_AFFILIATE_URL = 'https://t.cfjump.com/59728/t/87128';
 const SPRINGFREE_TRAMPOLINES_AFFILIATE_URL =
   'https://t.cfjump.com/59728/t/87128?Url=https%3a%2f%2fwww.springfreetrampoline.com.au%2fcollections%2ftrampolines';
@@ -48,7 +49,11 @@ function springfreeRedirectForPath(pathname: string): string | null {
 }
 
 function setGeoCookie(response: NextResponse, request: NextRequest) {
-  if (request.cookies.has(GEO_COOKIE)) return;
+  // Search crawlers do not need regional quiz personalisation. Avoiding a
+  // Set-Cookie response keeps their otherwise-static page requests cacheable.
+  if (request.cookies.has(GEO_COOKIE) || BOT_RE.test(request.headers.get('user-agent') ?? '')) {
+    return;
+  }
   const code = request.headers.get('x-vercel-ip-country') ?? 'AU';
   response.cookies.set(GEO_COOKIE, code, {
     path: '/',
