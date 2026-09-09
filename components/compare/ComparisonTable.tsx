@@ -215,7 +215,7 @@ export default function ComparisonTable({
 
   return (
     <div className="not-prose mx-auto w-fit max-w-full space-y-3">
-      <div className="max-w-full overflow-x-auto rounded-2xl border border-black/[0.08] shadow-sm">
+      <div className="relative max-w-full overflow-x-auto rounded-2xl border border-black/[0.08] shadow-sm">
         <table className="min-w-max border-separate border-spacing-0 text-sm">
           <caption className="sr-only">
             Trampoline specification comparison for {sideA.label} and {sideB.label}

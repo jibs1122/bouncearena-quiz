@@ -294,7 +294,10 @@ function SpecTable({ rows }: { rows: Trampoline[] }) {
     .flatMap((group) => group.variants);
 
   return (
-    <div className="overflow-x-auto rounded-2xl border border-black/[0.08] shadow-sm">
+    // Positioned so the sr-only labels in the cells (absolutely positioned) stay inside the
+    // scroller. Otherwise they sit against the initial containing block, far to the right of
+    // the viewport, and mobile Chrome widens the layout viewport to reach them.
+    <div className="relative max-w-full overflow-x-auto rounded-2xl border border-black/[0.08] shadow-sm">
       <table className="w-full min-w-[1320px] text-sm">
         <caption className="sr-only">
           {rows[0]?.brand ?? 'Brand'} trampoline model specifications

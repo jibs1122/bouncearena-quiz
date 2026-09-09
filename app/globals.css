@@ -29,9 +29,8 @@ html {
   color: var(--foreground);
   scroll-behavior: smooth;
   scroll-padding-top: 80px;
-  /* Nothing on the site should pan sideways on a phone. Set here rather than on body so
-     the value propagates to the viewport without making body a scroll container, which
-     would break the sticky header. */
+  /* Stops body's overflow-x below from propagating to the viewport (that only happens while
+     html's own overflow is visible) and hides a stray horizontal scrollbar on desktop. */
   overflow-x: hidden;
 }
 
@@ -40,6 +39,14 @@ body {
   background: #ffffff;
   color: var(--foreground);
   font-family: var(--font-sans), sans-serif;
+  /* Nothing on the site should pan sideways on a phone. Mobile Chrome widens its layout
+     viewport to reach any box that lands past the right edge, even an absolutely positioned
+     sr-only label inside a scrolling table, and fixed elements then stretch to match. Making
+     body the containing block for such boxes and clipping it keeps the document at viewport
+     width. clip rather than hidden so body never becomes a scroll container, which would
+     break the sticky header. */
+  position: relative;
+  overflow-x: clip;
 }
 
 a,

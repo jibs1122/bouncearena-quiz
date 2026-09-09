@@ -510,8 +510,9 @@ export default function ModelsBrowseClient() {
         )}
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto rounded-2xl border border-black/[0.08] shadow-sm">
+      {/* Table. Positioned so the cells' absolutely positioned sr-only labels stay inside the
+          scroller instead of widening mobile Chrome's layout viewport. */}
+      <div className="relative max-w-full overflow-x-auto rounded-2xl border border-black/[0.08] shadow-sm">
         <table className="w-full min-w-[860px] text-sm">
           <caption className="sr-only">Australian trampoline model comparison</caption>
           <thead className="border-b border-black/[0.06]">
@@ -590,7 +591,7 @@ export default function ModelsBrowseClient() {
                   {isExpanded && (
                     <tr className="bg-gray-50/70">
                       <td colSpan={8} className="px-6 py-4">
-                        <div className="overflow-x-auto">
+                        <div className="relative overflow-x-auto">
                           <table className="w-full min-w-[760px] text-xs">
                             <caption className="sr-only">Size details for {group.brand} {group.model}</caption>
                             <thead>
