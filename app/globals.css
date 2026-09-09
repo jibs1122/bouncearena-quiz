@@ -29,6 +29,10 @@ html {
   color: var(--foreground);
   scroll-behavior: smooth;
   scroll-padding-top: 80px;
+  /* Nothing on the site should pan sideways on a phone. Set here rather than on body so
+     the value propagates to the viewport without making body a scroll container, which
+     would break the sticky header. */
+  overflow-x: hidden;
 }
 
 body {

@@ -147,16 +147,20 @@ export default function PromoBell() {
         </aside>
       )}
 
+      {/* Physical left/right rather than inset-x-0: Tailwind v4 emits the logical inset-inline for
+          that, and an engine that drops it leaves this fixed box shrink-wrapped at its static
+          position inside the header, hanging off the right edge of the screen. */}
       {!mobileClosed && (
-        <aside aria-label="Promo codes" className="fixed inset-x-0 bottom-3 z-30 px-3 lg:hidden">
-          <div className="rounded-2xl border border-black/10 bg-white/96 px-4 py-3 shadow-[0_14px_34px_-22px_rgba(0,0,0,0.45)] backdrop-blur">
+        <aside aria-label="Promo codes" className="fixed bottom-3 left-0 right-0 z-30 px-3 lg:hidden">
+          {/* Clipped so a long code list can never widen the fixed card past the viewport. */}
+          <div className="max-w-full overflow-hidden rounded-2xl border border-black/10 bg-white/96 px-3.5 pb-2 pt-1.5 shadow-[0_14px_34px_-22px_rgba(0,0,0,0.45)] backdrop-blur">
             <div className="flex items-center justify-between gap-3">
-              <span className="text-sm font-bold text-[#278984]">Current promo codes</span>
+              <span className="text-[13px] font-bold text-[#278984]">Current promo codes</span>
               <button
                 type="button"
                 aria-label="Close promo codes"
                 onClick={() => setMobileClosed(true)}
-                className="flex h-9 w-9 items-center justify-center rounded-full text-black/50 transition-colors hover:bg-black/5 hover:text-black/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38b1ab]"
+                className="-mr-1.5 flex h-7 w-7 items-center justify-center rounded-full text-black/50 transition-colors hover:bg-black/5 hover:text-black/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38b1ab]"
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                   <path d="M6 6l12 12" />
@@ -164,24 +168,13 @@ export default function PromoBell() {
                 </svg>
               </button>
             </div>
-            <div className="mt-1.5 space-y-2">
+            <div className="space-y-1">
               {PROMOS.map((promo) => (
-                <div key={promo.brand} className="flex items-center justify-between gap-3">
-                  <div className="flex min-w-0 items-center gap-2">
-                    <span aria-hidden="true">
-                      <BrandLogoAvatar
-                        name={promo.brand}
-                        width={34}
-                        height={28}
-                        className="rounded-md"
-                        imageClassName="p-1"
-                      />
-                    </span>
-                    <p className="min-w-0 text-xs text-black/70">
-                      <span className="font-bold text-black">{promo.brand}</span>
-                      <span className="font-mono">: {promo.codes.join(' · ')}</span>
-                    </p>
-                  </div>
+                <div key={promo.brand} className="flex min-w-0 items-center justify-between gap-3">
+                  <p className="min-w-0 break-words text-xs leading-4 text-black/70">
+                    <span className="font-bold text-black">{promo.brand}</span>
+                    <span className="font-mono">: {promo.codes.join(' · ')}</span>
+                  </p>
                   <ShopLink
                     brand={promo.brand}
                     href={promo.href}
@@ -191,7 +184,7 @@ export default function PromoBell() {
                 </div>
               ))}
             </div>
-            <p className="mt-2 text-[10px] leading-4 text-black/50">
+            <p className="mt-1 text-[10px] leading-4 text-black/50">
               Affiliate links. We may earn a commission.
             </p>
           </div>
