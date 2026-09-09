@@ -1,5 +1,9 @@
 import type { Country } from '@/lib/geolocation';
 
+export const WEB_AND_WAREHOUSE_TRACKING_ID = '6a9550e65374c';
+export const WEB_AND_WAREHOUSE_AFFILIATE_URL =
+  'https://webandwarehouse.com.au/?tracking=6a9550e65374c';
+
 export const SPRINGFREE_AFFILIATE_URL = 'https://t.cfjump.com/59728/t/87128';
 export const SPRINGFREE_TRAMPOLINES_AFFILIATE_URL =
   'https://t.cfjump.com/59728/t/87128?Url=https%3a%2f%2fwww.springfreetrampoline.com.au%2fcollections%2ftrampolines';
@@ -8,6 +12,7 @@ export const SPRINGFREE_MEDIUM_ROUND_AFFILIATE_URL =
 
 export type LinkSlug =
   // Vuly
+  | 'vuly'
   | 'vuly-thunder-2-pro'
   | 'vuly-thunder-2'
   | 'vuly-ultra-2-pro'
@@ -66,6 +71,7 @@ export type LinkSlug =
   | 'acon-x-10x17';
 
 const VULY_LINK_SLUGS = [
+  'vuly',
   'vuly-thunder-2-pro',
   'vuly-thunder-2',
   'vuly-ultra-2-pro',
@@ -119,6 +125,14 @@ type LinkConfig = {
 
 export const links: Record<LinkSlug, LinkConfig> = {
   // ─── Vuly (affiliate) ────────────────────────────────────────────────────────
+  'vuly': {
+    label: 'Vuly trampolines',
+    affiliate: true,
+    destination: {
+      AU: 'https://www.vulyplay.com/aff/100/?url=trampoline',
+      US: 'https://www.vulyplay.com/aff/100/?url=trampoline',
+    },
+  },
   'vuly-flare': {
     label: 'Vuly Flare',
     affiliate: true,
@@ -348,52 +362,52 @@ export const links: Record<LinkSlug, LinkConfig> = {
     affiliate: false,
     destination: { AU: 'https://www.oztrampolines.com.au/trampolines/14ft-round-trampoline' },
   },
-  // ─── GeeTramp (non-affiliate, AU only, via Web & Warehouse) ──────────────────
+  // ─── GeeTramp (affiliate, AU only, via Web & Warehouse) ──────────────────────
   'geetramp-curve': {
     label: 'GeeTramp Curve',
-    affiliate: false,
-    destination: { AU: 'https://webandwarehouse.com.au/products/geetramp-curve-10ft-round-trampoline-forest-green-12239' },
+    affiliate: true,
+    destination: { AU: 'https://webandwarehouse.com.au/products/geetramp-curve-10ft-round-trampoline-forest-green-12239?tracking=6a9550e65374c' },
   },
   'geetramp-force-7x10': {
     label: 'GeeTramp Force 7x10',
-    affiliate: false,
-    destination: { AU: 'https://webandwarehouse.com.au/products/geetramp-force-7ft-x-10ft-rectangle-trampoline-12324' },
+    affiliate: true,
+    destination: { AU: 'https://webandwarehouse.com.au/products/geetramp-force-7ft-x-10ft-rectangle-trampoline-12324?tracking=6a9550e65374c' },
   },
   'geetramp-force-8x12': {
     label: 'GeeTramp Force 8x12',
-    affiliate: false,
-    destination: { AU: 'https://webandwarehouse.com.au/products/geetramp-force-8ft-x-12ft-rectangle-trampoline-10187' },
+    affiliate: true,
+    destination: { AU: 'https://webandwarehouse.com.au/products/geetramp-force-8ft-x-12ft-rectangle-trampoline-10187?tracking=6a9550e65374c' },
   },
   'geetramp-force-9x14': {
     label: 'GeeTramp Force 9x14',
-    affiliate: false,
-    destination: { AU: 'https://webandwarehouse.com.au/products/geetramp-force-9ft-x-14ft-rectangle-trampoline-black-edition-standard-10150' },
+    affiliate: true,
+    destination: { AU: 'https://webandwarehouse.com.au/products/geetramp-force-9ft-x-14ft-rectangle-trampoline-black-edition-standard-10150?tracking=6a9550e65374c' },
   },
   'geetramp-force-10x17': {
     label: 'GeeTramp Force 10x17',
-    affiliate: false,
-    destination: { AU: 'https://webandwarehouse.com.au/products/geetramp-force-10ft-x-17ft-rectangle-trampoline-black-edition-standard-11134' },
+    affiliate: true,
+    destination: { AU: 'https://webandwarehouse.com.au/products/geetramp-force-10ft-x-17ft-rectangle-trampoline-black-edition-standard-11134?tracking=6a9550e65374c' },
   },
   'geetramp-force-14x16': {
     label: 'GeeTramp Force 14x16',
-    affiliate: false,
-    destination: { AU: 'https://webandwarehouse.com.au/products/geetramp-force-14ft-x-16ft-rectangle-trampoline-black-edition-standard-12114' },
+    affiliate: true,
+    destination: { AU: 'https://webandwarehouse.com.au/products/geetramp-force-14ft-x-16ft-rectangle-trampoline-black-edition-standard-12114?tracking=6a9550e65374c' },
   },
-  // ─── ACON (non-affiliate, AU only, via Web & Warehouse) ──────────────────────
+  // ─── ACON (affiliate, AU only, via Web & Warehouse) ──────────────────────────
   'acon-air-gen2': {
     label: 'ACON Air GEN2',
-    affiliate: false,
-    destination: { AU: 'https://webandwarehouse.com.au/products/acon-air-12ft-round-trampoline-with-standard-net-gen-20-12049' },
+    affiliate: true,
+    destination: { AU: 'https://webandwarehouse.com.au/products/acon-air-12ft-round-trampoline-with-standard-net-gen-20-12049?tracking=6a9550e65374c' },
   },
   'acon-16-hd-10x17': {
     label: 'ACON 16 HD',
-    affiliate: false,
-    destination: { AU: 'https://webandwarehouse.com.au/products/acon-16-hd-rectangle-trampoline-and-enclosure-11930' },
+    affiliate: true,
+    destination: { AU: 'https://webandwarehouse.com.au/products/acon-16-hd-rectangle-trampoline-and-enclosure-11930?tracking=6a9550e65374c' },
   },
   'acon-x-10x17': {
     label: 'ACON X',
-    affiliate: false,
-    destination: { AU: 'https://webandwarehouse.com.au/products/acon-x-17ft-trampoline-with-net-enclosure-and-ladder-black-11982' },
+    affiliate: true,
+    destination: { AU: 'https://webandwarehouse.com.au/products/acon-x-17ft-trampoline-with-net-enclosure-and-ladder-black-11982?tracking=6a9550e65374c' },
   },
 };
 
@@ -463,6 +477,19 @@ export function isRawLifespanAffiliateHref(href: string): boolean {
     const isLifespanHost =
       url.hostname === 'www.lifespankids.com.au' || url.hostname === 'lifespankids.com.au';
     return isLifespanHost && url.searchParams.get('rfsn') === '9306020.3d9f288';
+  } catch {
+    return false;
+  }
+}
+
+export function isRawWebAndWarehouseAffiliateHref(href: string): boolean {
+  try {
+    const url = new URL(href);
+    const isWebAndWarehouseHost =
+      url.hostname === 'www.webandwarehouse.com.au' || url.hostname === 'webandwarehouse.com.au';
+    return (
+      isWebAndWarehouseHost && url.searchParams.get('tracking') === WEB_AND_WAREHOUSE_TRACKING_ID
+    );
   } catch {
     return false;
   }

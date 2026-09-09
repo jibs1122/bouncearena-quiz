@@ -1,5 +1,14 @@
 export type BrandPromo = {
+  /**
+   * The maker the promo is presented as. Retailer deals use their best-known
+   * brand here, and are re-headed with the brand the reader came for.
+   */
   brand: string;
+  /**
+   * Brand names the promo covers, for retailer deals that span several makers.
+   * Defaults to the promo's own brand.
+   */
+  appliesTo?: readonly string[];
   /** Every code we hold for the brand, primary (the one the promo block shows) first. */
   codes: [string, ...string[]];
   description: string;
@@ -23,6 +32,15 @@ const PROMOS: BrandPromo[] = [
     affiliate: true,
   },
   {
+    brand: 'GeeTramp',
+    appliesTo: ['GeeTramp', 'ACON', 'BERG', 'Plum', 'Mr Trampoline'],
+    codes: ['BOUNCE'],
+    description:
+      'Use code BOUNCE for a discount at Web and Warehouse, which stocks GeeTramp, ACON, BERG, Plum and Mr Trampoline.',
+    href: 'https://webandwarehouse.com.au/?tracking=6a9550e65374c',
+    affiliate: true,
+  },
+  {
     brand: 'Lifespan Kids',
     codes: ['BOUNCE5'],
     description: 'Use code BOUNCE5 for a discount at Lifespan Kids.',
@@ -31,7 +49,11 @@ const PROMOS: BrandPromo[] = [
   },
 ];
 
-const PROMOS_BY_BRAND = new Map(PROMOS.map((promo) => [promo.brand.toLowerCase(), promo]));
+const PROMOS_BY_BRAND = new Map(
+  PROMOS.flatMap((promo) =>
+    (promo.appliesTo ?? [promo.brand]).map((name) => [name.toLowerCase(), promo] as const),
+  ),
+);
 
 export function getAllPromos(): BrandPromo[] {
   return PROMOS;
@@ -43,13 +65,14 @@ export function getPromoForBrand(brandName: string): BrandPromo | null {
 
 export function buildPromosForBrands(brandNames: string[]): BrandPromo[] {
   const promos: BrandPromo[] = [];
-  const seen = new Set<string>();
+  const seen = new Set<BrandPromo>();
 
   for (const name of brandNames) {
     const promo = getPromoForBrand(name);
-    if (!promo || seen.has(promo.brand)) continue;
-    seen.add(promo.brand);
-    promos.push(promo);
+    if (!promo || seen.has(promo)) continue;
+    seen.add(promo);
+    // A retailer deal reads better under the brand on the page than the store's name.
+    promos.push(promo.appliesTo ? { ...promo, brand: name } : promo);
   }
 
   return promos;

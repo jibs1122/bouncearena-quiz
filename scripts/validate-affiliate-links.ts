@@ -4,6 +4,7 @@
  * - every rendered Springfree destination is a local /go/.../ URL
  * - every registered Springfree /go/.../ URL resolves to Commission Factory
  * - every Lifespan Kids destination includes the required rfsn affiliate ID
+ * - every Web and Warehouse destination includes the required tracking ID
  */
 
 import fs from 'fs';
@@ -16,6 +17,7 @@ import {
   isSpringfreeLinkSlug,
   isVulyLinkSlug,
   links,
+  WEB_AND_WAREHOUSE_TRACKING_ID,
 } from '../lib/links';
 
 const ROOT = process.cwd();
@@ -67,6 +69,13 @@ for (const file of SOURCE_DIRS.flatMap(sourceFiles)) {
       url.searchParams.get('rfsn') !== '9306020.3d9f288'
     ) {
       report(file, `Lifespan Kids URL is missing the required rfsn affiliate ID: ${url.href}`);
+    }
+
+    if (
+      /^(?:www\.)?webandwarehouse\.com\.au$/i.test(url.hostname) &&
+      url.searchParams.get('tracking') !== WEB_AND_WAREHOUSE_TRACKING_ID
+    ) {
+      report(file, `Web and Warehouse URL is missing the required tracking ID: ${url.href}`);
     }
   }
 }

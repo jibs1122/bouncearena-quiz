@@ -116,7 +116,7 @@ export const BRANDS: BrandInfo[] = [
     warranty:
       'GeeTramp lists a 10-year frame warranty and a 3-year mat warranty across the range, with a 2-year net warranty on the above-ground models.',
     imageDir: 'geetramp',
-    affiliate: false,
+    affiliate: true,
   },
   {
     name: 'ACON',
@@ -126,7 +126,7 @@ export const BRANDS: BrandInfo[] = [
     warranty:
       'ACON lists a 10-year frame warranty, a 5-year mat warranty and a 1-year net warranty across the range.',
     imageDir: 'acon',
-    affiliate: false,
+    affiliate: true,
   },
   {
     name: 'BERG',
@@ -136,7 +136,7 @@ export const BRANDS: BrandInfo[] = [
     warranty:
       'BERG lists a 13-year frame warranty on the Champion and 10 years on the in-ground and Ultim models. Mat and net cover is 2 years across the range.',
     imageDir: 'berg',
-    affiliate: false,
+    affiliate: true,
   },
   {
     name: 'Jump Star',
@@ -156,7 +156,7 @@ export const BRANDS: BrandInfo[] = [
     warranty:
       'Plum lists a 5-year frame warranty on the Deluxe models and 1 year on the Springsafe models. Mat cover runs 1 to 2 years, and the Deluxe adds a 1-year net warranty.',
     imageDir: 'plum',
-    affiliate: false,
+    affiliate: true,
   },
   {
     name: 'Mr Trampoline',
@@ -166,7 +166,7 @@ export const BRANDS: BrandInfo[] = [
     warranty:
       'Mr Trampoline lists a 30-year frame warranty and an 8-year mat warranty across the range.',
     imageDir: 'mr-trampoline',
-    affiliate: false,
+    affiliate: true,
   },
 ];
 
