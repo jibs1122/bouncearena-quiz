@@ -9,6 +9,8 @@ export type BrandPromo = {
    * Defaults to the promo's own brand.
    */
   appliesTo?: readonly string[];
+  /** Store the code is redeemed at, when that is not the brand's own shop. */
+  retailer?: string;
   /** Every code we hold for the brand, primary (the one the promo block shows) first. */
   codes: [string, ...string[]];
   description: string;
@@ -34,6 +36,7 @@ const PROMOS: BrandPromo[] = [
   {
     brand: 'GeeTramp',
     appliesTo: ['GeeTramp', 'ACON', 'BERG', 'Plum', 'Mr Trampoline'],
+    retailer: 'Web and Warehouse',
     codes: ['BOUNCE'],
     description:
       'Use code BOUNCE for a discount at Web and Warehouse, which stocks GeeTramp, ACON, BERG, Plum and Mr Trampoline.',

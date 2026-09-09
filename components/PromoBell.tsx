@@ -83,8 +83,9 @@ export default function PromoBell() {
         >
           <div className="relative">
             <div className="rounded-l-2xl border border-r-0 border-black/10 bg-white/96 px-3.5 py-3.5 shadow-[0_16px_40px_-22px_rgba(0,0,0,0.45)] backdrop-blur transition-transform hover:-translate-x-1">
-              <div className="w-[208px] pr-7">
-                <p className="text-base font-bold leading-5 text-black">Current promo codes</p>
+              <div className="w-[208px]">
+                {/* Only the title shares a line with the close button. */}
+                <p className="pr-7 text-base font-bold leading-5 text-black">Current promo codes</p>
                 <p className="mt-1 text-xs leading-4 text-black/55">Tap a code to copy.</p>
                 <div className="mt-3 space-y-2.5">
                   {PROMOS.map((promo) => (
@@ -102,7 +103,14 @@ export default function PromoBell() {
                             imageClassName="p-1.5"
                           />
                         </span>
-                        <p className="text-sm font-bold leading-4 text-black">{promo.brand}</p>
+                        <div className="min-w-0">
+                          <p className="text-sm font-bold leading-4 text-black">{promo.brand}</p>
+                          {promo.retailer && (
+                            <p className="mt-0.5 text-[11px] leading-4 text-black/55">
+                              ({promo.retailer})
+                            </p>
+                          )}
+                        </div>
                       </div>
                       <div className="mt-2.5 space-y-1.5">
                         {promo.codes.map((code) => (
