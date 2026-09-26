@@ -127,13 +127,16 @@ function offersFor(side: ResolvedSide): Record<string, unknown> | null {
   if (priced.length === 0) return null;
 
   const cheapest = priced.reduce((low, row) => (row.priceAud! < low.priceAud! ? row : low));
+  const dearest = priced.reduce((high, row) => (row.priceAud! > high.priceAud! ? row : high));
   const url = productUrl(cheapest, true);
   const hasFromPrice = priced.some(isFromPrice);
 
   return {
     '@type': hasFromPrice ? 'AggregateOffer' : 'Offer',
     priceCurrency: 'AUD',
-    ...(hasFromPrice ? { lowPrice: cheapest.priceAud } : { price: cheapest.priceAud }),
+    ...(hasFromPrice
+      ? { lowPrice: cheapest.priceAud, highPrice: dearest.priceAud, offerCount: priced.length }
+      : { price: cheapest.priceAud }),
     ...(url ? { url: url.startsWith('/') ? `${SITE_URL}${url}` : url } : {}),
   };
 }
