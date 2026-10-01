@@ -156,18 +156,47 @@
     },
     {
       "brand": "Springfree",
-      "status": "no-deal",
+      "status": "published",
       "reason": null,
       "facts": {
-        "trampolineDeal": false,
+        "trampolineDeal": true,
         "saleName": null,
         "ends": null,
-        "offers": [],
-        "examples": [],
-        "conditions": []
+        "offers": [
+          {
+            "offer": "Save $547 on the Costco Exclusive all black Springfree trampoline bundle (Medium Round Trampoline), which includes the FlexrStep and FlexrHoop",
+            "source": "image",
+            "evidence": "Costco Exclusive BUNDLE ... SAVE $547 online only"
+          }
+        ],
+        "examples": [
+          {
+            "product": "Medium Round Trampoline",
+            "saving": "SAVE $547",
+            "source": "image",
+            "evidence": "SAVE $547 online only ... Medium Round Trampoline"
+          }
+        ],
+        "conditions": [
+          {
+            "condition": "Online only",
+            "source": "image",
+            "evidence": "SAVE $547 online only"
+          },
+          {
+            "condition": "Bundle available only at Costco",
+            "source": "text",
+            "evidence": "The All Black Springfree Trampoline Bundles, available only at Costco, includes the FlexrStep and FlexrHoop for extra fun."
+          }
+        ]
       },
-      "droppedFacts": [],
-      "paragraph": null,
+      "droppedFacts": [
+        {
+          "fact": "Medium Round Trampoline SAVE $547",
+          "reason": "quoted evidence not found (\"SAVE $547 online only ... Medium Round Trampoline\")"
+        }
+      ],
+      "paragraph": "Springfree has $547 off the Costco exclusive all black bundle, built around the Medium Round Trampoline with a FlexrStep and FlexrHoop included. The bundle is sold online only through Costco.",
       "prices": [
         {
           "product": "Mini Round Trampoline",
@@ -429,47 +458,47 @@
         "ends": null,
         "offers": [
           {
-            "offer": "Trampolines reduced from RRP across the range, with discounts from 18% to 39% off",
+            "offer": "Trampolines across the range reduced from RRP, with discounts shown up to -39%",
             "source": "text",
-            "evidence": "-39%\nBounceZone M Rectangular Spring Trampoline Set\n$1,478.00$899.00 ... -35%\nBounceZone Round Spring Trampoline - S (8ft)\n$719.00$469.00 ... -18%\nLil' Hopper Childrens 40\" Mini Trampoline\n$158.00$129.00"
+            "evidence": "-39% BounceZone M Rectangular Spring Trampoline Set $1,478.00$899.00 ... -35% BounceZone Round Spring Trampoline - S (8ft) $719.00$469.00 ... -29% 8ft HyperJump3 Springless Trampoline $749.00$529.00"
           }
         ],
         "examples": [
           {
             "product": "BounceZone M Rectangular Spring Trampoline Set",
-            "saving": "39% off (RRP $1,478.00, now $899.00)",
+            "saving": "-39%, RRP $1,478.00 now $899.00",
             "source": "text",
-            "evidence": "-39%\nBounceZone M Rectangular Spring Trampoline Set\n$1,478.00$899.00"
+            "evidence": "-39% BounceZone M Rectangular Spring Trampoline Set $1,478.00$899.00"
           },
           {
-            "product": "BounceZone Round Spring Trampoline - S (8ft)",
-            "saving": "35% off (RRP $719.00, now $469.00)",
+            "product": "BounceZone Round Spring Trampoline - XL (14ft)",
+            "saving": "-28%, RRP $1,209.00 now $869.00",
             "source": "text",
-            "evidence": "-35%\nBounceZone Round Spring Trampoline - S (8ft)\n$719.00$469.00"
+            "evidence": "-28% BounceZone Round Spring Trampoline - XL (14ft) $1,209.00$869.00"
           },
           {
-            "product": "8ft HyperJump3 Springless Trampoline",
-            "saving": "29% off (RRP $749.00, now $529.00)",
+            "product": "12ft HyperJump3 Springless Trampoline",
+            "saving": "-27%, RRP $1,099.00 now $799.00",
             "source": "text",
-            "evidence": "-29%\n8ft HyperJump3 Springless Trampoline\n$749.00$529.00"
+            "evidence": "-27% 12ft HyperJump3 Springless Trampoline $1,099.00$799.00"
           },
           {
             "product": "7ft HyperJump Hoppy Trampoline",
-            "saving": "25% off (RRP $559.00, now $419.00)",
+            "saving": "-25%, RRP $559.00 now $419.00",
             "source": "text",
-            "evidence": "-25%\n7ft HyperJump Hoppy Trampoline\n$559.00$419.00"
+            "evidence": "-25% 7ft HyperJump Hoppy Trampoline $559.00$419.00"
           }
         ],
         "conditions": [
           {
-            "condition": "Savings are measured against the listed RRP",
+            "condition": "Advertised savings are measured against the RRP",
             "source": "text",
-            "evidence": "BounceZone Round Spring Trampoline - S (8ft)\nIn stock\nRRP $719.00\n$469.00"
+            "evidence": "BounceZone Round Spring Trampoline - S (8ft) In stock RRP $719.00 $469.00"
           }
         ]
       },
       "droppedFacts": [],
-      "paragraph": "Lifespan Kids has 18% to 39% off trampolines across the range, measured against the listed RRP. The BounceZone M Rectangular Spring Trampoline Set is 39% off and the 8ft BounceZone Round Spring Trampoline is 35% off, with 29% off the 8ft HyperJump3 Springless and 25% off the 7ft HyperJump Hoppy.",
+      "paragraph": "Lifespan Kids has trampolines across the range marked down from RRP, with up to 39% off the BounceZone M Rectangular Spring Trampoline Set. The BounceZone Round Spring Trampoline XL (14ft) is 28% off, the 12ft HyperJump3 Springless is 27% off and the 7ft HyperJump Hoppy is 25% off. All savings are measured against the RRP.",
       "prices": [
         {
           "product": "Swish Basketball Ring with BR10 Bracket BounceZone Round Trampoline",
@@ -923,52 +952,46 @@
         "ends": null,
         "offers": [
           {
-            "offer": "Trampolines and trampoline bundles are discounted on the Sale page, with savings shown against a previous \"was\" price",
+            "offer": "Trampolines are discounted in the Sale section, with savings shown against previous prices",
             "source": "text",
-            "evidence": "Sale ... $1,999 was $2,299 SAVE $300.00 ACON Air 15ft Round Trampoline with Standard Net - GEN 2.0 ... $3,599 was $3,999 SAVE $400.00 ACON 16 HD (10x17ft) Rectangle Trampoline and Enclosure"
+            "evidence": "Sale ... $6,499 was $7,099\nSAVE $600.00\nACON X 17ft Trampoline with Net Enclosure and Ladder - Black"
           },
           {
-            "offer": "Bundle deals on trampoline packages",
+            "offer": "Trampoline bundle deals are discounted",
             "source": "text",
-            "evidence": "You can also save big with our bundle deals!"
+            "evidence": "You can also save big with our bundle deals! ... $7,499 was $8,797\nSAVE $1,298.00\nACON X 17ft Trampoline with Net Enclosure and Ladder - Black - Peak Performance Bundle"
           }
         ],
         "examples": [
           {
             "product": "ACON X 17ft Trampoline with Net Enclosure and Ladder - Black - Peak Performance Bundle",
-            "saving": "SAVE $1,298.00 ($7,499 was $8,797)",
+            "saving": "SAVE $1,298.00",
             "source": "text",
-            "evidence": "$7,499 was $8,797 SAVE $1,298.00 ACON X 17ft Trampoline with Net Enclosure and Ladder - Black - Peak Performance Bundle"
+            "evidence": "$7,499 was $8,797\nSAVE $1,298.00\nACON X 17ft Trampoline with Net Enclosure and Ladder - Black - Peak Performance Bundle"
           },
           {
             "product": "ACON X 17ft Trampoline with Net Enclosure and Ladder - Black",
-            "saving": "SAVE $600.00 ($6,499 was $7,099)",
+            "saving": "SAVE $600.00",
             "source": "text",
-            "evidence": "$6,499 was $7,099 SAVE $600.00 ACON X 17ft Trampoline with Net Enclosure and Ladder - Black"
+            "evidence": "$6,499 was $7,099\nSAVE $600.00\nACON X 17ft Trampoline with Net Enclosure and Ladder - Black"
           },
           {
             "product": "ACON 16 HD (10x17ft) Rectangle Trampoline and Enclosure",
-            "saving": "SAVE $400.00 ($3,599 was $3,999)",
+            "saving": "SAVE $400.00",
             "source": "text",
-            "evidence": "$3,599 was $3,999 SAVE $400.00 ACON 16 HD (10x17ft) Rectangle Trampoline and Enclosure"
+            "evidence": "$3,599 was $3,999\nSAVE $400.00\nACON 16 HD (10x17ft) Rectangle Trampoline and Enclosure"
           },
           {
             "product": "ACON Freestyle Mini Trampoline",
-            "saving": "SAVE $400.00 ($1,299 was $1,699)",
+            "saving": "SAVE $400.00",
             "source": "text",
-            "evidence": "$1,299 was $1,699 SAVE $400.00 ACON Freestyle Mini Trampoline"
+            "evidence": "$1,299 was $1,699\nSAVE $400.00\nACON Freestyle Mini Trampoline"
           }
         ],
-        "conditions": [
-          {
-            "condition": "Savings are shown against each product's previous \"was\" price",
-            "source": "text",
-            "evidence": "$1,999 was $2,299 SAVE $300.00 ACON Air 15ft Round Trampoline with Standard Net - GEN 2.0"
-          }
-        ]
+        "conditions": []
       },
       "droppedFacts": [],
-      "paragraph": "There's $1,298 off the ACON X 17ft Peak Performance bundle and $600 off the same trampoline on its own, plus $400 off both the ACON 16 HD 10x17ft rectangle and the ACON Freestyle mini. Other trampolines and bundles on the sale page are discounted too, with each saving set against the previous price.",
+      "paragraph": "There's $1,298 off the ACON X 17ft Peak Performance bundle, or $600 off that same 17ft trampoline with its net enclosure and ladder on its own. The 16 HD rectangle model and the Freestyle mini each have $400 off, with further markdowns across the sale section and the trampoline bundle deals.",
       "prices": null
     },
     {
@@ -991,7 +1014,7 @@
             "evidence": "LONG WEEKEND SALE! Up to $250 off FLEX™ & HERO™ | Up to $700 off MEGA + FREE PROJAM™"
           },
           {
-            "offer": "Free accessory with trampolines (badge shown on all trampoline listings)",
+            "offer": "Free accessory with trampolines across the FLEX™, HERO™ and MEGA™ ranges",
             "source": "image",
             "evidence": "FREE ACCESSORY!"
           }
@@ -999,33 +1022,33 @@
         "examples": [
           {
             "product": "MEGA™ 19ft Trampoline",
-            "saving": "$2,799, was $3,499",
+            "saving": "$2,799, reduced from $3,499",
             "source": "text",
             "evidence": "MEGA™ 19ft Trampoline ... $2,799\n$3,499"
           },
           {
             "product": "MEGA™ 17ft Trampoline",
-            "saving": "$2,399, was $2,999",
+            "saving": "$2,399, reduced from $2,999",
             "source": "text",
             "evidence": "MEGA™ 17ft Trampoline ... $2,399\n$2,999"
           },
           {
-            "product": "MEGA™ 14ft Trampoline",
-            "saving": "$2,099, was $2,499",
-            "source": "text",
-            "evidence": "MEGA™ 14ft Trampoline ... $2,099\n$2,499"
-          },
-          {
             "product": "HERO™ 15ft Trampoline",
-            "saving": "$1,349, was $1,599",
+            "saving": "$1,349, reduced from $1,599",
             "source": "text",
             "evidence": "HERO™ 15ft Trampoline ... $1,349\n$1,599"
+          },
+          {
+            "product": "FLEX™ 8ft Trampoline",
+            "saving": "$649, reduced from $749",
+            "source": "text",
+            "evidence": "FLEX™ 8ft Trampoline ... $649\n$749"
           }
         ],
         "conditions": []
       },
       "droppedFacts": [],
-      "paragraph": "The long weekend sale takes up to $700 off MEGA trampolines, with a free PROJAM included, and up to $250 off the FLEX and HERO ranges. A free accessory comes with every trampoline.",
+      "paragraph": "The long weekend sale takes up to $700 off MEGA trampolines and up to $250 off the FLEX and HERO ranges. MEGA orders come with a free PROJAM, and every trampoline across the FLEX, HERO and MEGA ranges includes a free accessory.",
       "prices": null
     },
     {
@@ -1038,67 +1061,57 @@
         "ends": null,
         "offers": [
           {
-            "offer": "Sitewide sale: save up to 30% and free express delivery",
+            "offer": "Save up to 30% and free express delivery",
             "source": "text",
-            "evidence": "Sale Now On!\nSave up to 30%\nand free express delivery"
+            "evidence": "Sale Now On! Save up to 30% and free express delivery"
           },
           {
-            "offer": "OzUltimate Trampolines packages: save up to $495 or 30%, including free delivery, anchor kit, ladder and children's safety tip book",
+            "offer": "OzUltimate Trampolines packages: save up to $495 or 30%, including free delivery, anchor kit, ladder and childrens safety tip book",
             "source": "text",
-            "evidence": "OZULTIMATE TRAMPOLINES PACKAGES\nSAVE UP TO $495 OR 30%*\n+ FREE DELIVERY ... + ANCHOR KIT ... + LADDER ... + FULL OF BOUNCE\nChildrens safety tip book."
+            "evidence": "OZULTIMATE TRAMPOLINES PACKAGES SAVE UP TO $495 OR 30%* ... + FREE DELIVERY ... + ANCHOR KIT ... + LADDER ... + FULL OF BOUNCE Childrens safety tip book."
           },
           {
-            "offer": "Summit Trampolines packages: save up to $395 or 30%, including free delivery, anchor kit, ladder and children's safety tip book",
+            "offer": "Summit Trampolines packages: save up to $395 or 30%, including free delivery, anchor kit, ladder and childrens safety tip book",
             "source": "text",
-            "evidence": "SUMMIT TRAMPOLINES PACKAGES\nSAVE UP TO $395 OR 30%*\n+ FREE DELIVERY ... + ANCHOR KIT ... + LADDER ... + FULL OF BOUNCE\nChildrens safety tip book."
+            "evidence": "SUMMIT TRAMPOLINES PACKAGES SAVE UP TO $395 OR 30%* ... + FREE DELIVERY ... + ANCHOR KIT ... + LADDER ... + FULL OF BOUNCE Childrens safety tip book."
           },
           {
-            "offer": "In-Ground trampoline packages: save up to $350 plus free extras, including free delivery and children's safety tip book",
+            "offer": "In-Ground Trampoline packages: save up to $350 plus free extras, including free delivery and childrens safety tip book",
             "source": "text",
-            "evidence": "IN-GROUND TRAMPOLINE PACKAGES\nSAVE UP TO $350 PLUS FREE EXTRAS\n+ FREE DELIVERY ... + FULL OF BOUNCE\nChildrens safety tip book."
+            "evidence": "IN-GROUND TRAMPOLINE PACKAGES SAVE UP TO $350 PLUS FREE EXTRAS + FREE DELIVERY ... + FULL OF BOUNCE Childrens safety tip book."
           },
           {
             "offer": "North Trampolines bonus offer: save up to $750 plus free extras, including free delivery and anchor kit",
             "source": "text",
-            "evidence": "NORTH TRAMPOLINES BONUS OFFER\nSAVE UP TO $750 PLUS FREE EXTRAS*\n+ FREE DELIVERY ... + ANCHOR KIT"
-          },
-          {
-            "offer": "Free gift with a new trampoline when you enter your email",
-            "source": "image",
-            "evidence": "Get a free gift from us with your new trampoline ... Enter your email to get a special gift"
+            "evidence": "NORTH TRAMPOLINES BONUS OFFER SAVE UP TO $750 PLUS FREE EXTRAS* + FREE DELIVERY ... + ANCHOR KIT"
           }
         ],
         "examples": [],
         "conditions": [
           {
-            "condition": "OzUltimate saving is based on RRP of products and the average delivery cost of a 14ft OzUltimate Trampoline",
+            "condition": "OzUltimate savings are based on RRP of products and the average delivery cost of a 14ft OzUltimate Trampoline",
             "source": "text",
             "evidence": "*Savings based on RRP of products and the average delivery cost of a 14ft OzUltimate Trampoline."
           },
           {
-            "condition": "Summit saving is based on RRP of products and the average delivery cost of a 16ft Summit Trampoline",
+            "condition": "Summit savings are based on RRP of products and the average delivery cost of a 16ft Summit Trampoline",
             "source": "text",
             "evidence": "*Savings based on RRP of products and the average delivery cost of a 16ft Summit Trampoline."
           },
           {
-            "condition": "In-Ground saving is based on RRP of products and the average delivery cost of a 10 x 14FT In-Ground Trampoline",
+            "condition": "In-ground savings are based on RRP of products and the average delivery cost of a 10 x 14FT In-Ground Trampoline",
             "source": "text",
             "evidence": "*Savings based on RRP of products and the average delivery cost of a 10 x 14FT In-Ground Trampoline."
           },
           {
-            "condition": "North Trampolines saving is based on RRP of products and the average delivery cost of a North Explorer Rectangular 460 Trampoline",
+            "condition": "North Trampolines savings are based on RRP of products and the average delivery cost of a North Explorer Rectangular 460 Trampoline",
             "source": "text",
             "evidence": "*Savings based on RRP of products and the average delivery cost of a North Explorer Rectangular 460 Trampoline."
           }
         ]
       },
-      "droppedFacts": [
-        {
-          "fact": "Free gift with a new trampoline when you enter your email",
-          "reason": "quoted evidence not found (\"Get a free gift from us with your new trampoline ... Enter your email to get a special gift\")"
-        }
-      ],
-      "paragraph": "North Trampolines packages have up to $750 off with free delivery and an anchor kit. OzUltimate packages have up to $495 off and Summit packages up to $395, both with free delivery, an anchor kit, a ladder and a children's safety tip book, while in-ground packages have up to $350 off plus extras. Sitewide savings run to 30%, with free express delivery.",
+      "droppedFacts": [],
+      "paragraph": "North Trampolines packages have up to $750 off, OzUltimate packages up to $495 or 30% off, Summit packages up to $395 or 30% off, and in-ground packages up to $350 off. Free express delivery and a children's safety tip book come with all of them, and the OzUltimate and Summit packages also include an anchor kit and ladder.",
       "prices": null
     }
   ]
