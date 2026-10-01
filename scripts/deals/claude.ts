@@ -67,6 +67,7 @@ const EXTRACT_SYSTEM = `You read evidence captured from an Australian trampoline
 
 What counts:
 - Trampolines and trampoline packages only. Ignore swing sets, monkey bars, playsets and accessories sold on their own. A free accessory that comes with a trampoline does count.
+- Only offers a buyer can get from this website. An offer the site promotes but that is sold only through another retailer (such as a Costco-exclusive bundle) doesn't count, because the deals page links to this site.
 - A deal is a current discount, reduced price, free item, or free delivery offered as part of a promotion. Finance options (Afterpay, Zip, interest-free), warranties, newsletter sign-ups, price-match policies, and delivery that is always free are not deals.
 - If the evidence shows no current trampoline deal, set trampolineDeal to false and leave the lists empty. Record what the evidence shows, not what a store usually runs.
 

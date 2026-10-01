@@ -156,8 +156,8 @@
     },
     {
       "brand": "Springfree",
-      "status": "published",
-      "reason": null,
+      "status": "dropped",
+      "reason": "Removed by hand: the $547 bundle is a Costco exclusive, not sold on springfreetrampoline.com.au",
       "facts": {
         "trampolineDeal": true,
         "saleName": null,
