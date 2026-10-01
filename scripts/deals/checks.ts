@@ -115,7 +115,8 @@ const BANNED: [RegExp, string][] = [
   [/—|\s–\s/, 'em dash'],
   [/\?/, 'question'],
   [
-    /\b(massive|huge|incredible|amazing|unbeatable|biggest|best[- ]ever|epic|whopping|stunning|fantastic|awesome|exciting|unmissable|bargains?|steal|blowout|mega savings)\b/i,
+    // "Biggest saving" is a plain comparison; "biggest sale ever" is hype.
+    /\b(massive|huge|incredible|amazing|unbeatable|biggest (sale|deal|event)s?|(biggest|best)[- ]ever|epic|whopping|stunning|fantastic|awesome|exciting|unmissable|bargains?|steal|blowout|mega savings)\b/i,
     'hype word',
   ],
   [
