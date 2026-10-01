@@ -87,7 +87,7 @@ export function buildQuestions(country: Country): Question[] {
           id: 'springless',
           label: 'Springless',
           description:
-            'No exposed metal springs. Instead uses elastic straps, composite rods, or curved leaf springs attached under or inside the frame — keeping the jumping area clear of pinch points.',
+            'No exposed metal springs. Instead uses elastic straps, composite rods, or curved leaf springs attached under or inside the frame, keeping the jumping area clear of pinch points.',
           imageSrc: '/images/springless-trampoline.png',
           imageAlt: 'Springless trampoline',
         },
@@ -104,7 +104,7 @@ export function buildQuestions(country: Country): Question[] {
       id: 'shape',
       title: 'What shape trampoline are you after?',
       subtitle:
-        'Shape changes how the trampoline bounces and how it fits your yard — pick one, or let the quiz decide.',
+        'Shape changes how the trampoline bounces and how it fits your yard. Pick one, or let the quiz decide.',
       type: 'single',
       cardLayout: true,
       options: [
@@ -160,7 +160,7 @@ export function buildQuestions(country: Country): Question[] {
         {
           id: 'long-narrow',
           label: 'Long and narrow',
-          description: 'More length than width — suits oval trampolines',
+          description: 'More length than width; suits oval trampolines',
         },
         { id: 'not-sure', label: 'Not sure', description: 'Show me all options' },
       ],
@@ -183,7 +183,7 @@ export function buildQuestions(country: Country): Question[] {
     {
       id: 'budget',
       title: "What's your budget?",
-      subtitle: 'Choose one range, or two neighboring ranges if your budget can stretch.',
+      subtitle: 'Choose one range, or two neighbouring ranges if your budget can stretch.',
       type: 'multi',
       maxSelect: 2,
       adjacentOnly: true,

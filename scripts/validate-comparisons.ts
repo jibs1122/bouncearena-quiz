@@ -321,8 +321,8 @@ function validatePage(page: ComparePage, file: string, seenSlugs: Map<string, st
     }
   }
 
-  if (!/choose /i.test(page.content)) {
-    warn(file, 'no "Choose X if…" guidance found — the intro should close with the two-sided verdict');
+  if (!/\b(suits? (anyone|a family|families|you)|the better fit|makes (more )?sense if|is the only option if)\b/i.test(page.content)) {
+    warn(file, 'no two-sided verdict found: the intro should close with who each side suits (house voice bans "Choose X if")');
   }
 
   checkProseNumbers(page, file);

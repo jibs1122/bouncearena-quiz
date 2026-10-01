@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'About Us',
-  description: "Australia's go-to resource for unbiased, in-depth trampoline reviews and comparisons.",
+  description: "How Bounce Arena compares the trampoline brands sold in Australia: safety design, warranties, build quality and price.",
   alternates: { canonical: 'https://bouncearena.com.au/about/' },
 };
 
@@ -14,13 +14,13 @@ export default function AboutPage() {
       <div className="prose prose-neutral max-w-none prose-p:text-black/75 prose-p:leading-relaxed prose-a:text-[#38b1ab] prose-headings:text-black">
         <p>
           Bounce Arena helps Australian families pick a trampoline they won&apos;t regret. We compare
-          the top brands sold in Australia — Vuly, Springfree, Jumpflex, and more — across the
-          things that actually matter: safety design, frame and mat warranties, build quality,
-          replacement part availability, and whether the price holds up against alternatives.
+          the main brands sold in Australia (Vuly, Springfree, Jumpflex and more) on safety design,
+          frame and mat warranties, build quality, replacement part availability, and whether the
+          price holds up against alternatives.
         </p>
         <p>
-          The result is a set of buying guides and tools that reflects what owners experience after
-          year two, not just what looks good when new, covering both springless and spring-based models.
+          Our buying guides and tools cover springless and spring-based models, and lean on what owners
+          report after a year or two rather than how a trampoline looks when new.
         </p>
         <p>
           Not sure where to start?{' '}

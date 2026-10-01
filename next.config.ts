@@ -38,10 +38,7 @@ const nextConfig: NextConfig = {
         },
         { source: '/quiz-questions', destination: '/quiz/' },
         { source: '/quiz-questions-usa', destination: '/quiz/' },
-        {
-          source: '/australian-trampoline-brands/feed',
-          destination: '/australian-trampoline-brands/',
-        },
+        { source: '/australian-trampoline-brands/feed', destination: '/brands/' },
         {
           source: '/vuly-trampoline-assembly/feed',
           destination: '/vuly-trampoline-assembly/',
@@ -90,6 +87,18 @@ const nextConfig: NextConfig = {
         destination: '/compare/lifespan-hyperjump-3-vs-bouncezone/',
         permanent: true,
       },
+      // Retired articles, redirected to the closest page we keep.
+      ...[
+        { source: '/vulys-new-trampolines', destination: '/brands/vuly/' },
+        { source: '/vuly-thunder-vs-thunder-pro', destination: '/compare/vuly-thunder-2-vs-thunder-2-pro/' },
+        { source: '/vuly-ultra-vs-thunder', destination: '/compare/vuly-ultra-2-vs-thunder-2/' },
+        { source: '/vuly-ultra-vs-lift-2', destination: '/compare/vuly-ultra-2-vs-ultra-2-pro/' },
+        { source: '/australian-trampoline-brands', destination: '/brands/' },
+        { source: '/springfree-vs-spring-trampolines', destination: '/springless-vs-spring-trampolines/' },
+      ].flatMap(({ source, destination }) => [
+        { source, destination, permanent: true },
+        { source: `${source}/`, destination, permanent: true },
+      ]),
       // Articles replaced by published comparison pages.
       ...getSupersededPostRedirects().flatMap(({ sourceSlug, destinationSlug }) => [
         {

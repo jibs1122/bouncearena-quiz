@@ -522,7 +522,7 @@ export default function ModelsBrowseClient() {
               <th scope="col" className={TABLE_HEAD_CELL_CLASS}>Spring type</th>
               <SortTh label="Price" sortKey="priceAud" tip="AUD price. 'from' prices show the model's lowest available size." active={sortKey === 'priceAud'} sortDir={sortDir} onSort={toggleSort} />
               <SortTh label="Max weight" sortKey="maxWeightKg" tip="Maximum single-user weight rating in kg." active={sortKey === 'maxWeightKg'} sortDir={sortDir} onSort={toggleSort} />
-              <SortTh label="Overall size" sortKey="overallDiamCm" tip="Overall footprint — diameter for round, longest dimension for other shapes. Manufacturers generally recommend 1–2 m clearance on all sides." active={sortKey === 'overallDiamCm'} sortDir={sortDir} onSort={toggleSort} />
+              <SortTh label="Overall size" sortKey="overallDiamCm" tip="Overall footprint: diameter for round, longest dimension for other shapes. Manufacturers generally recommend 1–2 m clearance on all sides." active={sortKey === 'overallDiamCm'} sortDir={sortDir} onSort={toggleSort} />
               <SortTh label="Frame warranty" sortKey="warrantyFrameYrs" tip="Manufacturer's frame warranty in years." active={sortKey === 'warrantyFrameYrs'} sortDir={sortDir} onSort={toggleSort} />
               <th scope="col" className={TABLE_HEAD_CELL_CLASS}>
                 AU Std<Tip text="Whether the model is listed as meeting AS 4989:2015. A question mark means the status is not confirmed." />
@@ -569,7 +569,7 @@ export default function ModelsBrowseClient() {
                       {shopUrl && (
                         <a href={shopUrl} target="_blank" rel={outboundRel(group.variants.some(isAffiliateRow))}
                           className="text-[11px] text-[#38b1ab] hover:underline whitespace-nowrap">
-                          View best price →
+                          View price →
                         </a>
                       )}
                     </td>
@@ -648,7 +648,7 @@ export default function ModelsBrowseClient() {
                         {review?.reviewSlug && (
                           <div className="mt-3 flex items-center gap-3">
                             <Link href={`/${review.reviewSlug}/`} className="text-xs text-[#38b1ab] hover:underline">
-                              Read our in-depth review →
+                              Read our review →
                             </Link>
                             {review.baScore && <span className="text-xs text-black/40">Our score: {review.baScore}/10</span>}
                           </div>
@@ -670,7 +670,7 @@ export default function ModelsBrowseClient() {
       {/* Quiz CTA */}
       <div className="mt-10 rounded-2xl bg-[#38b1ab]/8 border border-[#38b1ab]/20 p-7 text-center">
         <p className="font-semibold text-black mb-1">Not sure which trampoline fits your yard and budget?</p>
-        <p className="text-sm text-black/60 mb-4">Our 2-minute quiz asks the right questions and recommends the best match for your family.</p>
+        <p className="text-sm text-black/60 mb-4">Our 2-minute quiz narrows the range to the models that suit your family, space and budget.</p>
         <Link href="/quiz/" className="inline-flex items-center gap-1 rounded-xl bg-[#38b1ab] hover:bg-[#2e9a94] text-white font-semibold px-6 py-2.5 text-sm transition-colors">
           Take the trampoline quiz →
         </Link>

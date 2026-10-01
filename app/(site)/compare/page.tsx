@@ -16,7 +16,7 @@ const SITE_URL = 'https://bouncearena.com.au';
 
 const TITLE = 'Trampoline Comparisons: Brand and Model Head-to-Heads';
 const DESCRIPTION =
-  'Side-by-side trampoline comparisons for Australian families — Vuly vs Springfree, Jumpflex vs Vuly, and model-by-model matchups built from published specs.';
+  'Side-by-side trampoline comparisons for Australian families: Vuly vs Springfree, Jumpflex vs Vuly, and model-by-model matchups built from published specs.';
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -121,7 +121,7 @@ export default function CompareHubPage() {
       <h1 className="mb-3 text-3xl font-bold text-black sm:text-4xl">Trampoline Comparisons</h1>
       <p className="mb-6 max-w-2xl text-black/60">
         Head-to-head comparisons of the trampoline brands and models sold in Australia, built from
-        published specifications — spring system, size, weight ratings, warranty and the Australian
+        published specifications: spring system, size, weight ratings, warranty and the Australian
         Trampoline Standard AS 4989:2015.
       </p>
 

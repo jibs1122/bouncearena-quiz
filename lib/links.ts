@@ -7,6 +7,8 @@ export const WEB_AND_WAREHOUSE_AFFILIATE_URL =
 export const SPRINGFREE_AFFILIATE_URL = 'https://t.cfjump.com/59728/t/87128';
 export const SPRINGFREE_TRAMPOLINES_AFFILIATE_URL =
   'https://t.cfjump.com/59728/t/87128?Url=https%3a%2f%2fwww.springfreetrampoline.com.au%2fcollections%2ftrampolines';
+export const SPRINGFREE_SAFETY_AFFILIATE_URL =
+  'https://t.cfjump.com/59728/t/87128?Url=https%3a%2f%2fwww.springfreetrampoline.com.au%2fpages%2fsafety';
 export const SPRINGFREE_MEDIUM_ROUND_AFFILIATE_URL =
   'https://t.cfjump.com/59728/t/87128?Url=https%3a%2f%2fwww.springfreetrampoline.com.au%2fproducts%2fexclusive-round-bundles%3fvariant%3d52174104297840';
 
@@ -24,6 +26,7 @@ export type LinkSlug =
   // Springfree
   | 'springfree'
   | 'springfree-trampolines'
+  | 'springfree-safety'
   | 'springfree-mini-round'
   | 'springfree-compact-round'
   | 'springfree-medium-round'
@@ -207,6 +210,11 @@ export const links: Record<LinkSlug, LinkConfig> = {
     label: 'Springfree Trampolines',
     affiliate: true,
     destination: { AU: SPRINGFREE_TRAMPOLINES_AFFILIATE_URL },
+  },
+  'springfree-safety': {
+    label: 'Springfree safety page',
+    affiliate: true,
+    destination: { AU: SPRINGFREE_SAFETY_AFFILIATE_URL },
   },
   'springfree-mini-round': {
     label: 'Springfree Mini Round',

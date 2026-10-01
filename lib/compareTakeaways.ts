@@ -244,10 +244,10 @@ function buildPriceTakeaway(a: SideSummary, b: SideSummary): string | null {
       // On model pages both sides are already named, so quote bare prices rather
       // than repeating the labels.
       if (sideNamesModel(lower.name, lowerEntry.row) && sideNamesModel(higher.name, higherEntry.row)) {
-        return `${lower.name} starts lower on comparable full-size models — ${formatAud(lowerEntry.price)} against ${formatAud(higherEntry.price)}.`;
+        return `${lower.name} starts lower on comparable full-size models: ${formatAud(lowerEntry.price)} against ${formatAud(higherEntry.price)}.`;
       }
 
-      return `On comparable full-size models, ${lower.name} starts lower — ${shortModelName(lowerEntry.row)} at ${formatAud(lowerEntry.price)} against ${possessive(higher.name)} ${shortModelName(higherEntry.row)} at ${formatAud(higherEntry.price)}.`;
+      return `On comparable full-size models, ${lower.name} starts lower: ${shortModelName(lowerEntry.row)} at ${formatAud(lowerEntry.price)} against ${possessive(higher.name)} ${shortModelName(higherEntry.row)} at ${formatAud(higherEntry.price)}.`;
     }
   }
 
@@ -296,7 +296,7 @@ function buildWarrantyTakeaway(a: SideSummary, b: SideSummary): string | null {
     return `${possessive(better.name)} frame warranty reaches ${formatYears(betterYears)} against ${formatYears(otherYears)}; compare exact models because terms vary by line.`;
   }
 
-  return `${better.name} carries the stronger frame warranty — ${formatYears(betterYears)} against ${formatYears(otherYears)}.`;
+  return `${better.name} carries the longer frame warranty: ${formatYears(betterYears)} against ${formatYears(otherYears)}.`;
 }
 
 function buildComponentWarrantyTakeaway(a: SideSummary, b: SideSummary): string | null {

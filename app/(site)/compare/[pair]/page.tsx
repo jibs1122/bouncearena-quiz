@@ -306,7 +306,7 @@ export default async function ComparePairPage({ params }: { params: Promise<{ pa
           )}
           {page.publishStatus === 'draft' && (
             <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
-              Draft — not published
+              Draft (not published)
             </span>
           )}
         </div>

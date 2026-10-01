@@ -4,7 +4,7 @@ import { getPostsByCategory } from '@/lib/content';
 
 export const metadata: Metadata = {
   title: 'Trampoline Reviews',
-  description: 'In-depth, unbiased reviews of Australia\'s top trampolines — Vuly, Springfree, JumpFlex and more.',
+  description: 'Reviews of the trampolines sold in Australia: Vuly, Springfree, JumpFlex and more, drawing on owner feedback and video reviews.',
   alternates: { canonical: 'https://bouncearena.com.au/reviews/' },
 };
 
@@ -14,7 +14,7 @@ export default function ReviewsPage() {
     <div className="mx-auto max-w-6xl px-5 sm:px-8 py-10">
       <h1 className="text-3xl font-bold text-black mb-2">Trampoline Reviews</h1>
       <p className="text-black/60 mb-8">
-        In-depth, unbiased reviews of Australia&apos;s top trampolines.
+        Reviews of the trampolines sold in Australia, from Vuly, Springfree, JumpFlex and more.
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {posts.map((post) => (

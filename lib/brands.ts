@@ -52,7 +52,7 @@ export const BRANDS: BrandInfo[] = [
     name: 'Springfree',
     slug: 'springfree',
     blurb:
-      'New Zealand brand whose trampolines have no springs at all — flexible fibreglass rods sit beneath the mat instead of springs around its edge.',
+      'New Zealand brand whose trampolines have no springs at all: flexible fibreglass rods sit beneath the mat instead of springs around its edge.',
     warranty:
       'Springfree covers the frame, mat and net for 10 years on every model.',
     imageDir: 'springfree',
@@ -72,7 +72,7 @@ export const BRANDS: BrandInfo[] = [
     name: 'Oz Trampolines',
     slug: 'oz-trampolines',
     blurb:
-      'Australian retailer offering round, oval and rectangular coil-spring trampolines built for local conditions, with replacement parts and after-sales support.',
+      'Australian retailer offering round, oval and rectangular coil-spring trampolines, along with replacement parts.',
     warranty:
       'Oz Trampolines lists a 5-year frame warranty across the range, with 2-year mat and net cover on most sizes.',
     imageDir: 'oz-trampolines',
@@ -92,7 +92,7 @@ export const BRANDS: BrandInfo[] = [
     name: 'Kmart',
     slug: 'kmart',
     blurb:
-      'Budget retailer offering low-cost round and rectangular trampoline options, including a springless-band model, with fewer published warranty and safety-standard details than premium brands.',
+      'Budget retailer offering low-cost round and rectangular trampoline options, including a springless-band model, with fewer published warranty and safety-standard details than dearer brands.',
     warranty:
       'Kmart lists a 2-year frame warranty on the rectangular model.',
     imageDir: 'kmart',
@@ -122,7 +122,7 @@ export const BRANDS: BrandInfo[] = [
     name: 'ACON',
     slug: 'acon',
     blurb:
-      'Premium Finnish brand selling round and rectangular coil-spring trampolines built for strong bounce, at the top of the Australian price range.',
+      'Finnish brand selling round and rectangular coil-spring trampolines with high spring counts, at the top of the Australian price range.',
     warranty:
       'ACON lists a 10-year frame warranty, a 5-year mat warranty and a 1-year net warranty across the range.',
     imageDir: 'acon',

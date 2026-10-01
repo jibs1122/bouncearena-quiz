@@ -99,7 +99,7 @@ export default function ComparisonHubClient({
           type="search"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search comparisons — try “Vuly” or “springless”"
+          placeholder="Search comparisons, e.g. Vuly or springless"
           className="w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm text-black placeholder:text-black/35 focus:border-[#38b1ab] focus:outline-none"
         />
       </div>
@@ -159,7 +159,7 @@ export default function ComparisonHubClient({
         <section className="mb-12">
           <h2 className="mb-1 text-xl font-bold text-black">Brand comparisons</h2>
           <p className="mb-5 text-sm text-black/55">
-            How two brands differ across their whole range — spring system, warranty, sizes and price.
+            How two brands differ across their whole range: spring system, warranty, sizes and price.
           </p>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {brandComparisons.map((comparison) => (

@@ -58,7 +58,7 @@ const CORE_PAGES: SearchItem[] = [
     title: 'Trampoline Reviews',
     href: '/reviews/',
     kind: 'page',
-    description: 'Read hands-on trampoline reviews, expert opinions and owner experiences.',
+    description: 'Trampoline reviews, including owner accounts and video reviews from Australian parents.',
     keywords: ['reviews', 'ratings', 'expert review', 'owner review'],
     priority: 50,
   },

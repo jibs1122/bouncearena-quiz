@@ -48,14 +48,14 @@ function springTypeLabel(rows: Array<{ springless: boolean }>): string {
 export const metadata: Metadata = {
   title: { absolute: 'Bounce Arena – Australia\'s Trampoline Review & Comparison Guide' },
   description:
-    'Unbiased trampoline reviews, brand comparisons, and buying advice for Australian families. Find the right trampoline with our free quiz.',
+    'Trampoline reviews, brand comparisons and buying advice for Australian families. Find the right trampoline with our free quiz.',
   verification: {
     google: 'BFFDRrI-ROvTm6R4VzXogMAZ0cKJNIzHtkP79mDBwQM',
   },
   openGraph: {
     title: 'Bounce Arena – Australia\'s Trampoline Review & Comparison Guide',
     description:
-      'Unbiased trampoline reviews, brand comparisons, and buying advice for Australian families.',
+      'Trampoline reviews, brand comparisons and buying advice for Australian families.',
     url: 'https://bouncearena.com.au',
     siteName: 'Bounce Arena',
     images: [{
@@ -102,10 +102,10 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl px-5 sm:px-8 py-14 sm:py-20 flex flex-col md:flex-row items-center gap-10 md:gap-16">
           <div className="flex-1 text-center md:text-left">
             <h1 className="text-4xl sm:text-5xl font-bold text-black leading-tight mb-4">
-              Find the perfect <span className="text-[#38b1ab]">trampoline</span> for your family
+              Find the right <span className="text-[#38b1ab]">trampoline</span> for your family
             </h1>
             <p className="text-lg text-black/60 mb-8 max-w-lg mx-auto md:mx-0">
-              Unbiased reviews and expert comparisons of Australia&apos;s top trampoline brands — Vuly, Springfree, JumpFlex and more.
+              Reviews and comparisons of Australia&apos;s trampoline brands: Vuly, Springfree, JumpFlex and more.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
               <Link
@@ -177,7 +177,7 @@ export default function HomePage() {
       {/* Latest Reviews */}
       <section className="mx-auto max-w-6xl px-5 sm:px-8 py-12">
         <div className="flex items-baseline justify-between mb-6">
-          <h2 className="text-2xl font-bold text-black">Latest Reviews</h2>
+          <h2 className="text-2xl font-bold text-black">Latest reviews</h2>
           <Link href="/reviews/" className="text-sm text-[#38b1ab] hover:underline font-medium">
             All reviews →
           </Link>

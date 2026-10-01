@@ -519,7 +519,7 @@ export default async function BrandPage({ params }: Props) {
         <p className="text-base leading-7 text-black/72">{brand.blurb}</p>
         <p className="text-base leading-7 text-black/72">
           {brand.name} sells {groups.length} model{groups.length === 1 ? '' : 's'} in Australia, across{' '}
-          {rows.length} size{rows.length === 1 ? '' : 's'} — {shapeSummary(rows).toLowerCase()}
+          {rows.length} size{rows.length === 1 ? '' : 's'}: {shapeSummary(rows).toLowerCase()}
           {largest ? `, up to ${largest}` : ''}. {standardSummary(groups, brand.name)} {brand.warranty}
         </p>
       </section>

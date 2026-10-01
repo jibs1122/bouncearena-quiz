@@ -242,11 +242,11 @@ export default function QuizPage() {
         {currentIndex === 0 && (
           <div className="mb-6">
             <h1 className="text-3xl font-bold tracking-tight text-black sm:text-4xl">
-              Trampoline quiz - find the right option for your family
+              Trampoline quiz: find the right option for your family
             </h1>
             <p className="mt-3 max-w-2xl text-base leading-7 text-black/55">
               Answer 7 quick questions and we&apos;ll match you with the right trampoline for your
-              family — based on your safety priorities, spring preference, shape, backyard size, and
+              family, based on your safety priorities, spring preference, shape, backyard size and
               budget.
             </p>
           </div>
@@ -292,7 +292,7 @@ export default function QuizPage() {
         {/* Affiliate disclaimer — priorities step only */}
         {currentQuestion.id === 'priorities' && (
           <p className="mt-6 text-xs text-black/30">
-            We earn a commission when you buy through some links. It doesn&apos;t change which trampoline we recommend.
+            We earn a commission when you buy through some links.
           </p>
         )}
 

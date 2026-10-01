@@ -21,12 +21,12 @@ export const metadata: Metadata = {
     template: '%s | Bounce Arena',
   },
   description:
-    'Unbiased trampoline reviews, comparisons, and buying advice for Australian families.',
+    'Trampoline reviews, brand comparisons and buying advice for Australian families.',
   icons: { icon: '/favicon.png' },
   openGraph: {
     title: "Bounce Arena – Australia's Trampoline Guide",
     description:
-      'Unbiased trampoline reviews, comparisons, and buying advice for Australian families.',
+      'Trampoline reviews, brand comparisons and buying advice for Australian families.',
     url: '/',
     siteName: 'Bounce Arena',
     locale: 'en_AU',
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: "Bounce Arena – Australia's Trampoline Guide",
     description:
-      'Unbiased trampoline reviews, comparisons, and buying advice for Australian families.',
+      'Trampoline reviews, brand comparisons and buying advice for Australian families.',
     images: ['/images/posts/kids-bouncing-on-trampoline.jpg'],
   },
 };
