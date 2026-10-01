@@ -3,7 +3,9 @@ import type { AnchorHTMLAttributes, ReactNode } from 'react';
 import {
   getGoLinkSlug,
   isAffiliateLink,
+  isRawLifespanAffiliateHref,
   isRawVulyAffiliateHref,
+  isRawWebAndWarehouseAffiliateHref,
   resolveRawVulyAffiliateHref,
 } from '@/lib/links';
 import { getSupersededSlugs } from '@/lib/supersededPosts';
@@ -42,7 +44,11 @@ export default function SmartLink({ href = '', children, ...props }: SmartLinkPr
 
   if (opensOffSite(resolvedHref)) {
     const slug = getGoLinkSlug(href);
-    const sponsored = Boolean(slug && isAffiliateLink(slug)) || isRawVulyAffiliateHref(resolvedHref);
+    const sponsored =
+      Boolean(slug && isAffiliateLink(slug)) ||
+      isRawVulyAffiliateHref(resolvedHref) ||
+      isRawLifespanAffiliateHref(resolvedHref) ||
+      isRawWebAndWarehouseAffiliateHref(resolvedHref);
     const trackedRedirect = resolvedHref === '/go' || resolvedHref.startsWith('/go/');
     const defaultRel = sponsored
       ? 'nofollow noopener noreferrer sponsored'

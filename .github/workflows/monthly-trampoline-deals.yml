@@ -1,0 +1,81 @@
+# Adds the month's section to /trampoline-deals-sales/ and pushes it to main, which Vercel deploys.
+# Any brand that fails a check is left out, and an issue lists what was left out and why.
+name: Monthly trampoline deals
+
+on:
+  schedule:
+    # 00:00 UTC on the 1st is 10am AEST or 11am AEDT in Melbourne.
+    - cron: '0 0 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: monthly-trampoline-deals
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npx playwright install --with-deps --only-shell chromium
+
+      - name: Check brand sites and write this month's section
+        id: deals
+        run: npm run update:trampoline-deals
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Check affiliate links
+        run: npm run validate:affiliate-links
+
+      - name: Commit and push to main
+        run: |
+          if git diff --quiet -- content/blog/trampoline-deals-sales.mdx && [ -z "$(git status --porcelain deals-history)" ]; then
+            echo "Nothing changed."
+            exit 0
+          fi
+          # Commit as the repo's usual author so Vercel deploys it like any other push.
+          git config user.name "$(git log -1 --format=%an)"
+          git config user.email "$(git log -1 --format=%ae)"
+          git add content/blog/trampoline-deals-sales.mdx deals-history
+          git commit -m "Update trampoline deals for $(TZ=Australia/Melbourne date +'%B %Y')"
+          git pull --rebase origin main
+          git push origin HEAD:main
+
+      - name: Keep screenshots, page text and the report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: deals-evidence
+          path: .deals-cache
+          if-no-files-found: ignore
+          retention-days: 90
+
+      - name: Open an issue when something was left out or the run failed
+        if: failure() || steps.deals.outputs.needs_attention == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          body=.deals-cache/report.md
+          if [ ! -f "$body" ]; then
+            body="$RUNNER_TEMP/report.md"
+            echo "The deals run failed before it wrote a report." > "$body"
+          fi
+          printf '\n\nRun log and screenshots: %s\n' "$RUN_URL" >> "$body"
+          gh issue create \
+            --title "Trampoline deals for $(TZ=Australia/Melbourne date +'%B %Y') need a look" \
+            --body-file "$body"

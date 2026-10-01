@@ -15,7 +15,7 @@
     "validate:search": "tsx scripts/validate-search.ts",
     "refresh:compare-data": "node scripts/refresh-compare-data.mjs",
     "fetch:model-images": "tsx scripts/fetch-model-images.ts",
-    "update:trampoline-deals": "node scripts/update-trampoline-deals.mjs"
+    "update:trampoline-deals": "tsx scripts/update-trampoline-deals.ts"
   },
   "dependencies": {
     "@tailwindcss/typography": "^0.5.19",
@@ -27,14 +27,17 @@
     "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.131.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
+    "playwright": "^1.63.0",
     "tailwindcss": "^4",
     "tsx": "^4.23.12",
-    "typescript": "^5"
+    "typescript": "^5",
+    "zod": "^4.6.5"
   }
 }

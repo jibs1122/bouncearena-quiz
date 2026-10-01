@@ -1,0 +1,1105 @@
+{
+  "checked": "1 October 2026",
+  "brands": [
+    {
+      "brand": "Vuly",
+      "status": "code-only",
+      "reason": null,
+      "facts": {
+        "trampolineDeal": false,
+        "saleName": null,
+        "ends": null,
+        "offers": [],
+        "examples": [],
+        "conditions": []
+      },
+      "droppedFacts": [],
+      "paragraph": "Vuly wasn't running a trampoline sale on 1 October.",
+      "prices": [
+        {
+          "product": "Junior Trampoline",
+          "variant": "Junior Trampoline",
+          "price": 449,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Flare Trampoline",
+          "variant": "Medium",
+          "price": 499,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Flare Trampoline",
+          "variant": "Large",
+          "price": 599,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Ultra 2 Trampoline",
+          "variant": "Small",
+          "price": 799,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Ultra 2 Trampoline",
+          "variant": "Medium",
+          "price": 899,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Ultra 2 Trampoline",
+          "variant": "Large",
+          "price": 999,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Ultra 2 Trampoline",
+          "variant": "Extra Large",
+          "price": 1099,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Ultra 2 Pro Trampoline",
+          "variant": "Medium",
+          "price": 1199,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Ultra 2 Pro Trampoline",
+          "variant": "Large",
+          "price": 1299,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Ultra 2 Pro Trampoline",
+          "variant": "Extra Large",
+          "price": 1399,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Thunder 2 Trampoline",
+          "variant": "Medium",
+          "price": 1399,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Thunder 2 Trampoline",
+          "variant": "Large",
+          "price": 1599,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Thunder 2 Trampoline",
+          "variant": "Extra Large",
+          "price": 1799,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Thunder 2 Trampoline",
+          "variant": "XXL",
+          "price": 1999,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Thunder 2 Pro Trampoline",
+          "variant": "Medium",
+          "price": 2099,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Thunder 2 Pro Trampoline",
+          "variant": "Large",
+          "price": 2599,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Thunder 2 Pro Trampoline",
+          "variant": "Extra Large",
+          "price": 3099,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        }
+      ]
+    },
+    {
+      "brand": "Springfree",
+      "status": "no-deal",
+      "reason": null,
+      "facts": {
+        "trampolineDeal": false,
+        "saleName": null,
+        "ends": null,
+        "offers": [],
+        "examples": [],
+        "conditions": []
+      },
+      "droppedFacts": [],
+      "paragraph": null,
+      "prices": [
+        {
+          "product": "Mini Round Trampoline",
+          "variant": "Classic",
+          "price": 999,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Mini Round Trampoline",
+          "variant": "Pure Black",
+          "price": 999,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Compact Oval Trampoline",
+          "variant": "Classic",
+          "price": 1799,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Compact Oval Trampoline",
+          "variant": "Pure Black",
+          "price": 1799,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Compact Round Trampoline",
+          "variant": "Classic",
+          "price": 1699,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Compact Round Trampoline",
+          "variant": "Pure Black",
+          "price": 1699,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Medium Oval Trampoline",
+          "variant": "Classic",
+          "price": 1999,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Medium Oval Trampoline",
+          "variant": "Pure Black",
+          "price": 1999,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Medium Oval Trampoline",
+          "variant": "Blue",
+          "price": 1999,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Medium Oval Trampoline",
+          "variant": "Gunmetal",
+          "price": 1999,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Medium Oval Trampoline",
+          "variant": "Green",
+          "price": 1999,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Medium Oval Trampoline",
+          "variant": "Pink",
+          "price": 1999,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Medium Oval Trampoline",
+          "variant": "Red",
+          "price": 1999,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Medium Oval Trampoline",
+          "variant": "Minty Blue",
+          "price": 1999,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Medium Oval Trampoline",
+          "variant": "Steely Wind",
+          "price": 1999,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Medium Round Trampoline",
+          "variant": "Classic",
+          "price": 2099,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Medium Round Trampoline",
+          "variant": "Pure Black",
+          "price": 2099,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Large Oval Trampoline",
+          "variant": "Classic",
+          "price": 2299,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Large Oval Trampoline",
+          "variant": "Pure Black",
+          "price": 2299,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Large Oval Trampoline",
+          "variant": "Blue",
+          "price": 2299,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Large Oval Trampoline",
+          "variant": "Gunmetal",
+          "price": 2299,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Large Oval Trampoline",
+          "variant": "Green",
+          "price": 2299,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Large Oval Trampoline",
+          "variant": "Pink",
+          "price": 2299,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Large Oval Trampoline",
+          "variant": "Red",
+          "price": 2299,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Large Oval Trampoline",
+          "variant": "Minty Blue",
+          "price": 2299,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Large Oval Trampoline",
+          "variant": "Steely Wind",
+          "price": 2299,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Large Square Trampoline",
+          "variant": "Classic",
+          "price": 2699,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Large Square Trampoline",
+          "variant": "Pure Black",
+          "price": 2699,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Jumbo Round Trampoline",
+          "variant": "Classic",
+          "price": 3199,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Jumbo Round Trampoline",
+          "variant": "Pure Black",
+          "price": 3199,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Jumbo Oval Trampoline",
+          "variant": "Classic",
+          "price": 4399,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        }
+      ]
+    },
+    {
+      "brand": "Lifespan Kids",
+      "status": "published",
+      "reason": null,
+      "facts": {
+        "trampolineDeal": true,
+        "saleName": null,
+        "ends": null,
+        "offers": [
+          {
+            "offer": "Trampolines reduced from RRP across the range, with discounts from 18% to 39% off",
+            "source": "text",
+            "evidence": "-39%\nBounceZone M Rectangular Spring Trampoline Set\n$1,478.00$899.00 ... -35%\nBounceZone Round Spring Trampoline - S (8ft)\n$719.00$469.00 ... -18%\nLil' Hopper Childrens 40\" Mini Trampoline\n$158.00$129.00"
+          }
+        ],
+        "examples": [
+          {
+            "product": "BounceZone M Rectangular Spring Trampoline Set",
+            "saving": "39% off (RRP $1,478.00, now $899.00)",
+            "source": "text",
+            "evidence": "-39%\nBounceZone M Rectangular Spring Trampoline Set\n$1,478.00$899.00"
+          },
+          {
+            "product": "BounceZone Round Spring Trampoline - S (8ft)",
+            "saving": "35% off (RRP $719.00, now $469.00)",
+            "source": "text",
+            "evidence": "-35%\nBounceZone Round Spring Trampoline - S (8ft)\n$719.00$469.00"
+          },
+          {
+            "product": "8ft HyperJump3 Springless Trampoline",
+            "saving": "29% off (RRP $749.00, now $529.00)",
+            "source": "text",
+            "evidence": "-29%\n8ft HyperJump3 Springless Trampoline\n$749.00$529.00"
+          },
+          {
+            "product": "7ft HyperJump Hoppy Trampoline",
+            "saving": "25% off (RRP $559.00, now $419.00)",
+            "source": "text",
+            "evidence": "-25%\n7ft HyperJump Hoppy Trampoline\n$559.00$419.00"
+          }
+        ],
+        "conditions": [
+          {
+            "condition": "Savings are measured against the listed RRP",
+            "source": "text",
+            "evidence": "BounceZone Round Spring Trampoline - S (8ft)\nIn stock\nRRP $719.00\n$469.00"
+          }
+        ]
+      },
+      "droppedFacts": [],
+      "paragraph": "Lifespan Kids has 18% to 39% off trampolines across the range, measured against the listed RRP. The BounceZone M Rectangular Spring Trampoline Set is 39% off and the 8ft BounceZone Round Spring Trampoline is 35% off, with 29% off the 8ft HyperJump3 Springless and 25% off the 7ft HyperJump Hoppy.",
+      "prices": [
+        {
+          "product": "Swish Basketball Ring with BR10 Bracket BounceZone Round Trampoline",
+          "variant": "",
+          "price": 105,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Swish Basketball Ring with BR5 Bracket HJ Series Round Trampoline",
+          "variant": "",
+          "price": 105,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Swish Basketball Ring with BR4 Bracket HJ-R and BounceZone R",
+          "variant": "",
+          "price": 99.99,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Jurassic Jump Inflatable Jumping Castle",
+          "variant": "",
+          "price": 659,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Palace Jumping Castle - Pastel Pink",
+          "variant": "",
+          "price": 469,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "BounceZone M Rectangular Spring Trampoline Set",
+          "variant": "",
+          "price": 899,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Palace Jumping Castle - White",
+          "variant": "",
+          "price": 469,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "BounceZone Round Spring Trampoline - S (8ft)",
+          "variant": "",
+          "price": 469,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "BounceZone Round Spring Trampoline - XL (14ft)",
+          "variant": "",
+          "price": 869,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "BounceZone Round Spring Trampoline - L (12ft)",
+          "variant": "",
+          "price": 769,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "BounceZone Round Spring Trampoline - M (10ft)",
+          "variant": "",
+          "price": 649,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "14ft Springless Frame Rail (HJP/HJ2/HJ3/HJ4, Top)",
+          "variant": "",
+          "price": 44,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "8ft Springless Frame Rail (HJP/HJ2/HJ3/HJ4, Top)",
+          "variant": "",
+          "price": 33,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "16ft Frame Rail (HJP/HJ2/HJ3/HJ4, Bottom)",
+          "variant": "",
+          "price": 44,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "14ft Frame Rail (HJP/HJ2/HJ3/HJ4, Bottom)",
+          "variant": "",
+          "price": 44,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "12ft Frame Rail (HJP/HJ2/HJ3/HJ4, Bottom)",
+          "variant": "",
+          "price": 38.5,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "8ft Frame Rail (HJP/HJ2/HJ3/HJ4, Bottom)",
+          "variant": "",
+          "price": 33,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "10-16ft Spring Frame Leg (HJP/HJ2/HJ3/HJ4) (8 Pack)",
+          "variant": "",
+          "price": 144,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "8ft Springless Frame Leg (HJP/HJ2/HJ3/HJ4) (6 Pack)",
+          "variant": "",
+          "price": 108,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "8ft Spring Frame Leg (HJP/HJ2/HJ3/HJ4) (6 Pack)",
+          "variant": "",
+          "price": 108,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Leg Base (HJP/HJ2/HJ3/HJ4) (8 Pack)",
+          "variant": "",
+          "price": 64,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Leg Base (HJP/HJ2/HJ3/HJ4) (6 Pack)",
+          "variant": "",
+          "price": 54,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Leg Base Ball Connector 35x60mm (HJP/HJ2/HJ3/HJ4) (8 Pack)",
+          "variant": "",
+          "price": 38.4,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Leg Base Ball Connector 35x60mm (HJP/HJ2/HJ3/HJ4) (6 Pack)",
+          "variant": "",
+          "price": 32.4,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Leg Base Ball Connector 35x60mm (HJP/HJ2/HJ3/HJ4)",
+          "variant": "",
+          "price": 6,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Swish Trampoline Basketball Ring with Junior Jungle Adaptor",
+          "variant": "",
+          "price": 119,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "BR5 Adjustable Basketball Ring Bracket (For HJ3/HJ4)",
+          "variant": "",
+          "price": 29.99,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "7x10ft Safety Nets (HyperJump-R)",
+          "variant": "",
+          "price": 104.5,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "7x10ft Top Ring (HyperJump-R)",
+          "variant": "",
+          "price": 38.5,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "7ft HyperJump Hoppy Trampoline",
+          "variant": "",
+          "price": 419,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Lil' Hopper Childrens 40\" Mini Trampoline",
+          "variant": "",
+          "price": 129,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "8ft Safety Nets (HJ3)",
+          "variant": "",
+          "price": 88,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "10ft Safety Nets (HyperJump 3)",
+          "variant": "",
+          "price": 99,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "16ft Safety Nets (HyperJump 3)",
+          "variant": "",
+          "price": 132,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "14ft Safety Nets (HyperJump 3)",
+          "variant": "",
+          "price": 104.5,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "12ft Safety Nets (HyperJump 3)",
+          "variant": "",
+          "price": 104.5,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "12ft HyperJump3 Springless Trampoline",
+          "variant": "",
+          "price": 799,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "10ft HyperJump3 Springless Trampoline",
+          "variant": "",
+          "price": 639,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "8ft HyperJump3 Springless Trampoline",
+          "variant": "",
+          "price": 529,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "14ft Trampoline Spring Set (SS/HJ/HJP/HJ2, 178mm, 80 pieces)",
+          "variant": "",
+          "price": 88,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "12ft Trampoline Spring Set (SS/HJ/HJP/HJ2, 178mm, 72 pieces)",
+          "variant": "",
+          "price": 79.2,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "8ft Trampoline Spring Set (CL/SS/HJ/HJP/HJ2, 140mm, 42 pieces)",
+          "variant": "",
+          "price": 60.5,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "16ft Trampoline Spring Set (SS/HJ, 214mm, 108 pieces)",
+          "variant": "",
+          "price": 118.8,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "10ft Trampoline Spring Set (CL/SS/HJ/HJP/HJ2, 140mm, 60 pieces)",
+          "variant": "",
+          "price": 66,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Trampoline Spring 178mm 12-14ft",
+          "variant": "",
+          "price": 3.3,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Trampoline Spring 214mm 16ft",
+          "variant": "",
+          "price": 3.3,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Trampoline Pole Padding (Single)",
+          "variant": "",
+          "price": 4,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "16ft Trampoline Spring Set (HJP/HJ2, 214mm, 112 pieces)",
+          "variant": "",
+          "price": 123.2,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "8ft Springless Frame Leg  (HJP/HJ2/HJ3/HJ4)",
+          "variant": "",
+          "price": 20,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "10-16ft Spring Frame Leg  (HJP/HJ2/HJ3)",
+          "variant": "",
+          "price": 20,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "8ft Spring Frame Leg  (HJP/HJ2/HJ3/HJ4)",
+          "variant": "",
+          "price": 20,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Leg Base (HJP/HJ2/HJ3/HJ4)",
+          "variant": "",
+          "price": 10,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "10ft Frame Rail (HJP/HJ2/HJ3/HJ4, Bottom)",
+          "variant": "",
+          "price": 33,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "10ft Springless Frame Rail (HJP/HJ2/HJ3/HJ4, Top)",
+          "variant": "",
+          "price": 33,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        },
+        {
+          "product": "Trampoline Spring 140mm (CL) 8-14ft (Other) 8-10ft",
+          "variant": "",
+          "price": 3.3,
+          "was": null,
+          "saving": null,
+          "savingPercent": null
+        }
+      ]
+    },
+    {
+      "brand": "Web and Warehouse",
+      "status": "published",
+      "reason": null,
+      "facts": {
+        "trampolineDeal": true,
+        "saleName": null,
+        "ends": null,
+        "offers": [
+          {
+            "offer": "Trampolines and trampoline bundles are discounted on the Sale page, with savings shown against a previous \"was\" price",
+            "source": "text",
+            "evidence": "Sale ... $1,999 was $2,299 SAVE $300.00 ACON Air 15ft Round Trampoline with Standard Net - GEN 2.0 ... $3,599 was $3,999 SAVE $400.00 ACON 16 HD (10x17ft) Rectangle Trampoline and Enclosure"
+          },
+          {
+            "offer": "Bundle deals on trampoline packages",
+            "source": "text",
+            "evidence": "You can also save big with our bundle deals!"
+          }
+        ],
+        "examples": [
+          {
+            "product": "ACON X 17ft Trampoline with Net Enclosure and Ladder - Black - Peak Performance Bundle",
+            "saving": "SAVE $1,298.00 ($7,499 was $8,797)",
+            "source": "text",
+            "evidence": "$7,499 was $8,797 SAVE $1,298.00 ACON X 17ft Trampoline with Net Enclosure and Ladder - Black - Peak Performance Bundle"
+          },
+          {
+            "product": "ACON X 17ft Trampoline with Net Enclosure and Ladder - Black",
+            "saving": "SAVE $600.00 ($6,499 was $7,099)",
+            "source": "text",
+            "evidence": "$6,499 was $7,099 SAVE $600.00 ACON X 17ft Trampoline with Net Enclosure and Ladder - Black"
+          },
+          {
+            "product": "ACON 16 HD (10x17ft) Rectangle Trampoline and Enclosure",
+            "saving": "SAVE $400.00 ($3,599 was $3,999)",
+            "source": "text",
+            "evidence": "$3,599 was $3,999 SAVE $400.00 ACON 16 HD (10x17ft) Rectangle Trampoline and Enclosure"
+          },
+          {
+            "product": "ACON Freestyle Mini Trampoline",
+            "saving": "SAVE $400.00 ($1,299 was $1,699)",
+            "source": "text",
+            "evidence": "$1,299 was $1,699 SAVE $400.00 ACON Freestyle Mini Trampoline"
+          }
+        ],
+        "conditions": [
+          {
+            "condition": "Savings are shown against each product's previous \"was\" price",
+            "source": "text",
+            "evidence": "$1,999 was $2,299 SAVE $300.00 ACON Air 15ft Round Trampoline with Standard Net - GEN 2.0"
+          }
+        ]
+      },
+      "droppedFacts": [],
+      "paragraph": "There's $1,298 off the ACON X 17ft Peak Performance bundle and $600 off the same trampoline on its own, plus $400 off both the ACON 16 HD 10x17ft rectangle and the ACON Freestyle mini. Other trampolines and bundles on the sale page are discounted too, with each saving set against the previous price.",
+      "prices": null
+    },
+    {
+      "brand": "Jumpflex",
+      "status": "published",
+      "reason": null,
+      "facts": {
+        "trampolineDeal": true,
+        "saleName": "LONG WEEKEND SALE!",
+        "ends": null,
+        "offers": [
+          {
+            "offer": "Up to $250 off FLEX™ & HERO™ trampolines",
+            "source": "text",
+            "evidence": "LONG WEEKEND SALE! Up to $250 off FLEX™ & HERO™ | Up to $700 off MEGA + FREE PROJAM™"
+          },
+          {
+            "offer": "Up to $700 off MEGA trampolines plus a free PROJAM™",
+            "source": "text",
+            "evidence": "LONG WEEKEND SALE! Up to $250 off FLEX™ & HERO™ | Up to $700 off MEGA + FREE PROJAM™"
+          },
+          {
+            "offer": "Free accessory with trampolines (badge shown on all trampoline listings)",
+            "source": "image",
+            "evidence": "FREE ACCESSORY!"
+          }
+        ],
+        "examples": [
+          {
+            "product": "MEGA™ 19ft Trampoline",
+            "saving": "$2,799, was $3,499",
+            "source": "text",
+            "evidence": "MEGA™ 19ft Trampoline ... $2,799\n$3,499"
+          },
+          {
+            "product": "MEGA™ 17ft Trampoline",
+            "saving": "$2,399, was $2,999",
+            "source": "text",
+            "evidence": "MEGA™ 17ft Trampoline ... $2,399\n$2,999"
+          },
+          {
+            "product": "MEGA™ 14ft Trampoline",
+            "saving": "$2,099, was $2,499",
+            "source": "text",
+            "evidence": "MEGA™ 14ft Trampoline ... $2,099\n$2,499"
+          },
+          {
+            "product": "HERO™ 15ft Trampoline",
+            "saving": "$1,349, was $1,599",
+            "source": "text",
+            "evidence": "HERO™ 15ft Trampoline ... $1,349\n$1,599"
+          }
+        ],
+        "conditions": []
+      },
+      "droppedFacts": [],
+      "paragraph": "The long weekend sale takes up to $700 off MEGA trampolines, with a free PROJAM included, and up to $250 off the FLEX and HERO ranges. A free accessory comes with every trampoline.",
+      "prices": null
+    },
+    {
+      "brand": "Oz Trampolines",
+      "status": "published",
+      "reason": null,
+      "facts": {
+        "trampolineDeal": true,
+        "saleName": null,
+        "ends": null,
+        "offers": [
+          {
+            "offer": "Sitewide sale: save up to 30% and free express delivery",
+            "source": "text",
+            "evidence": "Sale Now On!\nSave up to 30%\nand free express delivery"
+          },
+          {
+            "offer": "OzUltimate Trampolines packages: save up to $495 or 30%, including free delivery, anchor kit, ladder and children's safety tip book",
+            "source": "text",
+            "evidence": "OZULTIMATE TRAMPOLINES PACKAGES\nSAVE UP TO $495 OR 30%*\n+ FREE DELIVERY ... + ANCHOR KIT ... + LADDER ... + FULL OF BOUNCE\nChildrens safety tip book."
+          },
+          {
+            "offer": "Summit Trampolines packages: save up to $395 or 30%, including free delivery, anchor kit, ladder and children's safety tip book",
+            "source": "text",
+            "evidence": "SUMMIT TRAMPOLINES PACKAGES\nSAVE UP TO $395 OR 30%*\n+ FREE DELIVERY ... + ANCHOR KIT ... + LADDER ... + FULL OF BOUNCE\nChildrens safety tip book."
+          },
+          {
+            "offer": "In-Ground trampoline packages: save up to $350 plus free extras, including free delivery and children's safety tip book",
+            "source": "text",
+            "evidence": "IN-GROUND TRAMPOLINE PACKAGES\nSAVE UP TO $350 PLUS FREE EXTRAS\n+ FREE DELIVERY ... + FULL OF BOUNCE\nChildrens safety tip book."
+          },
+          {
+            "offer": "North Trampolines bonus offer: save up to $750 plus free extras, including free delivery and anchor kit",
+            "source": "text",
+            "evidence": "NORTH TRAMPOLINES BONUS OFFER\nSAVE UP TO $750 PLUS FREE EXTRAS*\n+ FREE DELIVERY ... + ANCHOR KIT"
+          },
+          {
+            "offer": "Free gift with a new trampoline when you enter your email",
+            "source": "image",
+            "evidence": "Get a free gift from us with your new trampoline ... Enter your email to get a special gift"
+          }
+        ],
+        "examples": [],
+        "conditions": [
+          {
+            "condition": "OzUltimate saving is based on RRP of products and the average delivery cost of a 14ft OzUltimate Trampoline",
+            "source": "text",
+            "evidence": "*Savings based on RRP of products and the average delivery cost of a 14ft OzUltimate Trampoline."
+          },
+          {
+            "condition": "Summit saving is based on RRP of products and the average delivery cost of a 16ft Summit Trampoline",
+            "source": "text",
+            "evidence": "*Savings based on RRP of products and the average delivery cost of a 16ft Summit Trampoline."
+          },
+          {
+            "condition": "In-Ground saving is based on RRP of products and the average delivery cost of a 10 x 14FT In-Ground Trampoline",
+            "source": "text",
+            "evidence": "*Savings based on RRP of products and the average delivery cost of a 10 x 14FT In-Ground Trampoline."
+          },
+          {
+            "condition": "North Trampolines saving is based on RRP of products and the average delivery cost of a North Explorer Rectangular 460 Trampoline",
+            "source": "text",
+            "evidence": "*Savings based on RRP of products and the average delivery cost of a North Explorer Rectangular 460 Trampoline."
+          }
+        ]
+      },
+      "droppedFacts": [
+        {
+          "fact": "Free gift with a new trampoline when you enter your email",
+          "reason": "quoted evidence not found (\"Get a free gift from us with your new trampoline ... Enter your email to get a special gift\")"
+        }
+      ],
+      "paragraph": "North Trampolines packages have up to $750 off with free delivery and an anchor kit. OzUltimate packages have up to $495 off and Summit packages up to $395, both with free delivery, an anchor kit, a ladder and a children's safety tip book, while in-ground packages have up to $350 off plus extras. Sitewide savings run to 30%, with free express delivery.",
+      "prices": null
+    }
+  ]
+}

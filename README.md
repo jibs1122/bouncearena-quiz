@@ -50,46 +50,42 @@ The refresh script targets the `Aus` tab explicitly and regenerates `data/trampo
 
 ## Monthly trampoline deals update
 
-The `update-trampoline-deals` script reads `.env.local` from the repo root before running. Keep your Anthropic key there for local use only.
+`.github/workflows/monthly-trampoline-deals.yml` runs at 00:00 UTC on the 1st of each month (10am or 11am in Melbourne). It adds that month's section to `content/blog/trampoline-deals-sales.mdx`, commits it to `main`, and Vercel deploys it. It needs an `ANTHROPIC_API_KEY` repository secret. Run it early from the Actions tab with **Run workflow**.
 
-Example `.env.local`:
+For each brand in `scripts/deals/brands.ts`, the script:
 
-```sh
-ANTHROPIC_API_KEY=your_rotated_anthropic_api_key_here
-# Optional:
-# ANTHROPIC_MODEL=claude-sonnet-4-20250514
-```
+1. Loads the brand's own pages (never the affiliate URL) in headless Chromium, keeping the visible text and screenshots of the top of each page.
+2. Reads structured prices where the store exposes them: Vuly's product tiles carry list price, sale price, savings and free items as JSON, and Shopify stores (Springfree, Lifespan Kids) publish compare-at prices in `products.json`.
+3. Has Claude record the trampoline deal as facts, each with the exact words it came from.
+4. Keeps only facts whose quotes and numbers appear in the captured evidence. A fact read only from a banner image must also appear in a second, independent transcription of the banners.
+5. Has Claude write the paragraph from those facts alone, so it never sees the brand's own wording. The paragraph is checked for invented numbers, sale prices (savings only), hype and calls to action, em dashes, and any 8-word run copied from the brand's page. It gets one rewrite; a second failure leaves the brand out.
+6. Adds the link and promo code in code. Links come from `brands.ts` (partner links carry affiliate tracking), and codes come from `lib/promoCtas.ts`. A brand with a code but no sale is still listed with its code.
+7. Opens the link target in the browser before publishing.
 
-Run the shortcut below from the repo root to fetch the configured retailer pages and prepend a draft section for the current Australia/Melbourne month into the deals post:
+A brand that fails a step is left out rather than published. The workflow opens a GitHub issue listing what was left out and why, and keeps the screenshots, page text and report as a run artifact for 90 days. Each run's facts and prices are saved to `deals-history/YYYY-MM.json`.
 
-```sh
-npm run update:trampoline-deals
-```
-
-If `ANTHROPIC_API_KEY` is set in your shell, the script will send the scraped evidence to Anthropic to decide whether each brand actually has a live sale/promo and to rewrite the included brand summaries into cleaner copy before writing the section. It also sends up to two likely promo-image URLs per brand so Claude can read offer text that only appears inside banners or other images. Brands without clear sale evidence are omitted for that month. You can optionally set `ANTHROPIC_MODEL`; otherwise the script queries Anthropic's Models API and picks the first supported model from its preferred list.
-
-The default sources live in [config/trampoline-deals-sources.json](/Users/scott/Projects/bouncearena-quiz/config/trampoline-deals-sources.json).
-
-You can override them on a one-off run:
+To run it locally, put `ANTHROPIC_API_KEY` in `.env.local` and install the browser once:
 
 ```sh
-npm run update:trampoline-deals -- \
-  --site "Vuly|https://www.vulyplay.com/aff/100/?url=promo" \
-  --site "Springfree|https://www.springfreetrampoline.com.au/collections/trampolines"
+npx playwright install --only-shell chromium
 ```
 
-Preview the generated section without writing to the MDX file:
+Preview this month's section without changing the post:
 
 ```sh
 npm run update:trampoline-deals -- --dry-run
 ```
 
-Disable the Anthropic rewrite step for a run even if `ANTHROPIC_API_KEY` is set:
+Check one brand (always a dry run):
 
 ```sh
-npm run update:trampoline-deals -- --no-ai
+npm run update:trampoline-deals -- --brand Vuly
 ```
 
-Without Anthropic, the script uses a conservative local heuristic to omit brands that do not show obvious sale or promo signals.
+Write the section into the post. Running it again in the same month replaces that month's section:
 
-The generated monthly section uses plain brand headings with a separate text link for each deal. `Vuly` is always listed first when included, always links to `https://www.vulyplay.com/aff/100/?url=promo`, and always adds the `BOUNCE15` and `BOUNCESURGE` promo code line.
+```sh
+npm run update:trampoline-deals
+```
+
+Screenshots, page text and the report go to `.deals-cache/`, which is gitignored. To add a brand, add an entry to `scripts/deals/brands.ts`. If it has a promo code in `lib/promoCtas.ts`, add a `codeNotes` line for each code.
