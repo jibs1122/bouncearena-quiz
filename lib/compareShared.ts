@@ -298,3 +298,62 @@ export function groupShopUrl(group: GroupedTrampoline, useAffiliate: boolean): s
 export function groupReview(group: GroupedTrampoline) {
   return group.variants.find((variant) => variant.reviewSlug || variant.baScore) ?? null;
 }
+
+const SHAPE_WORDS: Record<string, string> = {
+  Round: 'round',
+  Oval: 'oval',
+  Square: 'square',
+  Rectangle: 'rectangular',
+};
+
+const SPRING_TERMS: Array<[RegExp, string]> = [
+  [/fibreglass rods/i, 'fibreglass rods'],
+  [/leaf springs/i, 'leaf springs'],
+  [/piano wire/i, 'piano wire springs'],
+  [/elastic straps/i, 'elastic straps'],
+  [/elastic bands/i, 'elastic bands'],
+  [/springless bands/i, 'springless bands'],
+  [/coil/i, 'coil springs'],
+];
+
+function joinList(items: string[], conjunction = 'and'): string {
+  if (items.length <= 1) return items[0] ?? '';
+  return `${items.slice(0, -1).join(', ')} ${conjunction} ${items[items.length - 1]}`;
+}
+
+/**
+ * Plain description for Product structured data, built only from the spec rows so
+ * it never says more than the data sheet does.
+ */
+export function productSchemaDescription(rows: Trampoline[]): string {
+  const sorted = [...rows].sort(
+    (a, b) => (longestFootprintCm(a) ?? Infinity) - (longestFootprintCm(b) ?? Infinity),
+  );
+  const shapes = [...new Set(sorted.map((row) => SHAPE_WORDS[row.shape] ?? row.shape.toLowerCase()))];
+  const springSystem = sorted.find((row) => row.springSystem)?.springSystem ?? '';
+  const springs = SPRING_TERMS.find(([pattern]) => pattern.test(springSystem))?.[1] ?? null;
+  const sizes = [...new Set(sorted.map(compareSizeLabel))];
+
+  const kind = `${joinList(shapes, 'or')} trampoline${springs ? ` with ${springs}` : ''}`;
+  const summary = sizes.length === 1 ? `${sizes[0]} ${kind}` : `${kind}, sold in ${joinList(sizes)} sizes`;
+  const sentences = [`${summary.charAt(0).toUpperCase()}${summary.slice(1)}.`];
+
+  const weights = sorted.map((row) => row.maxWeightKg).filter((value): value is number => value !== null);
+  const frames = sorted.map((row) => row.warrantyFrameYrs).filter((value): value is number => value !== null);
+  const weight = weights.length > 0
+    ? Math.min(...weights) === Math.max(...weights)
+      ? `${weights[0]} kg`
+      : `between ${Math.min(...weights)} and ${Math.max(...weights)} kg`
+    : null;
+  const warranty = frames.length > 0
+    ? Math.min(...frames) === Math.max(...frames)
+      ? `a ${frames[0]}-year frame warranty`
+      : `a ${Math.min(...frames)}- to ${Math.max(...frames)}-year frame warranty`
+    : null;
+
+  if (weight && warranty) sentences.push(`Rated to ${weight} per jumper, with ${warranty}.`);
+  else if (weight) sentences.push(`Rated to ${weight} per jumper.`);
+  else if (warranty) sentences.push(`Comes with ${warranty}.`);
+
+  return sentences.join(' ');
+}

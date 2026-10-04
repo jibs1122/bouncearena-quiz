@@ -9,7 +9,7 @@ import RelatedComparisons, { type RelatedLink } from '@/components/compare/Relat
 import ModelImage from '@/components/ModelImage';
 import type { Trampoline } from '@/data/trampolines';
 import { hasAffiliateLink, isAffiliateRow, outboundRel } from '@/lib/affiliate';
-import { getAllBrands, getBrandBySlug, getBrandRows } from '@/lib/brands';
+import { getAllBrands, getBrandBySlug, getBrandRows, modelImage } from '@/lib/brands';
 import {
   comparePageBrands,
   comparePageHref,
@@ -30,6 +30,7 @@ import {
   isFromPrice,
   longestFootprintCm,
   meetsAs4989,
+  productSchemaDescription,
   productUrl,
   sizeLabel,
   type GroupedTrampoline,
@@ -454,10 +455,17 @@ export default async function BrandPage({ params }: Props) {
     ],
   };
 
+  // Google rejects a Product with no offer, or with an offer but no image, so only
+  // sizes with an exact price and a photo are marked up.
+  const productRows = rows.filter(
+    (row) => row.priceAud !== null && !isFromPrice(row) && modelImage(row.brand, row.model),
+  );
+  const absoluteUrl = (href: string) => (href.startsWith('/') ? `${SITE_URL}${href}` : href);
+
   const itemList = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    itemListElement: rows.map((row, index) => {
+    itemListElement: productRows.map((row, index) => {
       const href = productUrl(row, true);
 
       return {
@@ -466,17 +474,15 @@ export default async function BrandPage({ params }: Props) {
         item: {
           '@type': 'Product',
           name: `${row.brand} ${row.model} ${row.size}`,
+          image: absoluteUrl(modelImage(row.brand, row.model)!),
+          description: productSchemaDescription([row]),
           brand: { '@type': 'Brand', name: row.brand },
-          ...(row.priceAud !== null && !isFromPrice(row)
-            ? {
-                offers: {
-                  '@type': 'Offer',
-                  priceCurrency: 'AUD',
-                  price: row.priceAud,
-                  url: href?.startsWith('/') ? `${SITE_URL}${href}` : href ?? undefined,
-                },
-              }
-            : {}),
+          offers: {
+            '@type': 'Offer',
+            priceCurrency: 'AUD',
+            price: row.priceAud,
+            url: href ? absoluteUrl(href) : undefined,
+          },
         },
       };
     }),
@@ -485,7 +491,7 @@ export default async function BrandPage({ params }: Props) {
   return (
     <article className="mx-auto max-w-6xl px-5 py-10 sm:px-8">
       <JsonLd data={breadcrumb} />
-      <JsonLd data={itemList} />
+      {itemList.itemListElement.length > 0 && <JsonLd data={itemList} />}
 
       <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-2 text-sm text-black/40">
         <Link href="/" className="transition-colors hover:text-black">Home</Link>

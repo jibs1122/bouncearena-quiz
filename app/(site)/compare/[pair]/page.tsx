@@ -13,7 +13,7 @@ import JsonLd from '@/components/compare/JsonLd';
 import KeyTakeaways from '@/components/compare/KeyTakeaways';
 import RelatedComparisons, { type RelatedLink } from '@/components/compare/RelatedComparisons';
 import { hasAffiliateLink } from '@/lib/affiliate';
-import { brandSlug } from '@/lib/brands';
+import { brandSlug, modelImage } from '@/lib/brands';
 import {
   comparePageBrands,
   comparePageHref,
@@ -25,7 +25,13 @@ import {
   type ComparePage,
   type ResolvedSide,
 } from '@/lib/comparePages';
-import { AFFILIATE_DISCLOSURE, isFromPrice, productUrl } from '@/lib/compareShared';
+import {
+  AFFILIATE_DISCLOSURE,
+  groupRows,
+  isFromPrice,
+  productSchemaDescription,
+  productUrl,
+} from '@/lib/compareShared';
 import { buildCompareTakeaways } from '@/lib/compareTakeaways';
 import { formatDate, getAllPosts, getPost } from '@/lib/content';
 import { buildPromosForBrands, hasAffiliatePromo } from '@/lib/promoCtas';
@@ -122,6 +128,17 @@ function pageDates(page: ComparePage): { published: string; modified: string } {
   return { published, modified: page.updated ?? published };
 }
 
+function absoluteUrl(href: string): string {
+  return href.startsWith('/') ? `${SITE_URL}${href}` : href;
+}
+
+/** The same photo the side's featured model card shows. */
+function sideImage(side: ResolvedSide): string | null {
+  const [group] = groupRows(side.rows);
+  const image = group ? modelImage(side.brand, group.model) : null;
+  return image ? absoluteUrl(image) : null;
+}
+
 function offersFor(side: ResolvedSide): Record<string, unknown> | null {
   const priced = side.rows.filter((row) => row.priceAud !== null);
   if (priced.length === 0) return null;
@@ -137,7 +154,7 @@ function offersFor(side: ResolvedSide): Record<string, unknown> | null {
     ...(hasFromPrice
       ? { lowPrice: cheapest.priceAud, highPrice: dearest.priceAud, offerCount: priced.length }
       : { price: cheapest.priceAud }),
-    ...(url ? { url: url.startsWith('/') ? `${SITE_URL}${url}` : url } : {}),
+    ...(url ? { url: absoluteUrl(url) } : {}),
   };
 }
 
@@ -265,13 +282,17 @@ export default async function ComparePairPage({ params }: { params: Promise<{ pa
           itemListElement: sides
             .map((side, index) => {
               const offers = offersFor(side);
-              if (!offers) return null;
+              const image = sideImage(side);
+              // Google rejects a Product with an offer but no image.
+              if (!offers || !image) return null;
               return {
                 '@type': 'ListItem',
                 position: index + 1,
                 item: {
                   '@type': 'Product',
                   name: side.label,
+                  image,
+                  description: productSchemaDescription(side.rows),
                   brand: { '@type': 'Brand', name: side.brand },
                   offers,
                 },
