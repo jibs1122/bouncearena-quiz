@@ -213,7 +213,7 @@ const currentPriceReasons = selectMatchReasons(asScored(jumpflexFlex10, 'small')
 }, 'AU');
 assert.ok(
   currentPriceReasons.includes(
-    `From $${jumpflexFlex10.priceFrom.toLocaleString('en-AU')} AUD — within your selected budget range`,
+    `From $${jumpflexFlex10.priceFrom.toLocaleString('en-AU')} AUD, within your selected budget range`,
   ),
   'Budget reasons must use the current Aus-tab price',
 );

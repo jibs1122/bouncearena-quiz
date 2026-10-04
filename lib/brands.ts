@@ -62,7 +62,7 @@ export const BRANDS: BrandInfo[] = [
     name: 'Jumpflex',
     slug: 'jumpflex',
     blurb:
-      'New Zealand brand competing on specs and price, with round FLEX and HERO models plus the square and rectangular MEGA range rated to 225 kg per jumper.',
+      'New Zealand brand offering round FLEX and HERO models, plus square and rectangular MEGA models rated to 225 kg per jumper.',
     warranty:
       'Jumpflex lists a 10-year frame warranty and a 5-year mat warranty on the HERO and MEGA, dropping to 5 years and 1 year on the FLEX. Net cover is 1 year across the range.',
     imageDir: 'jumpflex',
@@ -84,7 +84,7 @@ export const BRANDS: BrandInfo[] = [
     blurb:
       'Budget-focused range spanning round, oval and rectangular models, including coil-spring ranges and the springless Twister.',
     warranty:
-      'Kahuna lists a general 1-year parts warranty across the range; separate frame, mat and net periods are not listed in the comparison data.',
+      'Kahuna lists a general 1-year parts warranty across the range, with no separate frame, mat or net periods.',
     imageDir: 'kahuna',
     affiliate: false,
   },
@@ -182,7 +182,7 @@ function fallbackBrandInfo(name: string): BrandInfo {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, ''),
     blurb:
-      `${name} trampoline models are included in the comparison data, with specifications sourced from the current catalog sheet.`,
+      `${name} trampoline models are listed in the comparison table, with specifications from manufacturer listings.`,
     warranty: `Warranty terms for each ${name} size are in the table below.`,
     imageDir: null,
     affiliate: false,

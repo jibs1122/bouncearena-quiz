@@ -105,7 +105,7 @@ export default function HomePage() {
               Find the right <span className="text-[#38b1ab]">trampoline</span> for your family
             </h1>
             <p className="text-lg text-black/60 mb-8 max-w-lg mx-auto md:mx-0">
-              Reviews and comparisons of Australia&apos;s trampoline brands: Vuly, Springfree, JumpFlex and more.
+              Reviews and comparisons of Australia&apos;s trampoline brands: Vuly, Springfree, Jumpflex and more.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
               <Link

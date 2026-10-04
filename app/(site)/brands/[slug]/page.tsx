@@ -567,9 +567,13 @@ export default async function BrandPage({ params }: Props) {
         <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 className="text-2xl font-bold text-black">Featured models</h2>
-            <p className="mt-1 text-sm text-black/55">
-              The top of the {brand.name} range, starting with the most expensive.
-            </p>
+            {groups.length > 1 && (
+              <p className="mt-1 text-sm text-black/55">
+                {featured.length < groups.length
+                  ? `The ${featured.length} highest-priced ${brand.name} models.`
+                  : `${brand.name} models, starting with the highest-priced.`}
+              </p>
+            )}
           </div>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

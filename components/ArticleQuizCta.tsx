@@ -10,7 +10,7 @@ export default function ArticleQuizCta({ className = '' }: ArticleQuizCtaProps) 
       <div className="rounded-2xl border border-[#38b1ab]/20 bg-[#38b1ab]/8 p-5 sm:p-6">
         <h2 className="mb-2 text-2xl font-bold text-black">Take the quiz</h2>
         <p className="mb-4 max-w-2xl leading-7 text-black/60">
-          Our trampoline quiz helps you narrow the right option for your family, yard, and budget.
+          Use the trampoline quiz to narrow the options by family, yard and budget.
         </p>
         <Link
           href="/quiz/"

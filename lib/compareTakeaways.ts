@@ -262,7 +262,7 @@ function buildPriceTakeaway(a: SideSummary, b: SideSummary): string | null {
     Math.max(aMax, bMax) / Math.max(Math.min(aMax, bMax), 1) >= TOP_END_PRICE_RATIO
   ) {
     const higherTop = aMax > bMax ? a : b;
-    return `${higherTop.name} reaches a higher top-end price (${formatAud(Math.max(aMax, bMax))} against ${formatAud(Math.min(aMax, bMax))}); compare exact models if budget is a factor.`;
+    return `${higherTop.name} reaches a higher top-end price: ${formatAud(Math.max(aMax, bMax))} against ${formatAud(Math.min(aMax, bMax))}.`;
   }
 
   return null;
@@ -293,7 +293,7 @@ function buildWarrantyTakeaway(a: SideSummary, b: SideSummary): string | null {
     a.warrantyRanges.frameWarrantyYrs.distinctCount > 1 ||
     b.warrantyRanges.frameWarrantyYrs.distinctCount > 1
   ) {
-    return `${possessive(better.name)} frame warranty reaches ${formatYears(betterYears)} against ${formatYears(otherYears)}; compare exact models because terms vary by line.`;
+    return `${possessive(better.name)} frame warranty reaches ${formatYears(betterYears)} against ${formatYears(otherYears)}, though terms vary by model.`;
   }
 
   return `${better.name} carries the longer frame warranty: ${formatYears(betterYears)} against ${formatYears(otherYears)}.`;
@@ -388,13 +388,13 @@ function buildShapeTakeaway(a: SideSummary, b: SideSummary): string | null {
   const onlyB = new Set([...b.shapes].filter((s) => !a.shapes.has(s)));
 
   if (onlyA.size > 0 && onlyB.size === 0 && shared.size > 0) {
-    return `Both cover ${formatShapeList(shared)} options; ${a.name} also comes in ${formatShapeList(onlyA)}.`;
+    return `Both come in ${formatShapeList(shared)}; ${a.name} also comes in ${formatShapeList(onlyA)}.`;
   }
   if (onlyB.size > 0 && onlyA.size === 0 && shared.size > 0) {
-    return `Both cover ${formatShapeList(shared)} options; ${b.name} also comes in ${formatShapeList(onlyB)}.`;
+    return `Both come in ${formatShapeList(shared)}; ${b.name} also comes in ${formatShapeList(onlyB)}.`;
   }
 
-  return `${a.name} comes in ${formatShapeList(a.shapes)}; ${b.name} covers ${formatShapeList(b.shapes)}.`;
+  return `${a.name} comes in ${formatShapeList(a.shapes)}; ${b.name} comes in ${formatShapeList(b.shapes)}.`;
 }
 
 function describeLargestModel(summary: SideSummary): string {
@@ -420,7 +420,7 @@ function buildSizeTakeaway(a: SideSummary, b: SideSummary): string | null {
   const smaller = larger === a ? b : a;
 
   if (larger.maxFootprintCm! - smaller.maxFootprintCm! < SIZE_GAP_CM) return null;
-  return `If yard space allows, ${larger.name} goes up to a ${describeLargestModel(larger)}; ${smaller.name} tops out at a ${describeLargestModel(smaller)}.`;
+  return `${larger.name} goes up to a ${describeLargestModel(larger)}; ${smaller.name} tops out at a ${describeLargestModel(smaller)}.`;
 }
 
 /**
@@ -447,13 +447,14 @@ export function buildCompareTakeaways(sideA: TakeawaySide, sideB: TakeawaySide):
     buildStandardsTakeaway(),
   ].filter((takeaway): takeaway is string => takeaway !== null);
 
+  // Two to four bullets: enough to scan, without restating every table row.
   const takeaways = priceTakeaway
-    ? [...nonPriceTakeaways.slice(0, 4), priceTakeaway]
-    : nonPriceTakeaways.slice(0, 5);
+    ? [...nonPriceTakeaways.slice(0, 3), priceTakeaway]
+    : nonPriceTakeaways.slice(0, 4);
 
   if (takeaways.length > 0) return takeaways;
 
   return [
-    'The biggest differences here are model-specific, so use the table below to compare the exact size, warranty, weight rating and price rows for the models you are considering.',
+    'The differences here are model-specific. The table below compares size, warranty, weight rating and price for each model.',
   ];
 }

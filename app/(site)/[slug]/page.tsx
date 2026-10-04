@@ -14,8 +14,9 @@ import YouTubeEmbed from '@/components/YouTubeEmbed';
 export const revalidate = 86400;
 
 const YT_RE = /^https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)[^\s]*/gm;
+// Case-insensitive: some posts write the heading as "Take the quiz".
 const QUIZ_BLOCK_RE =
-  /### Take the Quiz\s+Our Trampoline Quiz guides you through the key decisions you should make when choosing a trampoline and recommends the best options based on your preferences\.\s+\[Take the Quiz\]\(\/quiz\/?\)/g;
+  /### Take the Quiz\s+Our Trampoline Quiz guides you through the key decisions you should make when choosing a trampoline and recommends the best options based on your preferences\.\s+\[Take the Quiz\]\(\/quiz\/?\)/gi;
 const MONTHLY_DEALS_SLUG = 'trampoline-deals-sales';
 
 function getCurrentMonthYear(): string {

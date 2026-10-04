@@ -483,8 +483,8 @@ export function selectMatchReasons(
       const price = `$${rec.priceFrom.toLocaleString('en-AU')} AUD`;
       reasons.push(
         rec.priceFrom < min
-          ? `From ${price} — below your selected budget range`
-          : `From ${price} — within your selected budget range`,
+          ? `From ${price}, below your selected budget range`
+          : `From ${price}, within your selected budget range`,
       );
     }
   }
