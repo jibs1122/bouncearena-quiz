@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { isValidElement, type ReactNode } from 'react';
 import Link from 'next/link';
 import type { Trampoline } from '@/data/trampolines';
 import {
@@ -29,12 +29,19 @@ function hasMeaningfulValue(value: ReactNode): boolean {
   return !(typeof value === 'string' && (value.trim() === '' || value.trim() === DASH));
 }
 
-function nodeKey(value: ReactNode): string {
-  if (value === null || value === undefined) return '\0null';
-  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+/**
+ * The text a cell renders, used to spot cells that read the same. Only follows
+ * element children: serialising a whole element walks React's dev-only owner
+ * data, which reaches the route's params Promise.
+ */
+function nodeText(value: ReactNode): string {
+  if (value === null || value === undefined || typeof value === 'boolean') return '';
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'bigint') {
     return String(value);
   }
-  return JSON.stringify(value);
+  if (isValidElement<{ children?: ReactNode }>(value)) return nodeText(value.props.children);
+  if (Symbol.iterator in value) return Array.from(value, nodeText).join('');
+  return '';
 }
 
 function kgRange(values: Array<number | null>): string {
@@ -196,7 +203,7 @@ export default function ComparisonTable({
       row,
       values,
       hasData: values.some(hasMeaningfulValue),
-      allSame: new Set(values.map(nodeKey)).size === 1,
+      allSame: new Set(values.map(nodeText)).size === 1,
     };
   });
 
