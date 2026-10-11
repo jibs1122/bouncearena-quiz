@@ -5,19 +5,49 @@ import BrandLogoAvatar from '@/components/BrandLogoAvatar';
 import PostCard from '@/components/PostCard';
 import JsonLd from '@/components/compare/JsonLd';
 import { getAllBrands, getBrandRows } from '@/lib/brands';
-import { comparePageBrands, getComparePages } from '@/lib/comparePages';
+import { comparePageBrands, comparePageHref, getComparePages } from '@/lib/comparePages';
 import { getPostsByCategory } from '@/lib/content';
 import { groupPriceRange, groupRows } from '@/lib/compareShared';
 
-/** Brands we cover most heavily, measured by how many comparisons feature them. */
-function popularBrands(limit = 8) {
-  const pages = getComparePages();
+/** How many comparisons feature each brand. */
+function brandCoverage(): Map<string, number> {
   const coverage = new Map<string, number>();
-  for (const page of pages) {
+  for (const page of getComparePages()) {
     for (const brand of comparePageBrands(page)) {
       coverage.set(brand, (coverage.get(brand) ?? 0) + 1);
     }
   }
+  return coverage;
+}
+
+/**
+ * Brand-against-brand comparisons between the brands we cover most, with no brand in
+ * more than three so the list is not all Vuly.
+ */
+function popularBrandComparisons(limit = 8, perBrand = 3) {
+  const coverage = brandCoverage();
+  const weight = (brands: string[]) =>
+    brands.reduce((sum, brand) => sum + (coverage.get(brand) ?? 0), 0);
+
+  const picked: ReturnType<typeof getComparePages> = [];
+  const used = new Map<string, number>();
+  const candidates = getComparePages()
+    .filter((page) => page.type === 'brand')
+    .sort((a, b) => weight(comparePageBrands(b)) - weight(comparePageBrands(a)));
+
+  for (const page of candidates) {
+    const brands = comparePageBrands(page);
+    if (brands.some((brand) => (used.get(brand) ?? 0) >= perBrand)) continue;
+    brands.forEach((brand) => used.set(brand, (used.get(brand) ?? 0) + 1));
+    picked.push(page);
+    if (picked.length === limit) break;
+  }
+  return picked;
+}
+
+/** Brands we cover most heavily, measured by how many comparisons feature them. */
+function popularBrands(limit = 8) {
+  const coverage = brandCoverage();
 
   return getAllBrands()
     .map((brand) => {
@@ -71,6 +101,7 @@ export const metadata: Metadata = {
 export default function HomePage() {
   const reviews = getPostsByCategory('reviews').slice(0, 4);
   const brands = popularBrands();
+  const comparisons = popularBrandComparisons();
   const organization = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
@@ -185,6 +216,27 @@ export default function HomePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {reviews.map((post) => (
             <PostCard key={post.slug} post={post} />
+          ))}
+        </div>
+      </section>
+
+      {/* Brand comparisons */}
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 pt-12 pb-20">
+        <div className="mb-6 flex items-baseline justify-between gap-4">
+          <h2 className="text-2xl font-bold text-black">Compare brands</h2>
+          <Link href="/compare/" className="shrink-0 text-sm font-medium text-[#38b1ab] hover:underline">
+            All comparisons →
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {comparisons.map((page) => (
+            <Link
+              key={page.slug}
+              href={comparePageHref(page.slug)}
+              className="rounded-2xl border border-black/[0.08] px-4 py-3 text-sm font-medium text-black transition-colors hover:border-[#38b1ab]/50"
+            >
+              {page.title}
+            </Link>
           ))}
         </div>
       </section>

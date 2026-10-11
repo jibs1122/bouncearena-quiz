@@ -204,14 +204,96 @@ export function comparePageBrands(page: ComparePage): string[] {
   return [...new Set(page.sides.map((side) => canonicalBrandName(side.brand)))];
 }
 
-/** Sibling comparisons that share at least one brand, most recent first. */
-export function getRelatedComparisons(slug: string, brands: string[], max = 6): ComparePage[] {
-  const wanted = new Set(brands.map(canonicalBrandName));
+/** Stable per-pair number, so equally related pages are not all picked in file order. */
+function pairOrder(a: string, b: string): number {
+  let hash = 2166136261;
+  for (const char of `${a}|${b}`) {
+    hash ^= char.charCodeAt(0);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
 
-  return getComparePages()
-    .filter((page) => page.slug !== slug)
-    .filter((page) => comparePageBrands(page).some((brand) => wanted.has(brand)))
-    .slice(0, max);
+/**
+ * Comparisons ranked by how closely they match a set of brands: the same brand
+ * pairing first, then pages sharing a brand, then the rest (score 0). A shared brand
+ * that few pages cover counts for more, so a BERG page links to the other BERG pages
+ * rather than losing them among dozens of Springfree ones. Ties are ordered per
+ * `key` rather than by file order, which used to send every Vuly page's links to the
+ * same six siblings and leave 17 comparisons with no links from the others.
+ */
+function rankByBrands(
+  key: string,
+  brands: string[],
+  type?: ComparePageType,
+): { page: ComparePage; score: number }[] {
+  const wanted = new Set(brands.map(canonicalBrandName));
+  const pages = getComparePages();
+
+  const pagesPerBrand = new Map<string, number>();
+  for (const page of pages) {
+    for (const brand of comparePageBrands(page)) {
+      pagesPerBrand.set(brand, (pagesPerBrand.get(brand) ?? 0) + 1);
+    }
+  }
+
+  return pages
+    .map((page) => {
+      const pageBrands = comparePageBrands(page);
+      const shared = pageBrands.filter((brand) => wanted.has(brand));
+      if (shared.length === 0) return { page, score: 0, order: pairOrder(key, page.slug) };
+
+      const sameBrands = shared.length === pageBrands.length && shared.length === wanted.size;
+      const score =
+        shared.reduce((sum, brand) => sum + 2 + 4 / pagesPerBrand.get(brand)!, 0) +
+        (sameBrands ? 2 : 0) +
+        (page.type === type ? 0.5 : 0);
+      return { page, score, order: pairOrder(key, page.slug) };
+    })
+    .sort((a, b) => b.score - a.score || a.order - b.order);
+}
+
+/** Sibling comparisons for the end of a comparison page, closest first. */
+export function getRelatedComparisons(slug: string, brands: string[], max = 6): ComparePage[] {
+  return rankByBrands(slug, brands, getComparePage(slug)?.type)
+    .filter(({ page }) => page.slug !== slug)
+    .slice(0, max)
+    .map(({ page }) => page);
+}
+
+function mentionCount(text: string, brand: string): number {
+  const pattern = brand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s*');
+  return text.match(new RegExp(`\\b${pattern}\\b`, 'gi'))?.length ?? 0;
+}
+
+/**
+ * Comparisons for the end of an article: those covering the brands in its title, or
+ * failing that the two brands its body mentions most. An article that names no
+ * compared brand gets none rather than an unrelated list.
+ */
+export function getComparisonsForArticle(
+  slug: string,
+  title: string,
+  content: string,
+  max = 4,
+): ComparePage[] {
+  const compared = [...new Set(getComparePages().flatMap(comparePageBrands))];
+  let brands = compared.filter((brand) => mentionCount(title, brand) > 0);
+
+  if (brands.length === 0) {
+    brands = compared
+      .map((brand) => ({ brand, mentions: mentionCount(content, brand) }))
+      .filter(({ mentions }) => mentions >= 3)
+      .sort((a, b) => b.mentions - a.mentions)
+      .slice(0, 2)
+      .map(({ brand }) => brand);
+  }
+  if (brands.length === 0) return [];
+
+  return rankByBrands(slug, brands)
+    .filter(({ score }) => score > 0)
+    .slice(0, max)
+    .map(({ page }) => page);
 }
 
 export type ReviewLink = {

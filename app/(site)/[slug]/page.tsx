@@ -5,9 +5,11 @@ import { notFound } from 'next/navigation';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import remarkGfm from 'remark-gfm';
 import { getAllSlugs, getPost, getRelatedPosts, formatDate } from '@/lib/content';
+import { comparePageHref, getComparisonsForArticle } from '@/lib/comparePages';
 import PostCard from '@/components/PostCard';
 import ArticleQuizCta from '@/components/ArticleQuizCta';
 import JsonLd from '@/components/compare/JsonLd';
+import RelatedComparisons from '@/components/compare/RelatedComparisons';
 import SmartLink from '@/components/SmartLink';
 import YouTubeEmbed from '@/components/YouTubeEmbed';
 
@@ -101,6 +103,10 @@ export default async function PostPage(
   if (!post) notFound();
 
   const related = getRelatedPosts(slug, post.category, 3);
+  const comparisons = getComparisonsForArticle(slug, post.title, post.content).map((page) => ({
+    href: comparePageHref(page.slug),
+    label: page.title,
+  }));
   const { body, hasLeadYoutube, hasInlineQuizCta } = processContent(post.content);
   const showFeaturedImage = Boolean(post.featuredImage && !hasLeadYoutube);
   const displayTitle = getDisplayTitle(post);
@@ -236,6 +242,8 @@ export default async function PostPage(
           </div>
         </section>
       )}
+
+      <RelatedComparisons heading="Related comparisons" links={comparisons} />
     </article>
   );
 }
