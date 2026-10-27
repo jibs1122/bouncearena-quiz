@@ -7,6 +7,7 @@ import Footer from '@/components/Footer';
 import ModelImage from '@/components/ModelImage';
 import SiteHeader from '@/components/SiteHeader';
 import { trackOutboundClick } from '@/lib/gtag';
+import { trackQuizFinished } from '@/lib/openai-pixel';
 import { getLink, getLinkRetailerName, isAffiliateLink, normalizeCountry } from '@/lib/links';
 import { outboundRel } from '@/lib/affiliate';
 import {
@@ -152,12 +153,17 @@ function ResultsContent() {
 
     trackedRef.current = true;
 
+    const eventId = crypto.randomUUID();
+    trackQuizFinished(eventId);
+
     void fetch('/api/analytics/quiz-completion', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         country: resolvedCountry,
         topResultSlug: recommendations[0]?.slug ?? null,
+        eventId,
+        sourceUrl: `${window.location.origin}${window.location.pathname}`,
       }),
       keepalive: true,
     }).finally(() => {
