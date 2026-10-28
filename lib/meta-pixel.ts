@@ -1,0 +1,63 @@
+// Meta pixel helpers
+// window.fbq is injected by the Script tag in app/layout.tsx.
+
+declare global {
+  interface Window {
+    fbq?: (...args: unknown[]) => void;
+  }
+}
+
+type Params = Record<string, string | number | boolean | undefined>;
+
+function fire(...args: unknown[]) {
+  if (typeof window === 'undefined') return;
+  if (typeof window.fbq !== 'function') return;
+  window.fbq(...args);
+}
+
+/**
+ * Fired on client-side route changes. The first PageView is sent by the
+ * snippet in app/layout.tsx when the page loads.
+ */
+export function trackMetaPageView() {
+  fire('track', 'PageView');
+}
+
+/** Fired when the user answers or skips a quiz step. */
+export function trackMetaQuizStep({
+  stepNumber,
+  questionId,
+  skipped,
+}: {
+  stepNumber: number;
+  questionId: string;
+  skipped: boolean;
+}) {
+  fire('trackCustom', 'QuizStep', {
+    step_number: stepNumber,
+    question_id: questionId,
+    skipped,
+  } satisfies Params);
+}
+
+/** Fired when the user submits the final step. */
+export function trackMetaQuizComplete({
+  country,
+  topResult,
+}: {
+  country: string;
+  topResult: string | null;
+}) {
+  fire('trackCustom', 'QuizComplete', {
+    country,
+    top_result: topResult ?? '(none)',
+  } satisfies Params);
+}
+
+/** Fired on any outbound/affiliate link click. */
+export function trackMetaOutboundClick({ url, location }: { url: string; location: string }) {
+  fire('trackCustom', 'OutboundClick', {
+    link_url: url,
+    source_location: location,
+  } satisfies Params);
+}

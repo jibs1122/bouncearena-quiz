@@ -7,6 +7,7 @@ import Footer from '@/components/Footer';
 import ModelImage from '@/components/ModelImage';
 import SiteHeader from '@/components/SiteHeader';
 import { trackOutboundClick } from '@/lib/gtag';
+import { trackMetaOutboundClick } from '@/lib/meta-pixel';
 import { trackQuizFinished } from '@/lib/openai-pixel';
 import { getLink, getLinkRetailerName, isAffiliateLink, normalizeCountry } from '@/lib/links';
 import { outboundRel } from '@/lib/affiliate';
@@ -112,7 +113,10 @@ function ResultCard({
                   href={href}
                   target="_blank"
                   rel={outboundRel(isAffiliateLink(rec.slug))}
-                  onClick={() => trackOutboundClick({ url: href, label: `View on ${retailerName}`, location: `results_card_rank_${rank}` })}
+                  onClick={() => {
+                    trackOutboundClick({ url: href, label: `View on ${retailerName}`, location: `results_card_rank_${rank}` });
+                    trackMetaOutboundClick({ url: href, location: `results_card_rank_${rank}` });
+                  }}
                   className="inline-flex items-center gap-2 bg-[#38b1ab] text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-[#2e9a94] transition-colors active:scale-95"
                 >
                   View on {retailerName} →

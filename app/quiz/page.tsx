@@ -9,6 +9,7 @@ import SiteHeader from '@/components/SiteHeader';
 import { detectCountry, type Country } from '@/lib/geolocation';
 import { trackOutboundClick, trackQuizComplete, trackQuizStart, trackQuizStep } from '@/lib/gtag';
 import { getLink, isAffiliateLink, normalizeCountry } from '@/lib/links';
+import { trackMetaOutboundClick, trackMetaQuizComplete, trackMetaQuizStep } from '@/lib/meta-pixel';
 import { buildQuestions } from '@/lib/quiz';
 import {
   encodeAnswers,
@@ -118,6 +119,7 @@ export default function QuizPage() {
     const top = getRecommendations(nextAnswers)[0];
 
     trackQuizComplete({ country, topResult: top?.slug ?? null });
+    trackMetaQuizComplete({ country, topResult: top?.slug ?? null });
 
     // Only open a tab if the top result is an affiliate recommendation.
     // Must stay synchronous in the click handler — no await, no setTimeout.
@@ -125,6 +127,7 @@ export default function QuizPage() {
       const href = getLink(top.slug, country);
       if (href) {
         trackOutboundClick({ url: href, label: `View on ${top.brand}`, location: 'quiz_auto_open' });
+        trackMetaOutboundClick({ url: href, location: 'quiz_auto_open' });
         window.open(href, '_blank', 'noopener,noreferrer');
       }
     }
@@ -142,6 +145,7 @@ export default function QuizPage() {
       answerValue: skipped ? '(skipped)' : Array.isArray(value) ? value.join('|') : (value ?? ''),
       skipped,
     });
+    trackMetaQuizStep({ stepNumber, questionId, skipped });
 
     setAnswers(nextAnswers);
 

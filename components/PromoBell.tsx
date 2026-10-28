@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import BrandLogoAvatar from '@/components/BrandLogoAvatar';
 import { trackOutboundClick } from '@/lib/gtag';
+import { trackMetaOutboundClick } from '@/lib/meta-pixel';
 import { getAllPromos } from '@/lib/promoCtas';
 
 const PROMOS = getAllPromos();
@@ -48,7 +49,10 @@ function ShopLink({
     href,
     target: '_blank',
     rel: 'nofollow noopener noreferrer sponsored',
-    onClick: () => trackOutboundClick({ url: href, label: `Shop ${brand}`, location }),
+    onClick: () => {
+      trackOutboundClick({ url: href, label: `Shop ${brand}`, location });
+      trackMetaOutboundClick({ url: href, location });
+    },
     'aria-label': `Shop ${brand} with the listed promo code`,
   };
 
