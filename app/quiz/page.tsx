@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Footer from '@/components/Footer';
 import ProgressBar from '@/components/ProgressBar';
@@ -10,113 +10,101 @@ import { detectCountry, type Country } from '@/lib/geolocation';
 import { trackOutboundClick, trackQuizComplete, trackQuizStart, trackQuizStep } from '@/lib/gtag';
 import { getLink, isAffiliateLink, normalizeCountry } from '@/lib/links';
 import { buildQuestions } from '@/lib/quiz';
-import { encodeAnswers, getRecommendations, type BudgetId, type QuizAnswers } from '@/lib/scoring';
-import type { PriorityId } from '@/lib/trampolines';
+import {
+  encodeAnswers,
+  getRecommendations,
+  type AgeGroup,
+  type BackyardSize,
+  type BudgetId,
+  type JumperCount,
+  type QuizAnswers,
+  type ShapeChoice,
+  type SpringChoice,
+  type StandardsChoice,
+} from '@/lib/scoring';
 
 type PartialQuizAnswers = Partial<QuizAnswers> & { country: Country };
 
-const SKIP_DEFAULTS: Record<string, string | string[]> = {
-  safetyFeatures: 'nice-to-have',
-  springType: 'not-sure',
-  shape: 'no-preference',
-  backyardSize: 'not-sure',
-  standards: 'no',
-  budget: ['flexible'],
-  priorities: [],
-};
+/** Unanswered or skipped questions fall back to the neutral answer. */
+function withDefaults(answers: PartialQuizAnswers): QuizAnswers {
+  return {
+    country: answers.country,
+    backyardSize: answers.backyardSize ?? 'not-sure',
+    ages: answers.ages ?? 'not-sure',
+    jumpers: answers.jumpers ?? 'not-sure',
+    shape: answers.shape ?? 'no-preference',
+    budget: answers.budget?.length ? answers.budget : ['flexible'],
+    springType: answers.springType ?? 'not-sure',
+    standards: answers.standards ?? 'no',
+  };
+}
 
-function isCompleteAnswers(answers: PartialQuizAnswers): answers is QuizAnswers {
-  return Boolean(
-    answers.backyardSize &&
-      answers.shape &&
-      answers.standards &&
-      answers.safetyFeatures &&
-      answers.springType &&
-      Array.isArray(answers.budget) &&
-      answers.budget.length > 0 &&
-      Array.isArray(answers.priorities), // allow empty array
-  );
+function applyAnswer(answers: PartialQuizAnswers, questionId: string, value: string | string[] | null) {
+  const next: PartialQuizAnswers = { ...answers };
+  if (questionId === 'backyardSize') next.backyardSize = (value ?? 'not-sure') as BackyardSize;
+  if (questionId === 'users') {
+    const [ages, jumpers] = Array.isArray(value) ? value : [];
+    next.ages = (ages ?? 'not-sure') as AgeGroup;
+    next.jumpers = (jumpers ?? 'not-sure') as JumperCount;
+  }
+  if (questionId === 'shape') next.shape = (value ?? 'no-preference') as ShapeChoice;
+  if (questionId === 'budget') next.budget = [(value ?? 'flexible') as BudgetId];
+  if (questionId === 'springType') next.springType = (value ?? 'not-sure') as SpringChoice;
+  if (questionId === 'standards') next.standards = (value ?? 'no') as StandardsChoice;
+  return next;
 }
 
 export default function QuizPage() {
   const router = useRouter();
-  const [answers, setAnswers] = useState<PartialQuizAnswers>({ country: 'AU', priorities: [] });
+  const [answers, setAnswers] = useState<PartialQuizAnswers>({ country: 'AU' });
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState<'forward' | 'back'>('forward');
-  // Render the first question on the server so crawlers and no-JavaScript users
-  // receive the quiz heading and introductory content. Geolocation refines the
-  // default Australian question set after hydration.
-  const [ready, setReady] = useState(true);
-  const [previewPriorities, setPreviewPriorities] = useState<PriorityId[]>([]);
   const quizContentRef = useRef<HTMLElement | null>(null);
   const hasMountedQuestionRef = useRef(false);
 
-  const handlePreviewPrioritiesChange = useCallback((vals: string[]) => {
-    setPreviewPriorities((current) => {
-      if (
-        current.length === vals.length &&
-        current.every((value, index) => value === vals[index])
-      ) {
-        return current;
-      }
-
-      return vals as PriorityId[];
-    });
-  }, []);
-
   useEffect(() => {
     const country = detectCountry();
-    const readyTimer = window.setTimeout(() => {
+    const timer = window.setTimeout(() => {
       setAnswers((current) => ({ ...current, country }));
-      setReady(true);
     }, 0);
     trackQuizStart(country);
 
-    return () => window.clearTimeout(readyTimer);
+    return () => window.clearTimeout(timer);
   }, []);
 
   const questions = useMemo(() => buildQuestions(answers.country), [answers.country]);
   const currentQuestion = questions[currentIndex];
-  const progress = ((currentIndex + 1) / questions.length) * 100;
+  const stepNumber = currentIndex + 1;
+  const progress = (currentIndex / questions.length) * 100;
 
   useEffect(() => {
-    if (!ready) return;
-
     if (!hasMountedQuestionRef.current) {
       hasMountedQuestionRef.current = true;
       return;
     }
 
-    quizContentRef.current?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
-    });
-  }, [currentIndex, ready]);
+    quizContentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [currentIndex]);
 
-  // Compute whether the top result will auto-open when on the priorities question.
-  // Used to conditionally show the "Opens your top match in a new tab" disclaimer.
-  const topResultAutoOpens = useMemo(() => {
-    if (currentQuestion.id !== 'priorities') return false;
-    if (
-      !answers.backyardSize ||
-      !answers.shape ||
-      !answers.standards ||
-      !answers.safetyFeatures ||
-      !answers.springType ||
-      !Array.isArray(answers.budget) ||
-      answers.budget.length === 0
-    )
-      return false;
-    const preview = { ...answers, priorities: previewPriorities } as QuizAnswers;
-    const top = getRecommendations(preview)[0];
-    return Boolean(top && isAffiliateLink(top.slug) && getLink(top.slug, answers.country));
-  }, [answers, previewPriorities, currentQuestion.id]);
+  // On the last step, say up front that tapping an answer opens the top match
+  // in a new tab — but only when some answer would actually do that.
+  const finalStepOpensTab = useMemo(() => {
+    if (!currentQuestion.submitsQuiz) return false;
+    return currentQuestion.options.some((option) => {
+      const top = getRecommendations(withDefaults(applyAnswer(answers, currentQuestion.id, option.id)))[0];
+      return Boolean(top && isAffiliateLink(top.slug) && getLink(top.slug, answers.country));
+    });
+  }, [answers, currentQuestion]);
 
   function selectedValues(questionId: string): string[] {
-    if (questionId === 'priorities') return answers.priorities ?? [];
+    if (questionId === 'users') {
+      return [answers.ages, answers.jumpers].filter(
+        (value): value is AgeGroup | JumperCount => Boolean(value) && value !== 'not-sure',
+      );
+    }
     if (questionId === 'budget') return answers.budget ?? [];
-    const value = answers[questionId as keyof PartialQuizAnswers];
-    return typeof value === 'string' ? [value] : [];
+    const value = answers[questionId as 'backyardSize' | 'shape' | 'springType' | 'standards'];
+    return value ? [value] : [];
   }
 
   function goBack() {
@@ -127,8 +115,7 @@ export default function QuizPage() {
 
   function submitAndNavigate(nextAnswers: QuizAnswers) {
     const country = normalizeCountry(nextAnswers.country);
-    const topResults = getRecommendations(nextAnswers);
-    const top = topResults[0];
+    const top = getRecommendations(nextAnswers)[0];
 
     trackQuizComplete({ country, topResult: top?.slug ?? null });
 
@@ -145,174 +132,82 @@ export default function QuizPage() {
     router.push(`/results?${encodeAnswers(nextAnswers)}`);
   }
 
-  function handleAnswer(value: string | string[]) {
+  function advance(value: string | string[] | null, skipped: boolean) {
     const questionId = currentQuestion.id;
-    const nextAnswers: PartialQuizAnswers = { ...answers };
-
-    if (questionId === 'priorities') {
-      nextAnswers.priorities = value as PriorityId[];
-    } else if (questionId === 'budget') {
-      nextAnswers.budget = value as BudgetId[];
-    } else {
-      (nextAnswers as Record<string, unknown>)[questionId] = value;
-    }
+    const nextAnswers = applyAnswer(answers, questionId, value);
 
     trackQuizStep({
-      stepNumber: currentIndex + 1,
+      stepNumber,
       questionId,
-      answerValue: Array.isArray(value) ? value.join(',') : value,
-      skipped: false,
+      answerValue: skipped ? '(skipped)' : Array.isArray(value) ? value.join('|') : (value ?? ''),
+      skipped,
     });
 
     setAnswers(nextAnswers);
 
-    if (questionId === 'priorities') {
-      if (!isCompleteAnswers(nextAnswers)) return;
-      submitAndNavigate(nextAnswers);
+    if (currentQuestion.submitsQuiz || currentIndex === questions.length - 1) {
+      submitAndNavigate(withDefaults(nextAnswers));
       return;
     }
 
     setDirection('forward');
     setCurrentIndex((current) => Math.min(questions.length - 1, current + 1));
-  }
-
-  function handleSkip() {
-    const questionId = currentQuestion.id;
-    const skipValue = SKIP_DEFAULTS[questionId] ?? 'not-sure';
-    const nextAnswers: PartialQuizAnswers = { ...answers };
-
-    if (questionId === 'priorities') {
-      nextAnswers.priorities = [];
-    } else if (questionId === 'budget') {
-      nextAnswers.budget = skipValue as BudgetId[];
-    } else {
-      (nextAnswers as Record<string, unknown>)[questionId] = skipValue;
-    }
-
-    trackQuizStep({
-      stepNumber: currentIndex + 1,
-      questionId,
-      answerValue: '(skipped)',
-      skipped: true,
-    });
-
-    setAnswers(nextAnswers);
-
-    if (questionId === 'priorities') {
-      if (!isCompleteAnswers(nextAnswers)) return;
-      submitAndNavigate(nextAnswers);
-      return;
-    }
-
-    setDirection('forward');
-    setCurrentIndex((current) => Math.min(questions.length - 1, current + 1));
-  }
-
-  if (!ready) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-white">
-        <div className="flex items-center gap-3 text-sm text-black/40">
-          <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="3"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-            />
-          </svg>
-          Loading quiz...
-        </div>
-      </div>
-    );
   }
 
   return (
     <main className="min-h-screen bg-white text-black">
-      <SiteHeader active="quiz" />
+      {/* No promo card here: on phones it sits over the answers. */}
+      <SiteHeader active="quiz" showPromo={false} />
 
-
-      <section ref={quizContentRef} className="scroll-mt-20 mx-auto w-full max-w-3xl px-5 py-8 sm:px-8">
+      <section ref={quizContentRef} className="mx-auto w-full max-w-3xl scroll-mt-20 px-4 pb-8 pt-4 sm:px-8 sm:pt-8">
         {currentIndex === 0 && (
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold tracking-tight text-black sm:text-4xl">
-              Trampoline quiz: find the right option for your family
-            </h1>
-            <p className="mt-3 max-w-2xl text-base leading-7 text-black/55">
-              Answer 7 quick questions and we&apos;ll match you with the right trampoline for your
-              family, based on your safety priorities, spring preference, shape, backyard size and
-              budget.
+          <div className="mb-3">
+            <h1 className="text-xl font-bold tracking-tight text-black sm:text-4xl">Trampoline quiz</h1>
+            <p className="mt-0.5 text-sm text-black/60 sm:mt-2 sm:text-base">Answer 6 questions and get 3 suitable trampolines.</p>
+            <p className="mt-1 text-[11px] leading-4 text-black/45 sm:text-xs">
+              If you buy through a link on this page, the retailer may pay us a commission.
             </p>
           </div>
         )}
 
-        {/* Progress row */}
-        <div className="mb-5 flex items-center gap-4">
+        {/* Progress */}
+        <div className="mb-3 flex items-center gap-3">
+          <div className="whitespace-nowrap text-xs font-semibold tabular-nums text-black/55">
+            Question {stepNumber} of {questions.length}
+          </div>
           <div className="flex-1">
             <ProgressBar value={progress} />
           </div>
-          <div className="text-xs font-medium text-black/35 tabular-nums whitespace-nowrap">
-            {currentIndex + 1} / {questions.length}
-          </div>
         </div>
 
-        {/* Affiliate disclaimer — only on first question, above the heading */}
-        {currentIndex === 0 && (
-          <p className="mb-4 text-xs text-black/30">
-            This quiz contains affiliate links and we may earn a commission on purchases.
-          </p>
-        )}
-
-        {/* Question */}
         <div
           key={currentQuestion.id}
           className={direction === 'back' ? 'question-enter-back' : 'question-enter-forward'}
         >
           <QuizQuestion
             question={currentQuestion}
-            stepNumber={currentIndex + 1}
             selected={selectedValues(currentQuestion.id)}
-            onAnswer={handleAnswer}
-            onSkip={handleSkip}
-            onSelectionChange={
-              currentQuestion.id === 'priorities'
-                ? handlePreviewPrioritiesChange
-                : undefined
+            onAnswer={(value) => advance(value, false)}
+            onSkip={() => advance(null, true)}
+            note={
+              finalStepOpensTab
+                ? 'Your results show on the next page, and your top match opens in a new tab.'
+                : null
             }
-            newTabDisclaimer={topResultAutoOpens}
           />
         </div>
 
-        {/* Affiliate disclaimer — priorities step only */}
-        {currentQuestion.id === 'priorities' && (
-          <p className="mt-6 text-xs text-black/30">
-            We earn a commission when you buy through some links.
-          </p>
-        )}
-
-        {/* Back nav */}
-        <div className="mt-4 border-t border-black/[0.06] pt-5 space-y-4">
-          <div className="flex items-center justify-between">
+        {currentIndex > 0 && (
+          <div className="mt-4 border-t border-black/[0.06] pt-4">
             <button
               type="button"
               onClick={goBack}
-              disabled={currentIndex === 0}
-              className="text-sm font-medium transition-colors disabled:opacity-0 text-black/40 hover:text-black"
+              className="text-sm font-medium text-black/45 transition-colors hover:text-black"
             >
               ← Back
             </button>
-            <p className="text-xs text-black/25">
-              {currentQuestion.type === 'multi' ? 'Choose your answers, then continue' : 'Tap an answer to continue'}
-            </p>
           </div>
-
-        </div>
+        )}
       </section>
       <Footer />
     </main>

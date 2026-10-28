@@ -71,7 +71,9 @@ export type LinkSlug =
   // ACON
   | 'acon-air-gen2'
   | 'acon-16-hd-10x17'
-  | 'acon-x-10x17';
+  | 'acon-x-10x17'
+  // Guides
+  | 'webandwarehouse-round-vs-rectangle';
 
 const VULY_LINK_SLUGS = [
   'vuly',
@@ -416,6 +418,16 @@ export const links: Record<LinkSlug, LinkConfig> = {
     label: 'ACON X',
     affiliate: true,
     destination: { AU: 'https://webandwarehouse.com.au/products/acon-x-17ft-trampoline-with-net-enclosure-and-ladder-black-11982?tracking=6a9550e65374c' },
+  },
+
+  // ─── Guides (affiliate) ──────────────────────────────────────────────────────
+  'webandwarehouse-round-vs-rectangle': {
+    label: 'Round vs rectangle trampolines guide (Web and Warehouse)',
+    affiliate: true,
+    destination: {
+      AU: 'https://webandwarehouse.com.au/blog/posts/round-vs-rectangle-trampolines-the-definitive-guide-to-bounce-safety-and-quality-24?tracking=6a9550e65374c',
+      US: 'https://webandwarehouse.com.au/blog/posts/round-vs-rectangle-trampolines-the-definitive-guide-to-bounce-safety-and-quality-24?tracking=6a9550e65374c',
+    },
   },
 };
 

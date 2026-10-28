@@ -22,7 +22,9 @@ export function trackQuizStart(country: string) {
 
 /**
  * Fired when the user answers or skips a step.
- * answer_value is the raw answer string (or comma-joined array for priorities).
+ * step_number is the 1-based question position (registered in GA4 as a custom
+ * dimension, with question_id) so drop-off can be read per question.
+ * answer_value is the raw answer string ("ages|jumpers" for the users step).
  */
 export function trackQuizStep({
   stepNumber,

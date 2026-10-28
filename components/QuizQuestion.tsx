@@ -1,8 +1,8 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
-import { getGoLinkSlug, isAffiliateLink, isRawVulyAffiliateHref } from '@/lib/links';
+import { useState } from 'react';
+import { getGoLinkSlug, isAffiliateLink, isRawVulyAffiliateHref, isRawWebAndWarehouseAffiliateHref } from '@/lib/links';
 
 export interface QuizOption {
   id: string;
@@ -10,41 +10,30 @@ export interface QuizOption {
   description?: string;
   imageSrc?: string;
   imageAlt?: string;
-  exclusive?: boolean;
+}
+
+export interface QuizOptionGroup {
+  id: string;
+  label: string;
+  options: QuizOption[];
 }
 
 export interface Question {
   id: string;
   title: string;
-  subtitle?: string;
-  linkedSubtitle?: {
-    text: string;
-    href: string;
-    suffix: string;
-  };
-  subtitleExtra?: string;
-  questionImage?: string; // supporting image shown above options
-  type: 'single' | 'multi';
-  maxSelect?: number;
-  adjacentOnly?: boolean;
-  submitLabel?: string;
+  /** One line on why we ask, shown under the title. */
+  why?: string;
+  /** single: one tap advances. pair: one tap in each group advances. */
+  type: 'single' | 'pair';
   options: QuizOption[];
-  expandable?: {
-    trigger: string;
-    content: string;
-  };
-  affiliateLink?: {
-    text: string;
-    href: string;
-    suffix?: string;
-    showArrow?: boolean;
-  };
-  affiliateLinks?: Array<{
-    text: string;
-    href: string;
-    showArrow?: boolean;
-  }>;
+  groups?: QuizOptionGroup[];
   cardLayout?: boolean;
+  /** Final step: answer immediately so the results tab can open inside the click. */
+  submitsQuiz?: boolean;
+  links?: {
+    intro?: string;
+    items: Array<{ text: string; href: string }>;
+  };
 }
 
 interface QuizQuestionProps {
@@ -52,366 +41,221 @@ interface QuizQuestionProps {
   selected: string[];
   onAnswer: (value: string | string[]) => void;
   onSkip: () => void;
-  onSelectionChange?: (values: string[]) => void;
-  newTabDisclaimer?: boolean;
-  stepNumber?: number;
+  note?: string | null;
 }
+
+const ADVANCE_DELAY_MS = 280;
 
 function linkRel(href: string): string {
   const slug = getGoLinkSlug(href);
-  const sponsored = Boolean(slug && isAffiliateLink(slug)) || isRawVulyAffiliateHref(href);
+  const sponsored =
+    Boolean(slug && isAffiliateLink(slug)) ||
+    isRawVulyAffiliateHref(href) ||
+    isRawWebAndWarehouseAffiliateHref(href);
 
   if (sponsored) return 'nofollow noopener noreferrer sponsored';
   if (href === '/go' || href.startsWith('/go/')) return 'nofollow noopener noreferrer';
   return 'noopener noreferrer';
 }
 
-export default function QuizQuestion({
-  question,
-  selected,
-  onAnswer,
-  onSkip,
-  onSelectionChange,
-  newTabDisclaimer = false,
-  stepNumber,
-}: QuizQuestionProps) {
-  const [expanded, setExpanded] = useState(false);
+function optionClass(active: boolean, confirming: boolean, dimmed: boolean, extra: string) {
+  return [
+    'rounded-2xl border-2 transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#38b1ab] focus-visible:ring-offset-2',
+    extra,
+    active
+      ? 'border-[#38b1ab] bg-[#38b1ab]/[0.07] shadow-sm'
+      : 'border-black/[0.09] bg-white hover:border-[#38b1ab]/40 hover:bg-black/[0.015]',
+    confirming ? 'option-confirming' : '',
+    dimmed ? 'opacity-40 cursor-default' : 'cursor-pointer',
+  ]
+    .filter(Boolean)
+    .join(' ');
+}
+
+export default function QuizQuestion({ question, selected, onAnswer, onSkip, note }: QuizQuestionProps) {
   const [pendingId, setPendingId] = useState<string | null>(null);
-  const [localSelected, setLocalSelected] = useState<string[]>(selected);
-
-  useEffect(() => {
-    const syncTimer = window.setTimeout(() => {
-      setLocalSelected((current) => {
-        if (
-          current.length === selected.length &&
-          current.every((value, index) => value === selected[index])
-        ) {
-          return current;
-        }
-
-        return selected;
-      });
-    }, 0);
-
-    return () => window.clearTimeout(syncTimer);
-  }, [selected]);
-
-  useEffect(() => {
-    if (question.type !== 'multi') return;
-    onSelectionChange?.(localSelected);
-  }, [localSelected, onSelectionChange, question.type]);
-
-  function handleOptionClick(id: string) {
-    if (question.type === 'single') {
-      setPendingId(id);
-      setTimeout(() => {
-        setPendingId(null);
-        onAnswer(id);
-      }, 280);
-      return;
-    }
-
-    const max = question.maxSelect ?? 2;
-    setLocalSelected((current) => {
-      if (current.includes(id)) return current.filter((v) => v !== id);
-
-      const option = question.options.find((item) => item.id === id);
-      if (option?.exclusive) return [id];
-
-      const withoutExclusive = current.filter(
-        (value) => !question.options.find((item) => item.id === value)?.exclusive,
-      );
-
-      if (!question.adjacentOnly) {
-        return withoutExclusive.length >= max
-          ? [...withoutExclusive.slice(1), id]
-          : [...withoutExclusive, id];
-      }
-
-      const optionIndex = question.options.findIndex((item) => item.id === id);
-      const sortedSelection = [...withoutExclusive, id].sort(
-        (a, b) =>
-          question.options.findIndex((item) => item.id === a) -
-          question.options.findIndex((item) => item.id === b),
-      );
-
-      const isAdjacent = (values: string[]) => {
-        if (values.length <= 1) return true;
-        const indexes = values.map((value) => question.options.findIndex((item) => item.id === value));
-        return indexes.every((index, arrayIndex) => arrayIndex === 0 || index === indexes[arrayIndex - 1] + 1);
-      };
-
-      if (sortedSelection.length <= max && isAdjacent(sortedSelection)) {
-        return sortedSelection;
-      }
-
-      const adjacentPair = withoutExclusive
-        .map((value) => [value, id])
-        .map((values) =>
-          values.sort(
-            (a, b) =>
-              question.options.findIndex((item) => item.id === a) -
-              question.options.findIndex((item) => item.id === b),
-          ),
-        )
-        .filter(isAdjacent)
-        .sort((a, b) => {
-          const aDistance = Math.min(
-            ...a.map((value) => Math.abs(question.options.findIndex((item) => item.id === value) - optionIndex)),
-          );
-          const bDistance = Math.min(
-            ...b.map((value) => Math.abs(question.options.findIndex((item) => item.id === value) - optionIndex)),
-          );
-          return aDistance - bDistance;
-        })[0];
-
-      return adjacentPair ?? [id];
-    });
-  }
-
-  function isSelected(id: string): boolean {
-    if (question.type === 'single') return pendingId === id || selected.includes(id);
-    return localSelected.includes(id);
-  }
+  // Pair questions keep one pick per group, in group order.
+  const [pairPicks, setPairPicks] = useState<Array<string | undefined>>(() =>
+    (question.groups ?? []).map((group) => selected.find((id) => group.options.some((o) => o.id === id))),
+  );
 
   const isPending = pendingId !== null;
+
+  function handleSingleClick(id: string) {
+    if (question.submitsQuiz) {
+      // window.open for the top match must run inside the click handler.
+      setPendingId(id);
+      onAnswer(id);
+      return;
+    }
+    setPendingId(id);
+    window.setTimeout(() => {
+      setPendingId(null);
+      onAnswer(id);
+    }, ADVANCE_DELAY_MS);
+  }
+
+  function handlePairClick(groupIndex: number, id: string) {
+    if (isPending) return;
+    const next = [...pairPicks];
+    next[groupIndex] = id;
+    setPairPicks(next);
+
+    if (next.every(Boolean) && next.length === (question.groups?.length ?? 0)) {
+      setPendingId(id);
+      window.setTimeout(() => {
+        setPendingId(null);
+        onAnswer(next as string[]);
+      }, ADVANCE_DELAY_MS);
+    }
+  }
 
   return (
     <div className="mx-auto w-full max-w-2xl">
       {/* Heading */}
-      <div className="mb-5">
-        <h2 className="text-2xl font-bold tracking-tight text-black sm:text-3xl leading-snug">
-          {stepNumber ? `${stepNumber}. ` : ''}{question.title}
+      <div className="mb-3">
+        <h2 className="text-xl font-bold leading-snug tracking-tight text-black sm:text-3xl">
+          {question.title}
         </h2>
-
-        {question.subtitle && (
-          <p className="mt-3 text-base leading-7 text-black/55">{question.subtitle}</p>
-        )}
-
-        {question.linkedSubtitle && (
-          <p className="mt-3 text-base leading-7 text-black/55">
-            <a
-              href={question.linkedSubtitle.href}
-              target="_blank"
-              rel={linkRel(question.linkedSubtitle.href)}
-              className="font-medium text-[#38b1ab] underline underline-offset-4 transition-colors hover:text-[#2e9a94]"
-            >
-              {question.linkedSubtitle.text}
-            </a>
-            {question.linkedSubtitle.suffix}
-          </p>
-        )}
-
-        {question.subtitleExtra && (
-          <p className="mt-2 text-base leading-7 text-black/55">{question.subtitleExtra}</p>
-        )}
-
-        {question.affiliateLink && (
-          <p className="mt-2 text-base leading-7">
-            <a
-              href={question.affiliateLink.href}
-              target="_blank"
-              rel={linkRel(question.affiliateLink.href)}
-              className="font-medium text-[#38b1ab] underline underline-offset-4 hover:text-[#2e9a94] transition-colors"
-            >
-              {question.affiliateLink.text}
-            </a>
-            {question.affiliateLink.suffix ? (
-              <span className="text-black/55">{question.affiliateLink.suffix}</span>
-            ) : null}
-            {question.affiliateLink.showArrow === false ? null : (
-              <span className="text-[#38b1ab]"> →</span>
-            )}
-          </p>
-        )}
-
-        {question.affiliateLinks && (
-          <ul className="mt-2 list-disc space-y-1 pl-5 text-base leading-7">
-            {question.affiliateLinks.map((link) => (
-              <li key={link.href}>
-                <a
-                  href={link.href}
-                  target="_blank"
-                  rel={linkRel(link.href)}
-                  className="font-medium text-[#38b1ab] underline underline-offset-4 transition-colors hover:text-[#2e9a94]"
-                >
-                  {link.text}
-                </a>
-                {link.showArrow === false ? null : <span className="text-[#38b1ab]"> →</span>}
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {question.expandable && (
-          <div className="mt-4">
-            <button
-              type="button"
-              onClick={() => setExpanded((v) => !v)}
-              className="flex items-center gap-1.5 text-sm font-medium text-black/40 hover:text-black/70 transition-colors"
-            >
-              <span
-                className={`inline-block transition-transform duration-200 text-xs ${expanded ? 'rotate-90' : ''}`}
-              >
-                ▶
-              </span>
-              {question.expandable.trigger}
-            </button>
-            {expanded && (
-              <div className="mt-3 rounded-xl border border-black/[0.07] bg-black/[0.02] px-4 py-4 text-sm leading-7 text-black/55">
-                {question.expandable.content}
-              </div>
-            )}
-          </div>
+        {question.why && (
+          <p className="mt-1 text-sm leading-5 text-black/60 sm:text-base sm:leading-6">{question.why}</p>
         )}
       </div>
 
-      {/* Supporting image — square and slightly smaller to keep the quiz compact */}
-      {question.questionImage && (
-        <div className="mb-5">
-          <div
-            className="relative mx-auto w-full max-w-[26rem] overflow-hidden rounded-2xl bg-black/[0.03]"
-            style={{ aspectRatio: '1 / 1' }}
-          >
-            <Image
-              src={question.questionImage}
-              alt=""
-              fill
-              className="object-contain"
-              sizes="(max-width: 640px) calc(100vw - 2.5rem), 416px"
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Options */}
-      <div className={`grid gap-2.5 ${question.cardLayout ? 'sm:grid-cols-3' : 'grid-cols-1'}`}>
-        {question.options.map((option) => {
-          const active = isSelected(option.id);
-          const confirming = pendingId === option.id;
-
-          return (
-            <button
-              key={option.id}
-              type="button"
-              onClick={() => handleOptionClick(option.id)}
-              disabled={isPending && !confirming}
-              className={[
-                'text-left rounded-2xl border-2 transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#38b1ab] focus-visible:ring-offset-2',
-                question.cardLayout ? 'p-0 overflow-hidden' : 'px-5 py-4',
-                active
-                  ? 'border-[#38b1ab] bg-[#38b1ab]/[0.07] shadow-sm'
-                  : 'border-black/[0.09] bg-white hover:border-[#38b1ab]/40 hover:bg-black/[0.015]',
-                confirming ? 'option-confirming' : '',
-                isPending && !confirming ? 'opacity-40 cursor-default' : 'cursor-pointer',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-            >
-              {question.cardLayout ? (
-                <div className="flex flex-col h-full">
-                  {option.imageSrc && (
-                    <div className="relative h-36 sm:h-40 w-full overflow-hidden bg-black/[0.03]">
-                      <Image
-                        src={option.imageSrc}
-                        alt={option.imageAlt ?? option.label}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 640px) 100vw, 33vw"
-                      />
-                    </div>
-                  )}
-                  <div className="p-4 flex flex-col gap-1">
-                    <div
-                      className={`font-semibold text-base leading-snug ${active ? 'text-[#38b1ab]' : 'text-black'}`}
-                    >
-                      {option.label}
-                    </div>
-                    {option.description && (
-                      <div
-                        className={`text-sm leading-snug ${active ? 'text-[#38b1ab]/70' : 'text-black/45'}`}
-                      >
-                        {option.description}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-start gap-3.5">
-                  <span
-                    className={`mt-0.5 flex h-[18px] w-[18px] flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
-                      active ? 'border-[#38b1ab]' : 'border-black/25'
-                    }`}
-                  >
-                    {active && <span className="h-2 w-2 rounded-full bg-[#38b1ab]" />}
-                  </span>
-                  <div>
-                    <div
-                      className={`font-semibold leading-snug text-base ${active ? 'text-[#38b1ab]' : 'text-black'}`}
-                    >
-                      {option.label}
-                    </div>
-                    {option.description && (
-                      <div
-                        className={`mt-0.5 text-sm leading-snug ${active ? 'text-[#38b1ab]/70' : 'text-black/45'}`}
-                      >
-                        {option.description}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Multi-select footer */}
-      {question.type === 'multi' && (
-        <div className="mt-6 border-t border-black/[0.06] pt-5 space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-black/40">
-              {localSelected.length === 0
-                ? `Select up to ${question.maxSelect ?? 2}`
-                : `${localSelected.length} of ${question.maxSelect ?? 2} selected`}
-            </p>
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={onSkip}
-                className="text-sm text-black/30 underline underline-offset-4 hover:text-black/55 transition-colors"
-              >
-                Skip
-              </button>
-              <button
-                type="button"
-                onClick={() => onAnswer(localSelected)}
-                disabled={localSelected.length === 0}
-                className="rounded-xl bg-[#38b1ab] px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#2e9a94] active:scale-95 disabled:cursor-default disabled:bg-black/15"
-              >
-                {question.submitLabel ?? 'See my results →'}
-              </button>
-            </div>
-          </div>
-          {newTabDisclaimer && (
-            <p className="text-xs text-black/35 text-right">Opens your top match in a new tab</p>
-          )}
-        </div>
-      )}
-
-      {/* Skip — single-select questions */}
+      {/* Single-tap options */}
       {question.type === 'single' && (
-        <div className="mt-5 text-center">
-          <button
-            type="button"
-            onClick={onSkip}
-            disabled={isPending}
-            className="text-sm text-black/30 underline underline-offset-4 hover:text-black/55 transition-colors disabled:opacity-0"
-          >
-            Skip question
-          </button>
+        <div className={`grid gap-2 ${question.cardLayout ? 'sm:grid-cols-3 sm:gap-2.5' : 'grid-cols-1'}`}>
+          {question.options.map((option) => {
+            const confirming = pendingId === option.id;
+            const active = confirming || (!isPending && selected.includes(option.id));
+
+            return (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => handleSingleClick(option.id)}
+                disabled={isPending && !confirming}
+                className={optionClass(
+                  active,
+                  confirming,
+                  isPending && !confirming,
+                  question.cardLayout ? 'overflow-hidden p-0 text-left' : 'px-4 py-2 text-left',
+                )}
+              >
+                {question.cardLayout ? (
+                  <div className="flex h-full items-center sm:flex-col sm:items-stretch">
+                    {option.imageSrc && (
+                      <div className="relative h-20 w-24 flex-shrink-0 overflow-hidden bg-black/[0.03] sm:h-40 sm:w-full">
+                        <Image
+                          src={option.imageSrc}
+                          alt={option.imageAlt ?? option.label}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 640px) 96px, 33vw"
+                        />
+                      </div>
+                    )}
+                    <div className="flex flex-col gap-0.5 px-4 py-3">
+                      <div className={`text-base font-semibold leading-snug ${active ? 'text-[#38b1ab]' : 'text-black'}`}>
+                        {option.label}
+                      </div>
+                      {option.description && (
+                        <div className={`text-sm leading-snug ${active ? 'text-[#38b1ab]/80' : 'text-black/55'}`}>
+                          {option.description}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`flex h-[18px] w-[18px] flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+                        active ? 'border-[#38b1ab]' : 'border-black/25'
+                      }`}
+                    >
+                      {active && <span className="h-2 w-2 rounded-full bg-[#38b1ab]" />}
+                    </span>
+                    <div>
+                      <div className={`text-base font-semibold leading-snug ${active ? 'text-[#38b1ab]' : 'text-black'}`}>
+                        {option.label}
+                      </div>
+                      {option.description && (
+                        <div className={`text-sm leading-snug ${active ? 'text-[#38b1ab]/80' : 'text-black/60'}`}>
+                          {option.description}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </button>
+            );
+          })}
         </div>
       )}
+
+      {/* Two quick taps on one screen */}
+      {question.type === 'pair' && (
+        <div className="space-y-5">
+          {(question.groups ?? []).map((group, groupIndex) => (
+            <fieldset key={group.id}>
+              <legend className="mb-2 text-sm font-semibold text-black/70">{group.label}</legend>
+              <div className="grid grid-cols-2 gap-2">
+                {group.options.map((option) => {
+                  const active = pairPicks[groupIndex] === option.id;
+                  const confirming = pendingId === option.id && active;
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() => handlePairClick(groupIndex, option.id)}
+                      disabled={isPending}
+                      className={optionClass(active, confirming, false, 'px-4 py-3 text-center')}
+                    >
+                      <span className={`text-base font-semibold ${active ? 'text-[#38b1ab]' : 'text-black'}`}>
+                        {option.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </fieldset>
+          ))}
+        </div>
+      )}
+
+      {/* Supporting guides, below the answers so they never push the first tap down */}
+      {question.links && (
+        <p className="mt-4 text-sm leading-6 text-black/55">
+          {question.links.intro ? <>{question.links.intro} </> : null}
+          {question.links.items.map((link, index) => (
+            <span key={link.href}>
+              {index > 0 ? ' · ' : null}
+              <a
+                href={link.href}
+                target="_blank"
+                rel={linkRel(link.href)}
+                className="font-medium text-[#38b1ab] underline underline-offset-4 transition-colors hover:text-[#2e9a94]"
+              >
+                {link.text}
+              </a>
+            </span>
+          ))}
+        </p>
+      )}
+
+      {note && <p className="mt-4 text-xs text-black/40">{note}</p>}
+
+      <div className="mt-4 text-center">
+        <button
+          type="button"
+          onClick={onSkip}
+          disabled={isPending}
+          className="text-sm text-black/35 underline underline-offset-4 transition-colors hover:text-black/60 disabled:opacity-0"
+        >
+          Skip question
+        </button>
+      </div>
     </div>
   );
 }

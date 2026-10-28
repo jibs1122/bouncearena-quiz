@@ -83,6 +83,11 @@ function ResultCard({
             {rec.springType === 'springless' ? 'Springless' : 'Traditional spring'} ·{' '}
             {rec.recommendedSizeDisplay} · From ${rec.priceFrom.toLocaleString()} AUD
           </p>
+          {rec.closeMatch && (
+            <p className="mt-2 inline-block rounded-full bg-black/[0.05] px-2.5 py-1 text-xs font-medium text-black/65">
+              Close match: {rec.closeMatch.join(' · ').toLowerCase()}
+            </p>
+          )}
 
           {/* Match reasons */}
           {reasons.length > 0 && (
@@ -222,8 +227,8 @@ function ResultsContent() {
         {recommendations.length === 0 && (
           <div className="rounded-3xl border border-black/[0.08] p-8 text-center">
             <p className="text-black/50 leading-7">
-              No trampolines matched your exact criteria. Try adjusting your budget or spring
-              preference.
+              No trampolines matched every answer. A wider budget range, or &ldquo;Not sure&rdquo; on
+              spring type, will bring more options back.
             </p>
             <Link
               href="/quiz/"
