@@ -54,6 +54,16 @@ export function trackMetaQuizComplete({
   } satisfies Params);
 }
 
+/**
+ * Fired when quiz submit opens the top result in a new tab. Kept separate
+ * from OutboundClick so campaigns can optimise on clicks people chose.
+ */
+export function trackMetaQuizAutoOpen({ url }: { url: string }) {
+  fire('trackCustom', 'QuizAutoOpen', {
+    link_url: url,
+  } satisfies Params);
+}
+
 /** Fired on any outbound/affiliate link click. */
 export function trackMetaOutboundClick({ url, location }: { url: string; location: string }) {
   fire('trackCustom', 'OutboundClick', {

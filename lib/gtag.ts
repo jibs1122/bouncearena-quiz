@@ -63,6 +63,17 @@ export function trackQuizComplete({
 }
 
 /**
+ * Fired when quiz submit opens the top result in a new tab. Kept separate
+ * from outbound_click because the user did not choose this link.
+ */
+export function trackQuizAutoOpen({ url, label }: { url: string; label: string }) {
+  fire('quiz_auto_open', {
+    link_url: url,
+    link_text: label,
+  });
+}
+
+/**
  * Fired on any outbound/affiliate link click.
  * location describes where on the site the click happened (e.g. "results_card", "promo_pill").
  */

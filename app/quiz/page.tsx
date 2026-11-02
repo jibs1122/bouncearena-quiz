@@ -7,9 +7,9 @@ import ProgressBar from '@/components/ProgressBar';
 import QuizQuestion from '@/components/QuizQuestion';
 import SiteHeader from '@/components/SiteHeader';
 import { detectCountry, type Country } from '@/lib/geolocation';
-import { trackOutboundClick, trackQuizComplete, trackQuizStart, trackQuizStep } from '@/lib/gtag';
+import { trackQuizAutoOpen, trackQuizComplete, trackQuizStart, trackQuizStep } from '@/lib/gtag';
 import { getLink, isAffiliateLink, normalizeCountry } from '@/lib/links';
-import { trackMetaOutboundClick, trackMetaQuizComplete, trackMetaQuizStep } from '@/lib/meta-pixel';
+import { trackMetaQuizAutoOpen, trackMetaQuizComplete, trackMetaQuizStep } from '@/lib/meta-pixel';
 import { buildQuestions } from '@/lib/quiz';
 import {
   encodeAnswers,
@@ -126,8 +126,8 @@ export default function QuizPage() {
     if (top && isAffiliateLink(top.slug)) {
       const href = getLink(top.slug, country);
       if (href) {
-        trackOutboundClick({ url: href, label: `View on ${top.brand}`, location: 'quiz_auto_open' });
-        trackMetaOutboundClick({ url: href, location: 'quiz_auto_open' });
+        trackQuizAutoOpen({ url: href, label: `View on ${top.brand}` });
+        trackMetaQuizAutoOpen({ url: href });
         window.open(href, '_blank', 'noopener,noreferrer');
       }
     }
