@@ -51,7 +51,6 @@ export const metadata: Metadata = {
 };
 
 const GOOGLE_TAG_ID = 'G-KQSGY08M2W';
-const OPENAI_PIXEL_ID = 'K3KNgiuVwKuphrC2tXfk9n';
 const META_PIXEL_ID = '848804564109845';
 
 export default function RootLayout({
@@ -73,12 +72,6 @@ export default function RootLayout({
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', '${GOOGLE_TAG_ID}');
-          `}
-        </Script>
-        <Script id="openai-pixel" strategy="afterInteractive">
-          {`
-            !function(w,d,s,u){if(w.oaiq)return;var q=function(){q.q.push(arguments)};q.q=[];w.oaiq=q;var j=d.createElement(s);j.async=1;j.src=u;var f=d.getElementsByTagName(s)[0];f.parentNode.insertBefore(j,f)}(window,document,"script","https://bzrcdn.openai.com/sdk/oaiq.min.js");
-            oaiq("init",{pixelId:"${OPENAI_PIXEL_ID}",debug:true});
           `}
         </Script>
         <Script id="meta-pixel" strategy="afterInteractive">
