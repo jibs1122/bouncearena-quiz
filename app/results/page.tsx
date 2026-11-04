@@ -5,11 +5,13 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import Footer from '@/components/Footer';
 import ModelImage from '@/components/ModelImage';
+import { CopyCodeButton, useCopyCode } from '@/components/PromoBell';
 import SiteHeader from '@/components/SiteHeader';
 import { trackOutboundClick } from '@/lib/gtag';
 import { trackMetaOutboundClick } from '@/lib/meta-pixel';
 import { getLink, getLinkRetailerName, isAffiliateLink, normalizeCountry } from '@/lib/links';
 import { outboundRel } from '@/lib/affiliate';
+import { getPromoForBrand } from '@/lib/promoCtas';
 import {
   buildSummaryText,
   getRecommendations,
@@ -37,6 +39,10 @@ function ResultCard({
   const reasons = selectMatchReasons(rec, answers, country);
   const href = getLink(rec.slug, country);
   const retailerName = getLinkRetailerName(rec.slug, country) ?? rec.brand;
+  // Codes are AU-only, and a retailer code only works when this card links to that retailer.
+  const promo = country === 'AU' && href ? getPromoForBrand(rec.brand) : null;
+  const promoCode = promo && (!promo.retailer || promo.retailer === retailerName) ? promo.codes[0] : null;
+  const { copiedCode, copyCode } = useCopyCode(rec.brand, `results_card_rank_${rank}`);
 
   return (
     <article
@@ -121,6 +127,20 @@ function ResultCard({
                   View on {retailerName} →
                 </a>
                 <p className="mt-1.5 text-xs text-black/30">Opens product page in a new tab</p>
+                {promoCode && (
+                  <div className="mt-3 flex max-w-xs items-center gap-3">
+                    <p className="shrink-0 text-xs leading-4 text-black/60">
+                      Promo code at {retailerName}
+                    </p>
+                    <div className="min-w-0 flex-1">
+                      <CopyCodeButton
+                        code={promoCode}
+                        active={copiedCode === promoCode}
+                        onCopy={(code) => copyCode(code)}
+                      />
+                    </div>
+                  </div>
+                )}
               </>
             )}
           </div>

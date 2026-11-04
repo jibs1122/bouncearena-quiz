@@ -161,7 +161,7 @@ export default function QuizPage() {
   return (
     <main className="min-h-screen bg-white text-black">
       {/* No promo card here: on phones it sits over the answers. */}
-      <SiteHeader active="quiz" showPromo={false} />
+      <SiteHeader active="quiz" showPromo={false} showPromoMenu />
 
       <section ref={quizContentRef} className="mx-auto w-full max-w-3xl scroll-mt-20 px-4 pb-8 pt-4 sm:px-8 sm:pt-8">
         {currentIndex === 0 && (

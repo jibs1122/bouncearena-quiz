@@ -73,6 +73,24 @@ export function trackQuizAutoOpen({ url, label }: { url: string; label: string }
   });
 }
 
+/** Fired when a promo code is copied. location is where on the site it was copied. */
+export function trackPromoCodeCopy({
+  code,
+  brand,
+  location,
+}: {
+  code: string;
+  brand: string;
+  location: string;
+}) {
+  fire('promo_code_copy', { code, brand, source_location: location });
+}
+
+/** Fired when the promo codes menu in the quiz header is opened. */
+export function trackPromoMenuOpen() {
+  fire('promo_menu_open');
+}
+
 /**
  * Fired on any outbound/affiliate link click.
  * location describes where on the site the click happened (e.g. "results_card", "promo_pill").

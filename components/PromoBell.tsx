@@ -2,13 +2,32 @@
 
 import { useState } from 'react';
 import BrandLogoAvatar from '@/components/BrandLogoAvatar';
-import { trackOutboundClick } from '@/lib/gtag';
-import { trackMetaOutboundClick } from '@/lib/meta-pixel';
+import { trackOutboundClick, trackPromoCodeCopy } from '@/lib/gtag';
+import { trackMetaOutboundClick, trackMetaPromoCodeCopy } from '@/lib/meta-pixel';
 import { getAllPromos } from '@/lib/promoCtas';
 
 const PROMOS = getAllPromos();
 
-function CopyCodeButton({
+/** Copies a code to the clipboard and remembers which one was copied for ~2s. */
+export function useCopyCode(brand: string | null, location: string) {
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+
+  async function copyCode(code: string, codeBrand = brand ?? '') {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopiedCode(code);
+      trackPromoCodeCopy({ code, brand: codeBrand, location });
+      trackMetaPromoCodeCopy({ code, brand: codeBrand, location });
+      window.setTimeout(() => {
+        setCopiedCode((current) => (current === code ? null : current));
+      }, 1800);
+    } catch {}
+  }
+
+  return { copiedCode, copyCode };
+}
+
+export function CopyCodeButton({
   code,
   active,
   onCopy,
@@ -33,7 +52,7 @@ function CopyCodeButton({
   );
 }
 
-function ShopLink({
+export function ShopLink({
   brand,
   href,
   location,
@@ -80,17 +99,7 @@ function ShopLink({
 export default function PromoBell() {
   const [mobileClosed, setMobileClosed] = useState(false);
   const [desktopClosed, setDesktopClosed] = useState(false);
-  const [copiedCode, setCopiedCode] = useState<string | null>(null);
-
-  async function copyCode(code: string) {
-    try {
-      await navigator.clipboard.writeText(code);
-      setCopiedCode(code);
-      window.setTimeout(() => {
-        setCopiedCode((current) => (current === code ? null : current));
-      }, 1800);
-    } catch {}
-  }
+  const { copiedCode, copyCode } = useCopyCode(null, 'promo_pill_desktop');
 
   return (
     <>
@@ -136,7 +145,7 @@ export default function PromoBell() {
                             key={code}
                             code={code}
                             active={copiedCode === code}
-                            onCopy={copyCode}
+                            onCopy={(value) => copyCode(value, promo.brand)}
                           />
                         ))}
                       </div>

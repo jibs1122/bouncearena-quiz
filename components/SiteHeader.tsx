@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import PromoBell from '@/components/PromoBell';
+import PromoMenu from '@/components/PromoMenu';
 import SearchBox from '@/components/SearchBox';
 import type { SearchItem } from '@/lib/search';
 
@@ -14,6 +15,8 @@ interface SiteHeaderProps {
   searchItems?: SearchItem[];
   sticky?: boolean;
   showPromo?: boolean;
+  /** Phone-only promo codes button, for pages that hide the floating promo card. */
+  showPromoMenu?: boolean;
 }
 
 const NAV_LINKS: { label: string; href: string; id: NavItem }[] = [
@@ -30,6 +33,7 @@ export default function SiteHeader({
   searchItems = [],
   sticky = true,
   showPromo = true,
+  showPromoMenu = false,
 }: SiteHeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -71,6 +75,7 @@ export default function SiteHeader({
                 </Link>
               ))}
             </nav>
+            {showPromoMenu && <PromoMenu />}
             <button
               type="button"
               aria-label={mobileOpen ? 'Close menu' : 'Open menu'}

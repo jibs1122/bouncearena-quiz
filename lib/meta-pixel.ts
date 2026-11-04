@@ -64,6 +64,23 @@ export function trackMetaQuizAutoOpen({ url }: { url: string }) {
   } satisfies Params);
 }
 
+/** Fired when a promo code is copied. */
+export function trackMetaPromoCodeCopy({
+  code,
+  brand,
+  location,
+}: {
+  code: string;
+  brand: string;
+  location: string;
+}) {
+  fire('trackCustom', 'PromoCodeCopy', {
+    code,
+    brand,
+    source_location: location,
+  } satisfies Params);
+}
+
 /** Fired on any outbound/affiliate link click. */
 export function trackMetaOutboundClick({ url, location }: { url: string; location: string }) {
   fire('trackCustom', 'OutboundClick', {
