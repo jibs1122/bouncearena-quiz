@@ -13,11 +13,12 @@ export function useCopyCode(brand: string | null, location: string) {
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   async function copyCode(code: string, codeBrand = brand ?? '') {
+    // Tracked before the copy so a tap still counts where the clipboard is blocked.
+    trackPromoCodeCopy({ code, brand: codeBrand, location });
+    trackMetaPromoCodeCopy({ code, brand: codeBrand, location });
     try {
       await navigator.clipboard.writeText(code);
       setCopiedCode(code);
-      trackPromoCodeCopy({ code, brand: codeBrand, location });
-      trackMetaPromoCodeCopy({ code, brand: codeBrand, location });
       window.setTimeout(() => {
         setCopiedCode((current) => (current === code ? null : current));
       }, 1800);

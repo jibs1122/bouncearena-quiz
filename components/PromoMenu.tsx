@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { CopyCodeButton, ShopLink, useCopyCode } from '@/components/PromoBell';
 import { trackPromoMenuOpen } from '@/lib/gtag';
+import { trackMetaPromoMenuOpen } from '@/lib/meta-pixel';
 import { getAllPromos } from '@/lib/promoCtas';
 
 const PROMOS = getAllPromos();
@@ -37,7 +38,10 @@ export default function PromoMenu() {
   }, [open]);
 
   function toggle() {
-    if (!open) trackPromoMenuOpen();
+    if (!open) {
+      trackPromoMenuOpen();
+      trackMetaPromoMenuOpen();
+    }
     setOpen((current) => !current);
   }
 

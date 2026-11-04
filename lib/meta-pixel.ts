@@ -81,6 +81,11 @@ export function trackMetaPromoCodeCopy({
   } satisfies Params);
 }
 
+/** Fired when the promo codes menu in the quiz header is opened. */
+export function trackMetaPromoMenuOpen() {
+  fire('trackCustom', 'PromoMenuOpen');
+}
+
 /** Fired on any outbound/affiliate link click. */
 export function trackMetaOutboundClick({ url, location }: { url: string; location: string }) {
   fire('trackCustom', 'OutboundClick', {
