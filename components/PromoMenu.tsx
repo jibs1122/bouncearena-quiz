@@ -48,14 +48,14 @@ export default function PromoMenu() {
         aria-expanded={open}
         aria-controls="quiz-promo-menu"
         onClick={toggle}
-        className="flex h-10 items-center gap-1.5 rounded-lg px-2 text-xs font-semibold text-[#278984] transition-colors hover:bg-[#38b1ab]/[0.08]"
+        className="flex h-10 items-center gap-1.5 rounded-lg px-2 text-xs font-semibold text-black transition-colors hover:bg-black/5"
       >
         <span className="relative">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
             <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
           </svg>
-          <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#38b1ab] px-1 text-[10px] font-bold leading-none text-white">
+          <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold leading-none text-white">
             {PROMOS.length}
           </span>
         </span>
