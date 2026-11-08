@@ -6,7 +6,7 @@ export type BrandLogo = {
 };
 
 const BRAND_LOGOS: Record<string, BrandLogo> = {
-  acon: { src: '/brand-logos/acon.png', fullBleed: true },
+  acon: { src: '/brand-logos/acon-trampolines.png' },
   berg: { src: '/brand-logos/berg.svg' },
   geetramp: { src: '/brand-logos/geetramp.svg' },
   'jump star': { src: '/brand-logos/jump-star-cropped.png' },
