@@ -7,9 +7,9 @@ import ProgressBar from '@/components/ProgressBar';
 import QuizQuestion from '@/components/QuizQuestion';
 import SiteHeader from '@/components/SiteHeader';
 import { detectCountry, type Country } from '@/lib/geolocation';
-import { trackQuizAutoOpen, trackQuizComplete, trackQuizStart, trackQuizStep } from '@/lib/gtag';
-import { getLink, isAffiliateLink, normalizeCountry } from '@/lib/links';
-import { trackMetaQuizAutoOpen, trackMetaQuizComplete, trackMetaQuizStep } from '@/lib/meta-pixel';
+import { trackQuizComplete, trackQuizStart, trackQuizStep } from '@/lib/gtag';
+import { normalizeCountry } from '@/lib/links';
+import { trackMetaQuizComplete, trackMetaQuizStep } from '@/lib/meta-pixel';
 import { buildQuestions } from '@/lib/quiz';
 import {
   encodeAnswers,
@@ -87,16 +87,6 @@ export default function QuizPage() {
     quizContentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [currentIndex]);
 
-  // On the last step, say up front that tapping an answer opens the top match
-  // in a new tab — but only when some answer would actually do that.
-  const finalStepOpensTab = useMemo(() => {
-    if (!currentQuestion.submitsQuiz) return false;
-    return currentQuestion.options.some((option) => {
-      const top = getRecommendations(withDefaults(applyAnswer(answers, currentQuestion.id, option.id)))[0];
-      return Boolean(top && isAffiliateLink(top.slug) && getLink(top.slug, answers.country));
-    });
-  }, [answers, currentQuestion]);
-
   function selectedValues(questionId: string): string[] {
     if (questionId === 'users') {
       return [answers.ages, answers.jumpers].filter(
@@ -120,17 +110,6 @@ export default function QuizPage() {
 
     trackQuizComplete({ country, topResult: top?.slug ?? null });
     trackMetaQuizComplete({ country, topResult: top?.slug ?? null });
-
-    // Only open a tab if the top result is an affiliate recommendation.
-    // Must stay synchronous in the click handler — no await, no setTimeout.
-    if (top && isAffiliateLink(top.slug)) {
-      const href = getLink(top.slug, country);
-      if (href) {
-        trackQuizAutoOpen({ url: href, label: `View on ${top.brand}` });
-        trackMetaQuizAutoOpen({ url: href });
-        window.open(href, '_blank', 'noopener,noreferrer');
-      }
-    }
 
     router.push(`/results?${encodeAnswers(nextAnswers)}`);
   }
@@ -193,11 +172,6 @@ export default function QuizPage() {
             selected={selectedValues(currentQuestion.id)}
             onAnswer={(value) => advance(value, false)}
             onSkip={() => advance(null, true)}
-            note={
-              finalStepOpensTab
-                ? 'Your results show on the next page, and your top match opens in a new tab.'
-                : null
-            }
           />
         </div>
 

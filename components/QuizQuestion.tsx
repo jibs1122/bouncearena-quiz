@@ -30,7 +30,7 @@ export interface Question {
   options: QuizOption[];
   groups?: QuizOptionGroup[];
   cardLayout?: boolean;
-  /** Final step: answer immediately so the results tab can open inside the click. */
+  /** Final step: answer immediately and go straight to results. */
   submitsQuiz?: boolean;
   links?: {
     intro?: string;
@@ -43,7 +43,6 @@ interface QuizQuestionProps {
   selected: string[];
   onAnswer: (value: string | string[]) => void;
   onSkip: () => void;
-  note?: string | null;
 }
 
 const ADVANCE_DELAY_MS = 280;
@@ -74,7 +73,7 @@ function optionClass(active: boolean, confirming: boolean, dimmed: boolean, extr
     .join(' ');
 }
 
-export default function QuizQuestion({ question, selected, onAnswer, onSkip, note }: QuizQuestionProps) {
+export default function QuizQuestion({ question, selected, onAnswer, onSkip }: QuizQuestionProps) {
   const [pendingId, setPendingId] = useState<string | null>(null);
   // Pair questions keep one pick per group, in group order.
   const [pairPicks, setPairPicks] = useState<Array<string | undefined>>(() =>
@@ -85,7 +84,7 @@ export default function QuizQuestion({ question, selected, onAnswer, onSkip, not
 
   function handleSingleClick(id: string) {
     if (question.submitsQuiz) {
-      // window.open for the top match must run inside the click handler.
+      // The last answer goes straight to results, with no advance animation.
       setPendingId(id);
       onAnswer(id);
       return;
@@ -250,8 +249,6 @@ export default function QuizQuestion({ question, selected, onAnswer, onSkip, not
           ))}
         </p>
       )}
-
-      {note && <p className="mt-4 text-xs text-black/40">{note}</p>}
 
       <div className="mt-4 text-center">
         <button

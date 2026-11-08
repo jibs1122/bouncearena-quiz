@@ -62,17 +62,6 @@ export function trackQuizComplete({
   });
 }
 
-/**
- * Fired when quiz submit opens the top result in a new tab. Kept separate
- * from outbound_click because the user did not choose this link.
- */
-export function trackQuizAutoOpen({ url, label }: { url: string; label: string }) {
-  fire('quiz_auto_open', {
-    link_url: url,
-    link_text: label,
-  });
-}
-
 /** Fired when a promo code is copied. location is where on the site it was copied. */
 export function trackPromoCodeCopy({
   code,
