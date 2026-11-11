@@ -25,20 +25,20 @@ import { compareMatchers } from '@/lib/trampolines';
 // Orange is kept for promo codes only, so the code stands apart from the teal
 // buttons. #C2410C is the darkest step and passes contrast for small text on white.
 function PromoCoupon({
-  retailer,
+  brand,
   code,
   copied,
   onCopy,
 }: {
-  retailer: string;
+  brand: string;
   code: string;
   copied: boolean;
   onCopy: () => void;
 }) {
   // Keep it on one line, sized to the coupon's own width rather than the screen,
   // since the card is narrow on phones and beside the image on tablets. When the
-  // shop name won't fit it drops to "Promo code:"; the button above names the shop.
-  const fullLabel = FULL_LABEL_AT[retailer.length <= 6 ? 'short' : retailer.length <= 13 ? 'medium' : 'long'];
+  // brand name won't fit it drops to "Promo code:"; the button above names the shop.
+  const fullLabel = FULL_LABEL_AT[brand.length <= 4 ? 'short' : brand.length <= 8 ? 'medium' : 'long'];
   return (
     <div className="@container mt-3 w-full max-w-sm">
       <button
@@ -47,9 +47,9 @@ function PromoCoupon({
         aria-label={copied ? `${code} copied` : `Copy promo code ${code}`}
         className="flex w-full items-center gap-3 rounded-xl border-[1.5px] border-dashed border-[#EA580C] bg-[#FFF4ED] px-3 py-2.5 text-left transition-colors hover:bg-[#FFEDD5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EA580C] focus-visible:ring-offset-2 active:scale-[0.99]"
       >
-        <span className="min-w-0 flex-1 whitespace-nowrap text-sm leading-5 text-[#9A3412]">
+        <span className="min-w-0 flex-1 whitespace-nowrap text-[13px] leading-5 text-[#9A3412]">
           <span className={fullLabel.short}>Promo code:</span>
-          <span className={fullLabel.full}>{retailer} promo code:</span>{' '}
+          <span className={fullLabel.full}>{brand} promo code:</span>{' '}
           <span className="font-mono font-bold tracking-[0.06em] text-[#C2410C]">{code}</span>
         </span>
         <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-[#9A3412]">
@@ -71,14 +71,15 @@ function PromoCoupon({
   );
 }
 
-// Coupon width needed for "{shop} promo code: CODE" plus Copy on one line,
-// measured at 14px: Vuly 278px, Lifespan Kids 326px, Web and Warehouse 363px.
+// Coupon width needed for "{brand} promo code: CODE", a 12px gap and Copy on one
+// line, measured at 13px: Vuly 264px, GeeTramp 281px, Lifespan Kids 309px. A 375px
+// phone gives the coupon 286px, so Vuly and GeeTramp keep their names there.
 // Written as min-width container queries: Turbopack drops Tailwind's
 // @min-[...] variants, which use the newer (width >= ...) range syntax.
 const FULL_LABEL_AT = {
-  short: { short: '[@container(min-width:290px)]:hidden', full: 'hidden [@container(min-width:290px)]:inline' },
-  medium: { short: '[@container(min-width:340px)]:hidden', full: 'hidden [@container(min-width:340px)]:inline' },
-  long: { short: '[@container(min-width:372px)]:hidden', full: 'hidden [@container(min-width:372px)]:inline' },
+  short: { short: '[@container(min-width:268px)]:hidden', full: 'hidden [@container(min-width:268px)]:inline' },
+  medium: { short: '[@container(min-width:284px)]:hidden', full: 'hidden [@container(min-width:284px)]:inline' },
+  long: { short: '[@container(min-width:314px)]:hidden', full: 'hidden [@container(min-width:314px)]:inline' },
 } as const;
 
 // ─── Result card ──────────────────────────────────────────────────────────────
@@ -217,7 +218,7 @@ function ResultCard({
                 <p className="mt-1.5 text-xs text-black/30">Opens product page in a new tab</p>
                 {promoCode && (
                   <PromoCoupon
-                    retailer={retailerName}
+                    brand={rec.brand}
                     code={promoCode}
                     copied={copiedCode === promoCode}
                     onCopy={() => copyCode(promoCode)}
