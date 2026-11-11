@@ -116,8 +116,11 @@ export function classifyOutbound(href: string): OutboundInfo | null {
 
   let target = url;
   if (slug) {
+    const destination = getLinkDestination(slug);
     // Springfree guide slugs redirect in proxy.ts and are not in the link table.
-    const destination = getLinkDestination(slug) ?? (isAffiliateLink(slug) ? 'https://t.cfjump.com/' : null);
+    if (!destination && isAffiliateLink(slug)) {
+      return { merchant: 'Springfree', affiliate: true, domain: 'springfreetrampoline.com.au' };
+    }
     try {
       if (destination) target = new URL(destination);
     } catch {}
