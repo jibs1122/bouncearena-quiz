@@ -5,10 +5,8 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import Footer from '@/components/Footer';
 import ModelImage from '@/components/ModelImage';
-import { CopyCodeButton, useCopyCode } from '@/components/PromoBell';
+import { useCopyCode } from '@/components/PromoBell';
 import SiteHeader from '@/components/SiteHeader';
-import { trackOutboundClick } from '@/lib/gtag';
-import { trackMetaOutboundClick } from '@/lib/meta-pixel';
 import { getLink, getLinkRetailerName, isAffiliateLink, normalizeCountry } from '@/lib/links';
 import { outboundRel } from '@/lib/affiliate';
 import { getPromoForBrand } from '@/lib/promoCtas';
@@ -21,6 +19,67 @@ import {
   type QuizAnswers,
 } from '@/lib/scoring';
 import { compareMatchers } from '@/lib/trampolines';
+
+// ─── Promo coupon ─────────────────────────────────────────────────────────────
+
+// Orange is kept for promo codes only, so the code stands apart from the teal
+// buttons. #C2410C is the darkest step and passes contrast for small text on white.
+function PromoCoupon({
+  retailer,
+  code,
+  copied,
+  onCopy,
+}: {
+  retailer: string;
+  code: string;
+  copied: boolean;
+  onCopy: () => void;
+}) {
+  // Keep it on one line, sized to the coupon's own width rather than the screen,
+  // since the card is narrow on phones and beside the image on tablets. When the
+  // shop name won't fit it drops to "Promo code:"; the button above names the shop.
+  const fullLabel = FULL_LABEL_AT[retailer.length <= 6 ? 'short' : retailer.length <= 13 ? 'medium' : 'long'];
+  return (
+    <div className="@container mt-3 w-full max-w-sm">
+      <button
+        type="button"
+        onClick={onCopy}
+        aria-label={copied ? `${code} copied` : `Copy promo code ${code}`}
+        className="flex w-full items-center gap-3 rounded-xl border-[1.5px] border-dashed border-[#EA580C] bg-[#FFF4ED] px-3 py-2.5 text-left transition-colors hover:bg-[#FFEDD5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EA580C] focus-visible:ring-offset-2 active:scale-[0.99]"
+      >
+        <span className="min-w-0 flex-1 whitespace-nowrap text-sm leading-5 text-[#9A3412]">
+          <span className={fullLabel.short}>Promo code:</span>
+          <span className={fullLabel.full}>{retailer} promo code:</span>{' '}
+          <span className="font-mono font-bold tracking-[0.06em] text-[#C2410C]">{code}</span>
+        </span>
+        <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-[#9A3412]">
+          {copied ? (
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12l5 5L20 7" />
+            </svg>
+          ) : (
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="8" y="8" width="12" height="12" rx="2" />
+              <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
+            </svg>
+          )}
+          {/* The smallest phones show the icon alone. */}
+          <span className="hidden [@container(min-width:260px)]:inline">{copied ? 'Copied' : 'Copy'}</span>
+        </span>
+      </button>
+    </div>
+  );
+}
+
+// Coupon width needed for "{shop} promo code: CODE" plus Copy on one line,
+// measured at 14px: Vuly 278px, Lifespan Kids 326px, Web and Warehouse 363px.
+// Written as min-width container queries: Turbopack drops Tailwind's
+// @min-[...] variants, which use the newer (width >= ...) range syntax.
+const FULL_LABEL_AT = {
+  short: { short: '[@container(min-width:290px)]:hidden', full: 'hidden [@container(min-width:290px)]:inline' },
+  medium: { short: '[@container(min-width:340px)]:hidden', full: 'hidden [@container(min-width:340px)]:inline' },
+  long: { short: '[@container(min-width:372px)]:hidden', full: 'hidden [@container(min-width:372px)]:inline' },
+} as const;
 
 // ─── Result card ──────────────────────────────────────────────────────────────
 
@@ -62,12 +121,32 @@ function ResultCard({
       <div className="flex flex-col sm:flex-row">
         {/* Product image */}
         <div className={`relative flex-shrink-0 bg-white flex items-center justify-center ${isTop ? 'h-52 sm:h-auto sm:w-64' : 'h-44 sm:h-auto sm:w-52'}`}>
-          <ModelImage
-            brand={rec.brand}
-            model={compareMatchers[rec.slug]?.model ?? rec.displayName}
-            className="object-contain p-5"
-            sizes="(max-width: 640px) 100vw, 256px"
-          />
+          {href ? (
+            // Same destination as the button; many people tap the photo first.
+            <a
+              href={href}
+              target="_blank"
+              rel={outboundRel(isAffiliateLink(rec.slug))}
+              data-track-location={`results_card_rank_${rank}_image`}
+              data-track-label={`${rec.brand} ${rec.displayName} image`}
+              aria-label={`View ${rec.brand} ${rec.displayName} on ${retailerName}`}
+              className="absolute inset-0"
+            >
+              <ModelImage
+                brand={rec.brand}
+                model={compareMatchers[rec.slug]?.model ?? rec.displayName}
+                className="object-contain p-5"
+                sizes="(max-width: 640px) 100vw, 256px"
+              />
+            </a>
+          ) : (
+            <ModelImage
+              brand={rec.brand}
+              model={compareMatchers[rec.slug]?.model ?? rec.displayName}
+              className="object-contain p-5"
+              sizes="(max-width: 640px) 100vw, 256px"
+            />
+          )}
         </div>
 
         {/* Content */}
@@ -83,7 +162,19 @@ function ResultCard({
 
           {/* Name + meta */}
           <h2 className={`font-bold text-black leading-tight ${isTop ? 'text-xl sm:text-2xl' : 'text-lg sm:text-xl'}`}>
-            {rec.brand} {rec.displayName}
+            {href ? (
+              <a
+                href={href}
+                target="_blank"
+                rel={outboundRel(isAffiliateLink(rec.slug))}
+                data-track-location={`results_card_rank_${rank}_title`}
+                className="hover:text-[#38b1ab] transition-colors"
+              >
+                {rec.brand} {rec.displayName}
+              </a>
+            ) : (
+              <>{rec.brand} {rec.displayName}</>
+            )}
           </h2>
           <p className="text-xs text-black/40 mt-1">
             {rec.springType === 'springless' ? 'Springless' : 'Traditional spring'} ·{' '}
@@ -118,28 +209,19 @@ function ResultCard({
                   href={href}
                   target="_blank"
                   rel={outboundRel(isAffiliateLink(rec.slug))}
-                  onClick={() => {
-                    trackOutboundClick({ url: href, label: `View on ${retailerName}`, location: `results_card_rank_${rank}` });
-                    trackMetaOutboundClick({ url: href, location: `results_card_rank_${rank}` });
-                  }}
-                  className="inline-flex items-center gap-2 bg-[#38b1ab] text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-[#2e9a94] transition-colors active:scale-95"
+                  data-track-location={`results_card_rank_${rank}`}
+                  className="flex w-full items-center justify-center gap-2 bg-[#38b1ab] text-white px-5 py-3 rounded-xl font-semibold text-base hover:bg-[#2e9a94] transition-colors active:scale-95 sm:inline-flex sm:w-auto sm:py-2.5 sm:text-sm"
                 >
                   View on {retailerName} →
                 </a>
                 <p className="mt-1.5 text-xs text-black/30">Opens product page in a new tab</p>
                 {promoCode && (
-                  <div className="mt-3 flex max-w-xs items-center gap-3">
-                    <p className="shrink-0 text-xs leading-4 text-black/60">
-                      Promo code at {retailerName}
-                    </p>
-                    <div className="min-w-0 flex-1">
-                      <CopyCodeButton
-                        code={promoCode}
-                        active={copiedCode === promoCode}
-                        onCopy={(code) => copyCode(code)}
-                      />
-                    </div>
-                  </div>
+                  <PromoCoupon
+                    retailer={retailerName}
+                    code={promoCode}
+                    copied={copiedCode === promoCode}
+                    onCopy={() => copyCode(promoCode)}
+                  />
                 )}
               </>
             )}

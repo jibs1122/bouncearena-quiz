@@ -76,10 +76,50 @@ export function trackMetaPromoMenuOpen() {
   fire('trackCustom', 'PromoMenuOpen');
 }
 
-/** Fired on any outbound/affiliate link click. */
-export function trackMetaOutboundClick({ url, location }: { url: string; location: string }) {
+/** Fired on every off-site link click, paid or not. */
+export function trackMetaOutboundClick({
+  url,
+  location,
+  merchant,
+  affiliate,
+}: {
+  url: string;
+  location: string;
+  merchant: string;
+  affiliate: boolean;
+}) {
   fire('trackCustom', 'OutboundClick', {
     link_url: url,
+    source_location: location,
+    merchant,
+    affiliate,
+  } satisfies Params);
+}
+
+/**
+ * The single event campaigns optimise for: an affiliate click or a promo code
+ * copy. It uses the standard Lead event so it can be picked as an ad set's
+ * conversion event without a custom conversion. Sent once per merchant per
+ * session, so a visitor tapping the same retailer twice counts once and Meta
+ * learns from people rather than taps.
+ */
+export function trackMetaAffiliateLead({
+  merchant,
+  location,
+  action,
+}: {
+  merchant: string;
+  location: string;
+  action: 'click' | 'code_copy';
+}) {
+  const key = `ba-meta-lead:${merchant}`;
+  try {
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, '1');
+  } catch {}
+  fire('track', 'Lead', {
+    content_name: merchant,
+    content_category: action,
     source_location: location,
   } satisfies Params);
 }

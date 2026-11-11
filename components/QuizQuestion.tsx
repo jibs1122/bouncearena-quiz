@@ -2,9 +2,7 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
-import { trackOutboundClick } from '@/lib/gtag';
 import { getGoLinkSlug, isAffiliateLink, isRawVulyAffiliateHref, isRawWebAndWarehouseAffiliateHref } from '@/lib/links';
-import { trackMetaOutboundClick } from '@/lib/meta-pixel';
 
 export interface QuizOption {
   id: string;
@@ -236,11 +234,7 @@ export default function QuizQuestion({ question, selected, onAnswer, onSkip }: Q
                 href={link.href}
                 target="_blank"
                 rel={linkRel(link.href)}
-                onClick={() => {
-                  const location = `quiz_guide_${question.id}`;
-                  trackOutboundClick({ url: link.href, label: link.text, location });
-                  trackMetaOutboundClick({ url: link.href, location });
-                }}
+                data-track-location={`quiz_guide_${question.id}`}
                 className="font-medium text-[#38b1ab] underline underline-offset-4 transition-colors hover:text-[#2e9a94]"
               >
                 {link.text}

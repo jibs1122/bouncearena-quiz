@@ -67,12 +67,14 @@ export function trackPromoCodeCopy({
   code,
   brand,
   location,
+  trafficSource,
 }: {
   code: string;
   brand: string;
   location: string;
+  trafficSource: string;
 }) {
-  fire('promo_code_copy', { code, brand, source_location: location });
+  fire('promo_code_copy', { code, brand, merchant: brand, source_location: location, traffic_source: trafficSource });
 }
 
 /** Fired when the promo codes menu in the quiz header is opened. */
@@ -81,21 +83,33 @@ export function trackPromoMenuOpen() {
 }
 
 /**
- * Fired on any outbound/affiliate link click.
- * location describes where on the site the click happened (e.g. "results_card", "promo_pill").
+ * Fired on every off-site link click by components/OutboundTracker.
+ * Paid links send affiliate_click (a GA key event); everything else sends
+ * outbound_click, so the key event counts only clicks that can earn.
  */
-export function trackOutboundClick({
+export function trackLinkClick({
   url,
   label,
   location,
+  merchant,
+  domain,
+  affiliate,
+  trafficSource,
 }: {
   url: string;
   label: string;
   location: string;
+  merchant: string;
+  domain: string;
+  affiliate: boolean;
+  trafficSource: string;
 }) {
-  fire('outbound_click', {
+  fire(affiliate ? 'affiliate_click' : 'outbound_click', {
     link_url: url,
     link_text: label,
+    link_domain: domain,
+    merchant,
     source_location: location,
+    traffic_source: trafficSource,
   });
 }

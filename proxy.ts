@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import { withNetworkSubId } from '@/lib/subid';
 
 const GEO_COOKIE = 'ba_country';
 const BOT_RE = /bot|crawl|slurp|spider|mediapartners/i;
@@ -76,7 +77,9 @@ export function proxy(request: NextRequest) {
   if (springfreeRedirect) {
     return new NextResponse(null, {
       status: 308,
-      headers: { Location: springfreeRedirect },
+      headers: {
+        Location: withNetworkSubId(springfreeRedirect, request.nextUrl.searchParams.get('sid')),
+      },
     });
   }
 

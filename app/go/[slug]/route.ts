@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server';
 import { getClientIp, isInternalTraffic, trackRedirectClick } from '@/lib/analytics';
 import { getLinkDestination, isSpringfreeLinkSlug } from '@/lib/links';
 import type { Country } from '@/lib/geolocation';
+import { withNetworkSubId } from '@/lib/subid';
 
 export async function GET(request: NextRequest, context: RouteContext<'/go/[slug]'>) {
   const { slug } = await context.params;
@@ -17,5 +18,5 @@ export async function GET(request: NextRequest, context: RouteContext<'/go/[slug
     void trackRedirectClick(slug);
   }
 
-  return Response.redirect(destination, isSpringfreeLinkSlug(slug) ? 308 : 302);
+  return Response.redirect(withNetworkSubId(destination, request.nextUrl.searchParams.get('sid')), isSpringfreeLinkSlug(slug) ? 308 : 302);
 }
