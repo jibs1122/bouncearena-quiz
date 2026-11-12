@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import BrandLogoAvatar from '@/components/BrandLogoAvatar';
-import { getTrafficSource } from '@/lib/attribution';
+import { getAdId, getTrafficSource } from '@/lib/attribution';
 import { trackPromoCodeCopy } from '@/lib/gtag';
 import { trackMetaAffiliateLead, trackMetaPromoCodeCopy } from '@/lib/meta-pixel';
+import { trackRedditAffiliateLead } from '@/lib/reddit-pixel';
 import { getAllPromos, getPromoForBrand } from '@/lib/promoCtas';
 
 const PROMOS = getAllPromos();
@@ -15,11 +16,12 @@ export function useCopyCode(brand: string | null, location: string) {
 
   async function copyCode(code: string, codeBrand = brand ?? '') {
     // Tracked before the copy so a tap still counts where the clipboard is blocked.
-    trackPromoCodeCopy({ code, brand: codeBrand, location, trafficSource: getTrafficSource() });
+    trackPromoCodeCopy({ code, brand: codeBrand, location, trafficSource: getTrafficSource(), adId: getAdId() });
     trackMetaPromoCodeCopy({ code, brand: codeBrand, location });
     // Retailer codes count against the store, matching the click's merchant.
     const merchant = getPromoForBrand(codeBrand)?.retailer ?? codeBrand;
     trackMetaAffiliateLead({ merchant, location, action: 'code_copy' });
+    trackRedditAffiliateLead({ merchant });
     try {
       await navigator.clipboard.writeText(code);
       setCopiedCode(code);

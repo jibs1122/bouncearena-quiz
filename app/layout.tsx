@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import Script from 'next/script';
-import MetaPixelPageView from '@/components/MetaPixelPageView';
+import PixelPageView from '@/components/PixelPageView';
 import OutboundTracker from '@/components/OutboundTracker';
 import './globals.css';
 
@@ -53,6 +53,8 @@ export const metadata: Metadata = {
 
 const GOOGLE_TAG_ID = 'G-KQSGY08M2W';
 const META_PIXEL_ID = '848804564109845';
+// From Reddit Ads Manager > Events Manager. The pixel stays off while empty.
+const REDDIT_PIXEL_ID = 'a2_k08pvtj6789w';
 
 export default function RootLayout({
   children,
@@ -82,6 +84,15 @@ export default function RootLayout({
             fbq('track','PageView');
           `}
         </Script>
+        {REDDIT_PIXEL_ID && (
+          <Script id="reddit-pixel" strategy="afterInteractive">
+            {`
+              !function(w,d){if(!w.rdt){var p=w.rdt=function(){p.sendEvent?p.sendEvent.apply(p,arguments):p.callQueue.push(arguments)};p.callQueue=[];var t=d.createElement("script");t.src="https://www.redditstatic.com/ads/pixel.js",t.async=!0;var s=d.getElementsByTagName("script")[0];s.parentNode.insertBefore(t,s)}}(window,document);
+              rdt('init','${REDDIT_PIXEL_ID}');
+              rdt('track','PageVisit');
+            `}
+          </Script>
+        )}
         <noscript>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -92,7 +103,7 @@ export default function RootLayout({
             src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
           />
         </noscript>
-        <MetaPixelPageView />
+        <PixelPageView />
         <OutboundTracker />
         {children}
       </body>

@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect } from 'react';
-import { buildSubId, captureAttribution, classifyOutbound, getTrafficSource, withSubId } from '@/lib/attribution';
+import { buildSubId, captureAttribution, classifyOutbound, getAdId, getTrafficSource, withSubId } from '@/lib/attribution';
 import { trackLinkClick } from '@/lib/gtag';
 import { trackMetaAffiliateLead, trackMetaOutboundClick } from '@/lib/meta-pixel';
+import { trackRedditAffiliateLead } from '@/lib/reddit-pixel';
 
 /**
  * One listener for every off-site link on the site, so no link can be left
@@ -43,9 +44,13 @@ export default function OutboundTracker() {
         domain: info.domain,
         affiliate: info.affiliate,
         trafficSource: getTrafficSource(),
+        adId: getAdId(),
       });
       trackMetaOutboundClick({ url: original, location, merchant: info.merchant, affiliate: info.affiliate });
-      if (info.affiliate) trackMetaAffiliateLead({ merchant: info.merchant, location, action: 'click' });
+      if (info.affiliate) {
+        trackMetaAffiliateLead({ merchant: info.merchant, location, action: 'click' });
+        trackRedditAffiliateLead({ merchant: info.merchant });
+      }
     }
 
     document.addEventListener('click', onClick, true);

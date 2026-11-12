@@ -7,9 +7,11 @@ import ProgressBar from '@/components/ProgressBar';
 import QuizQuestion from '@/components/QuizQuestion';
 import SiteHeader from '@/components/SiteHeader';
 import { detectCountry, type Country } from '@/lib/geolocation';
+import { getAdId, getTrafficSource } from '@/lib/attribution';
 import { trackQuizComplete, trackQuizStart, trackQuizStep } from '@/lib/gtag';
 import { normalizeCountry } from '@/lib/links';
 import { trackMetaQuizComplete, trackMetaQuizStep } from '@/lib/meta-pixel';
+import { trackRedditQuizComplete } from '@/lib/reddit-pixel';
 import { buildQuestions } from '@/lib/quiz';
 import {
   encodeAnswers,
@@ -68,7 +70,7 @@ export default function QuizPage() {
     const timer = window.setTimeout(() => {
       setAnswers((current) => ({ ...current, country }));
     }, 0);
-    trackQuizStart(country);
+    trackQuizStart(country, getTrafficSource());
 
     return () => window.clearTimeout(timer);
   }, []);
@@ -108,8 +110,14 @@ export default function QuizPage() {
     const country = normalizeCountry(nextAnswers.country);
     const top = getRecommendations(nextAnswers)[0];
 
-    trackQuizComplete({ country, topResult: top?.slug ?? null });
+    trackQuizComplete({
+      country,
+      topResult: top?.slug ?? null,
+      trafficSource: getTrafficSource(),
+      adId: getAdId(),
+    });
     trackMetaQuizComplete({ country, topResult: top?.slug ?? null });
+    trackRedditQuizComplete();
 
     router.push(`/results?${encodeAnswers(nextAnswers)}`);
   }

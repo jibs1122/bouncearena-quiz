@@ -16,8 +16,8 @@ function fire(eventName: string, params?: Params) {
 }
 
 /** Fired once when the quiz first renders (step 1). */
-export function trackQuizStart(country: string) {
-  fire('quiz_start', { country });
+export function trackQuizStart(country: string, trafficSource: string) {
+  fire('quiz_start', { country, traffic_source: trafficSource });
 }
 
 /**
@@ -52,29 +52,47 @@ export function trackQuizStep({
 export function trackQuizComplete({
   country,
   topResult,
+  trafficSource,
+  adId,
 }: {
   country: string;
   topResult: string | null;
+  trafficSource: string;
+  adId: string;
 }) {
   fire('quiz_complete', {
     country,
     top_result: topResult ?? '(none)',
+    traffic_source: trafficSource,
+    ad_id: adId,
   });
 }
 
-/** Fired when a promo code is copied. location is where on the site it was copied. */
+/**
+ * Fired when a promo code is copied. location is where on the site it was
+ * copied; traffic_source and ad_id come from lib/attribution.
+ */
 export function trackPromoCodeCopy({
   code,
   brand,
   location,
   trafficSource,
+  adId,
 }: {
   code: string;
   brand: string;
   location: string;
   trafficSource: string;
+  adId: string;
 }) {
-  fire('promo_code_copy', { code, brand, merchant: brand, source_location: location, traffic_source: trafficSource });
+  fire('promo_code_copy', {
+    code,
+    brand,
+    merchant: brand,
+    source_location: location,
+    traffic_source: trafficSource,
+    ad_id: adId,
+  });
 }
 
 /** Fired when the promo codes menu in the quiz header is opened. */
@@ -95,6 +113,7 @@ export function trackLinkClick({
   domain,
   affiliate,
   trafficSource,
+  adId,
 }: {
   url: string;
   label: string;
@@ -103,6 +122,7 @@ export function trackLinkClick({
   domain: string;
   affiliate: boolean;
   trafficSource: string;
+  adId: string;
 }) {
   fire(affiliate ? 'affiliate_click' : 'outbound_click', {
     link_url: url,
@@ -111,5 +131,6 @@ export function trackLinkClick({
     merchant,
     source_location: location,
     traffic_source: trafficSource,
+    ad_id: adId,
   });
 }

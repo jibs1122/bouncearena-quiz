@@ -40,6 +40,11 @@ export function captureAttribution(): void {
   if (params.has('fbclid') || /^(facebook|fb|ig|instagram|meta)$/.test(utmSource)) {
     const ad = params.get('utm_content');
     next = { src: 'fb', ad: ad && /^\d+$/.test(ad) ? ad : undefined, at: Date.now() };
+  } else if (params.has('rdt_cid') || utmSource === 'reddit') {
+    // utm_content carries Reddit's {{AD_ID}} macro. A macro Reddit didn't
+    // fill in arrives as literal text with no digits, so it's dropped.
+    const ad = clean(params.get('utm_content') ?? '', 24);
+    next = { src: 'reddit', ad: /\d/.test(ad) ? ad : undefined, at: Date.now() };
   } else if (params.has('gclid') || utmSource === 'google') {
     next = { src: 'gads', at: Date.now() };
   } else if (utmSource) {
@@ -56,9 +61,14 @@ export function captureAttribution(): void {
   } catch {}
 }
 
-/** Where the current visitor came from: fb, seo, gads, a utm_source, or direct. */
+/** Where the current visitor came from: fb, reddit, seo, gads, a utm_source, or direct. */
 export function getTrafficSource(): string {
   return readStored()?.src ?? 'direct';
+}
+
+/** The Facebook or Reddit ad the visitor clicked, or '(none)'. */
+export function getAdId(): string {
+  return readStored()?.ad ?? '(none)';
 }
 
 /** Short, network-safe location codes so the sub-ID stays readable in reports. */
