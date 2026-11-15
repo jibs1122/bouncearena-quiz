@@ -1,6 +1,7 @@
 import type { Country } from '@/lib/geolocation';
 import { resolveQuizCountry } from '@/lib/geolocation';
 import {
+  compareMatchers,
   getEligibleTrampolines,
   type MatchReasonBank,
   type SpringType,
@@ -102,18 +103,25 @@ function targetTier(backyardSize: 'small' | 'medium' | 'large', jumpers: JumperC
   return jumpers === '1-2' ? Math.min(yardTier, 2) : yardTier;
 }
 
+function largestSizeFt(trampoline: Trampoline): number {
+  return Math.max(...trampoline.sizes);
+}
+
+/** Smallest trampoline (approximate ft) shown to three or more jumpers. */
+function minGroupSizeFt(backyardSize: BackyardSize): number {
+  return backyardSize === 'small' ? 8 : 9;
+}
+
 export function scoreSize(
   trampoline: Trampoline,
   backyardSize: BackyardSize,
   jumpers: JumperCount,
 ): number {
-  if (backyardSize === 'not-sure') {
-    if (trampoline.fitsYard.medium) return 12;
-    if (trampoline.fitsYard.small) return 8;
-    if (trampoline.fitsYard.large) return -20;
-    if (trampoline.fitsYard.longNarrow) return -10;
-    return -20;
-  }
+  // Three or more jumpers need a mat they can share, whatever the yard allows.
+  if (jumpers === '3-plus' && largestSizeFt(trampoline) < minGroupSizeFt(backyardSize)) return -100;
+
+  // "Not sure" shows all sizes. Ties are then split towards mid sizes by sizeGap.
+  if (backyardSize === 'not-sure') return 0;
   if (backyardSize === 'long-narrow') {
     if (trampoline.shape === 'oval' || trampoline.shape === 'rectangle') return 40;
     if (trampoline.shape === 'square') return -10;
@@ -139,7 +147,7 @@ export function scoreSize(
 
 /**
  * Young kids lean to springless designs (Springfree, Vuly Thunder). Kids 8–12
- * lean to spring trampolines with enclosed-spring safety designs (Vuly Ultra).
+ * lean to any safety design, springless or spring.
  * Teens and adults lean to rectangles for a higher bounce, and away from the
  * smallest frames. A mix of ages leans to either safety design.
  */
@@ -151,8 +159,9 @@ export function scoreUsers(trampoline: Trampoline, ages: AgeGroup): number {
     return trampoline.advancedSafety ? 0 : -15;
   }
   if (ages === '8-12') {
-    if (springless) return 0;
-    return trampoline.advancedSafety ? 30 : 15;
+    // Toddler-sized frames are too small once kids are 8 or older.
+    const tooSmall = largestSizeFt(trampoline) < 8 ? -40 : 0;
+    return (springless || trampoline.advancedSafety ? 30 : 15) + tooSmall;
   }
   if (ages === 'teens') {
     const shapeScore =
@@ -163,11 +172,13 @@ export function scoreUsers(trampoline: Trampoline, ages: AgeGroup): number {
           : trampoline.shape === 'oval'
             ? 5
             : 0;
-    const tooSmall = Math.max(...trampoline.sizes) < 10 ? -15 : 0;
+    const largest = largestSizeFt(trampoline);
+    const tooSmall = largest < 8 ? -40 : largest < 10 ? -15 : 0;
     return shapeScore + tooSmall;
   }
   if (ages === 'mixed') {
-    return springless || trampoline.advancedSafety ? 15 : 0;
+    const tooSmall = largestSizeFt(trampoline) < 8 ? -40 : 0;
+    return (springless || trampoline.advancedSafety ? 15 : 0) + tooSmall;
   }
   return 0;
 }
@@ -304,6 +315,16 @@ function baseMeritScore(trampoline: Trampoline): number {
   );
 }
 
+/**
+ * Tie-breaker: how far the closest size is from the size we would aim for.
+ * It splits equal scores by fit before the fixed merit score, so the same few
+ * models do not win every tie.
+ */
+function sizeGap(trampoline: Trampoline, answers: QuizAnswers): number {
+  const target = targetFeet(answers.backyardSize, answers.jumpers);
+  return Math.min(...trampoline.sizes.map((size) => Math.abs(size - target)));
+}
+
 function rawScoreFor(trampoline: Trampoline, answers: QuizAnswers): number {
   return (
     scoreSize(trampoline, answers.backyardSize, answers.jumpers) +
@@ -313,6 +334,18 @@ function rawScoreFor(trampoline: Trampoline, answers: QuizAnswers): number {
     scoreSpringType(trampoline, answers.springType) +
     scoreStandards(trampoline, answers.standards, resolveQuizCountry(answers.country))
   );
+}
+
+/**
+ * Sizes of one model are separate entries in the catalogue (GeeTramp Force 7×10
+ * and 8×12, Jumpflex Hero 10ft and 12ft, Springfree Medium and Large Square). A result set shows each model once, in
+ * the size that fits the answers best.
+ */
+export function modelKey(trampoline: Trampoline): string {
+  const model = compareMatchers[trampoline.slug]?.model ?? trampoline.displayName;
+  // Springfree puts the size in the model name: Medium Square and Large Square
+  // are one design in two sizes.
+  return `${trampoline.brand}|${model.replace(/^(Mini|Compact|Medium|Large|Jumbo)\s+/, '')}`;
 }
 
 function getDiverseRecommendations(answers: QuizAnswers): ScoredTrampoline[] {
@@ -326,20 +359,24 @@ function getDiverseRecommendations(answers: QuizAnswers): ScoredTrampoline[] {
         scoreShape(b, answers.shape) - scoreShape(a, answers.shape) ||
         scoreUsers(b, answers.ages) - scoreUsers(a, answers.ages) ||
         scoreSize(b, answers.backyardSize, answers.jumpers) - scoreSize(a, answers.backyardSize, answers.jumpers) ||
+        sizeGap(a, answers) - sizeGap(b, answers) ||
         baseMeritScore(b) - baseMeritScore(a) ||
         a.priceFrom - b.priceFrom,
     );
 
   const picks: Trampoline[] = [];
-  const seenIds = new Set<string>();
   const seenBrands = new Set<string>();
+  const seenModels = new Set<string>();
+
+  function take(match: Trampoline) {
+    picks.push(match);
+    seenBrands.add(match.brand);
+    seenModels.add(modelKey(match));
+  }
 
   function pick(predicate: (trampoline: Trampoline) => boolean) {
-    const match = pool.find((trampoline) => !seenIds.has(trampoline.id) && predicate(trampoline));
-    if (!match) return;
-    picks.push(match);
-    seenIds.add(match.id);
-    seenBrands.add(match.brand);
+    const match = pool.find((trampoline) => !seenModels.has(modelKey(trampoline)) && predicate(trampoline));
+    if (match) take(match);
   }
 
   pick((trampoline) => trampoline.springType === 'springless');
@@ -348,19 +385,20 @@ function getDiverseRecommendations(answers: QuizAnswers): ScoredTrampoline[] {
 
   for (const trampoline of pool) {
     if (picks.length >= 3) break;
-    if (seenIds.has(trampoline.id)) continue;
-    picks.push(trampoline);
-    seenIds.add(trampoline.id);
+    if (seenModels.has(modelKey(trampoline))) continue;
+    take(trampoline);
   }
 
-  const scoredPicks = picks.slice(0, 3).map((trampoline) => ({
-    ...trampoline,
-    rawScore: 1,
-    finalScore: 1,
-    recommendedSizeDisplay: getRecommendedSizeDisplay(trampoline, answers.backyardSize, answers.jumpers),
-  }));
-
-  return diversifyTopTwoBrands(scoredPicks).slice(0, 3);
+  // With so little to go on there is no best match, so list them cheapest first.
+  return picks
+    .slice(0, 3)
+    .sort((a, b) => a.priceFrom - b.priceFrom)
+    .map((trampoline) => ({
+      ...trampoline,
+      rawScore: 1,
+      finalScore: 1,
+      recommendedSizeDisplay: getRecommendedSizeDisplay(trampoline, answers.backyardSize, answers.jumpers),
+    }));
 }
 
 // ─── Recommended size display ──────────────────────────────────────────────────
@@ -430,25 +468,35 @@ function applyVulyBias(sorted: ScoredTrampoline[]): ScoredTrampoline[] {
   return sorted;
 }
 
-function diversifyTopTwoBrands(sorted: ScoredTrampoline[]): ScoredTrampoline[] {
-  const [first, second] = sorted;
-  if (!first || !second || first.brand !== second.brand) return sorted;
+/** A different brand takes a slot only when it scores within this of the model it replaces. */
+const BRAND_SPREAD_MARGIN = 25;
 
-  const replacementIndex = sorted.findIndex((trampoline, index) => index > 1 && trampoline.brand !== first.brand);
-  // No other brand fits: show the same brand again rather than a single result.
-  if (replacementIndex === -1) return sorted;
+/**
+ * Picks three models, preferring a brand not already shown when its score is
+ * close to the best remaining model. The picks are returned highest score first,
+ * so a lower-scoring model never sits above a higher-scoring one.
+ */
+function pickWithBrandSpread(sorted: ScoredTrampoline[]): ScoredTrampoline[] {
+  let remaining = [...sorted];
+  const picks: ScoredTrampoline[] = [];
+  const brands = new Set<string>();
 
-  const replacement = sorted[replacementIndex];
-  return [
-    first,
-    replacement,
-    ...sorted.slice(1, replacementIndex),
-    ...sorted.slice(replacementIndex + 1),
-  ];
-}
+  while (picks.length < 3 && remaining.length > 0) {
+    const best = remaining[0];
+    const otherBrand = remaining.find((trampoline) => !brands.has(trampoline.brand));
+    const choice =
+      brands.has(best.brand) && otherBrand && best.rawScore - otherBrand.rawScore <= BRAND_SPREAD_MARGIN
+        ? otherBrand
+        : best;
+    picks.push(choice);
+    brands.add(choice.brand);
+    // Other sizes of the chosen model go too: each model is shown once.
+    const chosenModel = modelKey(choice);
+    remaining = remaining.filter((trampoline) => modelKey(trampoline) !== chosenModel);
+  }
 
-function applyRankingRules(sorted: ScoredTrampoline[]): ScoredTrampoline[] {
-  return diversifyTopTwoBrands(applyVulyBias(sorted));
+  // Stable sort: equal scores keep the order they were picked in.
+  return picks.sort((a, b) => b.rawScore - a.rawScore);
 }
 
 export function getRecommendations(answers: QuizAnswers): ScoredTrampoline[] {
@@ -470,11 +518,12 @@ function getRankedMatches(answers: QuizAnswers): ScoredTrampoline[] {
     .sort(
       (a, b) =>
         b.rawScore - a.rawScore ||
+        sizeGap(a, answers) - sizeGap(b, answers) ||
         baseMeritScore(b) - baseMeritScore(a) ||
         a.priceFrom - b.priceFrom,
     );
 
-  return applyRankingRules(passing).slice(0, 3);
+  return pickWithBrandSpread(applyVulyBias(passing));
 }
 
 // ─── Fill-in results ──────────────────────────────────────────────────────────
@@ -500,10 +549,11 @@ function getCloseMatches(
   slots: number,
 ): ScoredTrampoline[] {
   const country = resolveQuizCountry(answers.country);
-  const takenIds = new Set(taken.map((trampoline) => trampoline.id));
+  // Another size of a model already shown is not a new result.
+  const takenModels = new Set(taken.map(modelKey));
 
-  return getScoringPool(answers)
-    .filter((trampoline) => !takenIds.has(trampoline.id))
+  let candidates = getScoringPool(answers)
+    .filter((trampoline) => !takenModels.has(modelKey(trampoline)))
     .filter((trampoline) => scoreSize(trampoline, answers.backyardSize, answers.jumpers) > -100)
     .filter((trampoline) => scoreStandards(trampoline, answers.standards, country) > -100)
     .map((trampoline) => {
@@ -530,8 +580,29 @@ function getCloseMatches(
         a.distance - b.distance ||
         b.keptScore - a.keptScore ||
         a.trampoline.priceFrom - b.trampoline.priceFrom,
-    )
-    .slice(0, slots)
+    );
+
+  // Same brand spread as the full matches: among equally close models, a brand
+  // not yet shown takes the slot when its score is near the best one left.
+  const brands = new Set(taken.map((trampoline) => trampoline.brand));
+  const chosen: typeof candidates = [];
+  while (chosen.length < slots && candidates.length > 0) {
+    const best = candidates[0];
+    const otherBrand = candidates.find(
+      (candidate) =>
+        !brands.has(candidate.trampoline.brand) &&
+        candidate.distance === best.distance &&
+        best.keptScore - candidate.keptScore <= BRAND_SPREAD_MARGIN,
+    );
+    const choice = brands.has(best.trampoline.brand) && otherBrand ? otherBrand : best;
+    chosen.push(choice);
+    brands.add(choice.trampoline.brand);
+    const chosenModel = modelKey(choice.trampoline);
+    candidates = candidates.filter((candidate) => modelKey(candidate.trampoline) !== chosenModel);
+  }
+
+  return chosen
+    .sort((a, b) => a.distance - b.distance || b.keptScore - a.keptScore)
     .map(({ trampoline, misses, keptScore }) => ({
       ...trampoline,
       rawScore: keptScore,
@@ -620,6 +691,21 @@ export function selectMatchReasons(
     }
   }
 
+  // 7. Few answers leave few reasons, so describe the model itself.
+  if (reasons.length < 2) {
+    const general = [
+      rec.springType === 'springless' ? mr.springless : mr.traditional,
+      mr.warranty,
+      mr.valueForMoney,
+      mr.durability,
+      mr.bounce,
+    ];
+    for (const reason of general) {
+      if (reasons.length >= 3) break;
+      add(reason);
+    }
+  }
+
   return reasons.slice(0, 4);
 }
 
@@ -695,7 +781,7 @@ export function buildSummaryText(answers: QuizAnswers): string {
   );
 
   if (parts.length === 0) {
-    return 'You skipped the questions, so these are well-rated options from different brands and price points.';
+    return 'You skipped the questions, so these are well-rated mid-size options from different brands.';
   }
 
   const list =

@@ -30,6 +30,7 @@ export function buildQuestions(country: Country): Question[] {
     {
       id: 'backyardSize',
       title: 'How big is your backyard?',
+      why: '(assume 1–2m clearance around trampoline)',
       type: 'single',
       options: [
         { id: 'small', label: 'Small', description: 'Room for a 2.4–3m wide trampoline' },

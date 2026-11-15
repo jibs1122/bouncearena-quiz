@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Footer from '@/components/Footer';
 import ProgressBar from '@/components/ProgressBar';
@@ -16,6 +17,7 @@ import { buildQuestions } from '@/lib/quiz';
 import {
   encodeAnswers,
   getRecommendations,
+  parseAnswers,
   type AgeGroup,
   type BackyardSize,
   type BudgetId,
@@ -62,15 +64,30 @@ export default function QuizPage() {
   const [answers, setAnswers] = useState<PartialQuizAnswers>({ country: 'AU' });
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState<'forward' | 'back'>('forward');
+  // Set when the results page sends someone back to change a single answer.
+  const [editing, setEditing] = useState(false);
   const quizContentRef = useRef<HTMLElement | null>(null);
   const hasMountedQuestionRef = useRef(false);
 
   useEffect(() => {
     const country = detectCountry();
+    // The results page links back here with the answers in the URL, so a retake
+    // starts filled in, and "?edit=budget" opens that one question.
+    const params = new URLSearchParams(window.location.search);
+    const previous = parseAnswers(params);
+    const editIndex = previous
+      ? buildQuestions(country).findIndex((question) => question.id === params.get('edit'))
+      : -1;
+
     const timer = window.setTimeout(() => {
-      setAnswers((current) => ({ ...current, country }));
+      setAnswers((current) => ({ ...current, ...previous, country }));
+      if (editIndex >= 0) {
+        setCurrentIndex(editIndex);
+        setEditing(true);
+      }
     }, 0);
-    trackQuizStart(country, getTrafficSource());
+    // Changing one answer is not a new quiz start.
+    if (editIndex < 0) trackQuizStart(country, getTrafficSource());
 
     return () => window.clearTimeout(timer);
   }, []);
@@ -107,6 +124,12 @@ export default function QuizPage() {
   }
 
   function submitAndNavigate(nextAnswers: QuizAnswers) {
+    if (editing) {
+      // Already counted as a completion the first time through.
+      router.push(`/results?${encodeAnswers(nextAnswers)}`);
+      return;
+    }
+
     const country = normalizeCountry(nextAnswers.country);
     const top = getRecommendations(nextAnswers)[0];
 
@@ -125,6 +148,12 @@ export default function QuizPage() {
   function advance(value: string | string[] | null, skipped: boolean) {
     const questionId = currentQuestion.id;
     const nextAnswers = applyAnswer(answers, questionId, value);
+
+    if (editing) {
+      setAnswers(nextAnswers);
+      submitAndNavigate(withDefaults(nextAnswers));
+      return;
+    }
 
     trackQuizStep({
       stepNumber,
@@ -151,7 +180,7 @@ export default function QuizPage() {
       <SiteHeader active="quiz" showPromo={false} showPromoMenu />
 
       <section ref={quizContentRef} className="mx-auto w-full max-w-3xl scroll-mt-20 px-4 pb-8 pt-4 sm:px-8 sm:pt-8">
-        {currentIndex === 0 && (
+        {currentIndex === 0 && !editing && (
           <div className="mb-3">
             <h1 className="text-xl font-bold tracking-tight text-black sm:text-4xl">Trampoline quiz</h1>
             <p className="mt-0.5 text-sm text-black/60 sm:mt-2 sm:text-base">Answer 6 questions and get 3 suitable trampolines.</p>
@@ -162,14 +191,20 @@ export default function QuizPage() {
         )}
 
         {/* Progress */}
-        <div className="mb-3 flex items-center gap-3">
-          <div className="whitespace-nowrap text-xs font-semibold tabular-nums text-black/55">
-            Question {stepNumber} of {questions.length}
+        {editing ? (
+          <p className="mb-3 text-xs font-semibold text-black/55">
+            Change this answer to update your results.
+          </p>
+        ) : (
+          <div className="mb-3 flex items-center gap-3">
+            <div className="whitespace-nowrap text-xs font-semibold tabular-nums text-black/55">
+              Question {stepNumber} of {questions.length}
+            </div>
+            <div className="flex-1">
+              <ProgressBar value={progress} />
+            </div>
           </div>
-          <div className="flex-1">
-            <ProgressBar value={progress} />
-          </div>
-        </div>
+        )}
 
         <div
           key={currentQuestion.id}
@@ -183,7 +218,18 @@ export default function QuizPage() {
           />
         </div>
 
-        {currentIndex > 0 && (
+        {editing && (
+          <div className="mt-4 border-t border-black/[0.06] pt-4">
+            <Link
+              href={`/results/?${encodeAnswers(withDefaults(answers))}`}
+              className="text-sm font-medium text-black/45 transition-colors hover:text-black"
+            >
+              ← Back to your results
+            </Link>
+          </div>
+        )}
+
+        {currentIndex > 0 && !editing && (
           <div className="mt-4 border-t border-black/[0.06] pt-4">
             <button
               type="button"

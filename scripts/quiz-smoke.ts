@@ -15,12 +15,14 @@ import {
   parseAnswers,
   resolveTrampolineForAnswers,
   scoreSize,
+  scoreUsers,
   selectMatchReasons,
   shapeChoices,
   springChoices,
   standardsChoices,
   type QuizAnswers,
   type ScoredTrampoline,
+  modelKey,
 } from '@/lib/scoring';
 import { compareMatchers, getEligibleTrampolines, trampolines, type Trampoline } from '@/lib/trampolines';
 
@@ -165,8 +167,12 @@ assert.ok(
 );
 
 const middleRound = top({ ...baseAnswers, ages: '8-12', shape: 'round', budget: ['1000-1500'] });
-assert.equal(middleRound[0]?.springType, 'traditional', 'Kids 8–12 must get a spring trampoline first');
-assert.ok(middleRound[0]?.advancedSafety, 'Kids 8–12 must get a spring trampoline with a safety design first');
+assert.ok(middleRound[0]?.advancedSafety, 'Kids 8–12 must get a safety design first');
+assert.equal(
+  scoreUsers(requireQuizModel('springfree-medium-round'), '8-12'),
+  scoreUsers(requireQuizModel('vuly-ultra-2'), '8-12'),
+  'Kids 8–12 must not mark a springless safety design below a spring one',
+);
 
 const teensLarge = top({ ...baseAnswers, backyardSize: 'large', ages: 'teens' });
 assert.ok(
@@ -197,9 +203,16 @@ assert.ok(
 );
 assert.ok(scoreSize(hero12, 'large', '1-2') > 0, 'A medium trampoline still fits a large yard');
 assert.ok(scoreSize(hero15, 'small', '1-2') <= -100, 'A 15ft must never be shown for a small yard');
-assert.ok(
-  scoreSize(requireQuizModel('springfree-mini-round'), 'large', '3-plus') <= -100,
-  'A small-only trampoline is out for 3+ jumpers in a large yard',
+for (const yard of backyardSizes) {
+  assert.ok(
+    scoreSize(requireQuizModel('springfree-mini-round'), yard, '3-plus') <= -100,
+    `A 6ft trampoline is out for 3+ jumpers (${yard} yard)`,
+  );
+}
+assert.equal(
+  scoreSize(requireQuizModel('jumpflex-mega-19ft'), 'not-sure', 'not-sure'),
+  scoreSize(requireQuizModel('jumpflex-hero-12ft'), 'not-sure', 'not-sure'),
+  '"Not sure" on yard size must show all sizes',
 );
 
 const oneKidLarge = top({ ...baseAnswers, backyardSize: 'large', ages: 'mixed', jumpers: '1-2' });
@@ -306,6 +319,7 @@ for (const country of ['AU', 'US'] as const) {
             assert.ok(results.length <= 3, `${label}: at most 3 results`);
             if (country === 'AU') assert.equal(results.length, 3, `${label}: AU always gets 3 results`);
             assert.equal(new Set(results.map((result) => result.id)).size, results.length, `${label}: no duplicates`);
+            assert.equal(new Set(results.map(modelKey)).size, results.length, `${label}: each model appears once, not in two sizes`);
 
             for (const result of results) {
               assert.ok(pool.has(result.id), `${label}: ${result.id} must be sold in ${country}`);
@@ -322,7 +336,13 @@ for (const country of ['AU', 'US'] as const) {
               }
               if (backyardSize === 'small') assert.ok(result.fitsYard.small, `${label}: ${result.slug} too big`);
               if (backyardSize === 'medium') assert.ok(result.fitsYard.small || result.fitsYard.medium, `${label}: ${result.slug} too big`);
-              assert.ok(selectMatchReasons(result, answers, country).length > 0 || backyardSize === 'not-sure', `${label}: reasons`);
+              assert.ok(selectMatchReasons(result, answers, country).length > 0, `${label}: ${result.slug} reasons`);
+              if (jumpers === '3-plus') {
+                assert.ok(
+                  Math.max(...result.sizes) >= (backyardSize === 'small' ? 8 : 9),
+                  `${label}: ${result.slug} is too small for 3+ jumpers`,
+                );
+              }
               if (springType !== 'not-sure' && result.springType !== springType) {
                 assert.ok(notes.some((note) => /springs|Springless/.test(note)), `${label}: ${result.slug} spring miss must be labelled`);
               }
@@ -330,6 +350,11 @@ for (const country of ['AU', 'US'] as const) {
               if (standards === 'yes') {
                 assert.ok(country === 'US' ? result.meetsUSStandards : result.meetsAUStandards, `${label}: ${result.slug} standard`);
               }
+            }
+
+            // Full matches lead, highest score first; labelled close matches follow.
+            for (let index = 1; index < results.length && !results[index].closeMatch; index += 1) {
+              assert.ok(results[index - 1].rawScore >= results[index].rawScore, `${label}: results must be in score order`);
             }
 
             if (results.length === 0) empty.push(label);
