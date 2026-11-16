@@ -4,12 +4,14 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import remarkGfm from 'remark-gfm';
-import { getAllSlugs, getPost, getRelatedPosts, formatDate } from '@/lib/content';
-import { comparePageHref, getComparisonsForArticle } from '@/lib/comparePages';
+import { getAllSlugs, getPost, getRelatedPosts, formatDate, type RelatedEntry } from '@/lib/content';
+import { comparePageHref, getComparePages, getComparisonsForArticle } from '@/lib/comparePages';
+import { getCurrentMonthYear } from '@/lib/monthYear';
 import PostCard from '@/components/PostCard';
 import ArticleQuizCta from '@/components/ArticleQuizCta';
 import JsonLd from '@/components/compare/JsonLd';
-import RelatedComparisons from '@/components/compare/RelatedComparisons';
+import RelatedComparisons, { type RelatedLink } from '@/components/compare/RelatedComparisons';
+import MonthYear from '@/components/MonthYear';
 import SmartLink from '@/components/SmartLink';
 import YouTubeEmbed from '@/components/YouTubeEmbed';
 
@@ -21,17 +23,22 @@ const QUIZ_BLOCK_RE =
   /### Take the Quiz\s+Our Trampoline Quiz guides you through the key decisions you should make when choosing a trampoline and recommends the best options based on your preferences\.\s+\[Take the Quiz\]\(\/quiz\/?\)/gi;
 const MONTHLY_DEALS_SLUG = 'trampoline-deals-sales';
 
-function getCurrentMonthYear(): string {
-  return new Intl.DateTimeFormat('en-AU', {
-    month: 'long',
-    year: 'numeric',
-    timeZone: 'Australia/Melbourne',
-  }).format(new Date());
-}
-
 function getDisplayTitle(post: { slug: string; title: string }): string {
   if (post.slug !== MONTHLY_DEALS_SLUG) return post.title;
   return `${post.title} - ${getCurrentMonthYear()}`;
+}
+
+/** Resolves a post's hand-picked related entries to links, dropping any that no longer exist. */
+function resolveRelated(entries: RelatedEntry[]): RelatedLink[] {
+  const comparePages = getComparePages();
+  return entries.flatMap((entry): RelatedLink[] => {
+    if (typeof entry !== 'string') return entry.href && entry.label ? [entry] : [];
+    // A compare page supersedes a blog post with the same slug, so check it first.
+    const page = comparePages.find((p) => p.slug === entry);
+    if (page) return [{ href: comparePageHref(page.slug), label: page.title }];
+    const post = getPost(entry);
+    return post ? [{ href: `/${post.slug}/`, label: post.title }] : [];
+  });
 }
 
 function processContent(content: string): {
@@ -102,11 +109,13 @@ export default async function PostPage(
   const post = getPost(slug);
   if (!post) notFound();
 
-  const related = getRelatedPosts(slug, post.category, 3);
-  const comparisons = getComparisonsForArticle(slug, post.title, post.content).map((page) => ({
-    href: comparePageHref(page.slug),
-    label: page.title,
-  }));
+  const curated = resolveRelated(post.related);
+  const curatedHrefs = new Set(curated.map((link) => link.href));
+  // A hand-picked list replaces the generic latest-posts cards.
+  const related = curated.length > 0 ? [] : getRelatedPosts(slug, post.category, 3);
+  const comparisons = getComparisonsForArticle(slug, post.title, post.content)
+    .map((page) => ({ href: comparePageHref(page.slug), label: page.title }))
+    .filter((link) => !curatedHrefs.has(link.href));
   const { body, hasLeadYoutube, hasInlineQuizCta } = processContent(post.content);
   const showFeaturedImage = Boolean(post.featuredImage && !hasLeadYoutube);
   const displayTitle = getDisplayTitle(post);
@@ -223,7 +232,7 @@ export default async function PostPage(
         prose-blockquote:border-[#38b1ab] prose-blockquote:text-black/60">
         <MDXRemote
           source={body}
-          components={{ YouTubeEmbed, ArticleQuizCta, a: SmartLink }}
+          components={{ YouTubeEmbed, ArticleQuizCta, MonthYear, a: SmartLink }}
           options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
         />
       </div>
@@ -242,6 +251,8 @@ export default async function PostPage(
           </div>
         </section>
       )}
+
+      <RelatedComparisons heading="Related reading" links={curated} />
 
       <RelatedComparisons heading="Related comparisons" links={comparisons} />
     </article>

@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import { getSupersededSlugs } from '@/lib/supersededPosts';
+import { fillMonthYear } from '@/lib/monthYear';
 
 export type Category = 'reviews' | 'comparisons' | 'blog';
 
@@ -14,7 +15,10 @@ export type PostMeta = {
   featuredImage: string;
 };
 
-export type Post = PostMeta & { content: string };
+/** A hand-picked related link: a post or compare slug, or an explicit href and label. */
+export type RelatedEntry = string | { href: string; label: string };
+
+export type Post = PostMeta & { content: string; related: RelatedEntry[] };
 
 const CONTENT_DIR = path.join(process.cwd(), 'content');
 const CATEGORIES: Category[] = ['reviews', 'comparisons', 'blog'];
@@ -34,11 +38,11 @@ function readCategory(category: Category): PostMeta[] {
       const raw = fs.readFileSync(path.join(dir, filename), 'utf8');
       const { data } = matter(raw);
       return {
-        title: data.title ?? '',
+        title: fillMonthYear(data.title ?? ''),
         slug: data.slug ?? filename.replace('.mdx', ''),
         date: data.date ?? '',
         category,
-        description: data.description ?? '',
+        description: fillMonthYear(data.description ?? ''),
         featuredImage: data.featuredImage ?? '',
       } satisfies PostMeta;
     })
@@ -62,13 +66,14 @@ export function getPost(slug: string): Post | null {
       const raw = fs.readFileSync(filepath, 'utf8');
       const { data, content } = matter(raw);
       return {
-        title: data.title ?? '',
+        title: fillMonthYear(data.title ?? ''),
         slug: data.slug ?? slug,
         date: data.date ?? '',
         category: data.category ?? category,
-        description: data.description ?? '',
+        description: fillMonthYear(data.description ?? ''),
         featuredImage: data.featuredImage ?? '',
         content,
+        related: Array.isArray(data.related) ? data.related : [],
       };
     }
   }

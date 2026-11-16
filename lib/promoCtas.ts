@@ -28,7 +28,7 @@ export type BrandPromo = {
 const PROMOS: BrandPromo[] = [
   {
     brand: 'Vuly',
-    codes: ['BOUNCE15', 'BOUNCESURGE'],
+    codes: ['BOUNCE15', 'BOUNCESURGE', 'BOUNCEFREE'],
     description: 'Use code BOUNCE15 for a discount on any new Vuly trampoline, swing set or monkey bars.',
     href: 'https://www.vulyplay.com/aff/100/',
     affiliate: true,
