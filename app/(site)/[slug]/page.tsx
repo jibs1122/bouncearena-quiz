@@ -14,6 +14,7 @@ import RelatedComparisons, { type RelatedLink } from '@/components/compare/Relat
 import MonthYear from '@/components/MonthYear';
 import SmartLink from '@/components/SmartLink';
 import YouTubeEmbed from '@/components/YouTubeEmbed';
+import MdxTable from '@/components/MdxTable';
 
 export const revalidate = 86400;
 
@@ -232,7 +233,7 @@ export default async function PostPage(
         prose-blockquote:border-[#38b1ab] prose-blockquote:text-black/60">
         <MDXRemote
           source={body}
-          components={{ YouTubeEmbed, ArticleQuizCta, MonthYear, a: SmartLink }}
+          components={{ YouTubeEmbed, ArticleQuizCta, MonthYear, a: SmartLink, table: MdxTable }}
           options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
         />
       </div>

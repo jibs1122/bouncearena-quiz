@@ -6,6 +6,7 @@ import remarkGfm from 'remark-gfm';
 import ArticleQuizCta from '@/components/ArticleQuizCta';
 import BrandLogoAvatar from '@/components/BrandLogoAvatar';
 import SmartLink from '@/components/SmartLink';
+import MdxTable from '@/components/MdxTable';
 import ComparePromoCta from '@/components/compare/ComparePromoCta';
 import ComparisonTable from '@/components/compare/ComparisonTable';
 import FeaturedModels from '@/components/compare/FeaturedModels';
@@ -117,7 +118,7 @@ function Markdown({ source }: { source: string }) {
   return (
     <MDXRemote
       source={source}
-      components={{ a: SmartLink }}
+      components={{ a: SmartLink, table: MdxTable }}
       options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
     />
   );
