@@ -13,9 +13,11 @@ import { getPromoForBrand } from '@/lib/promoCtas';
 import {
   buildSummaryText,
   encodeAnswers,
+  getPartnerPick,
   getRecommendations,
   parseAnswers,
   selectMatchReasons,
+  type PartnerPick,
   type ScoredTrampoline,
   type QuizAnswers,
 } from '@/lib/scoring';
@@ -94,6 +96,12 @@ const FULL_LABEL_AT = {
   long: { short: '[@container(min-width:314px)]:hidden', full: 'hidden [@container(min-width:314px)]:inline' },
 } as const;
 
+/** Codes are AU-only, and a retailer code only works when the card links to that retailer. */
+function promoCodeFor(brand: string, href: string | null, retailerName: string, country: 'AU' | 'US'): string | null {
+  const promo = country === 'AU' && href ? getPromoForBrand(brand) : null;
+  return promo && (!promo.retailer || promo.retailer === retailerName) ? promo.codes[0] : null;
+}
+
 // ─── Result card ──────────────────────────────────────────────────────────────
 
 function ResultCard({
@@ -111,9 +119,7 @@ function ResultCard({
   const reasons = selectMatchReasons(rec, answers, country);
   const href = getLink(rec.slug, country);
   const retailerName = getLinkRetailerName(rec.slug, country) ?? rec.brand;
-  // Codes are AU-only, and a retailer code only works when this card links to that retailer.
-  const promo = country === 'AU' && href ? getPromoForBrand(rec.brand) : null;
-  const promoCode = promo && (!promo.retailer || promo.retailer === retailerName) ? promo.codes[0] : null;
+  const promoCode = promoCodeFor(rec.brand, href, retailerName, country);
   const { copiedCode, copyCode } = useCopyCode(rec.brand, `results_card_rank_${rank}`);
 
   return (
@@ -246,6 +252,110 @@ function ResultCard({
   );
 }
 
+// ─── Partner pick ─────────────────────────────────────────────────────────────
+
+function PartnerCard({ pick, country }: { pick: PartnerPick; country: 'AU' | 'US' }) {
+  const rec = pick.entry;
+  const href = getLink(rec.slug, country);
+  const retailerName = getLinkRetailerName(rec.slug, country) ?? rec.brand;
+  const promoCode = promoCodeFor(rec.brand, href, retailerName, country);
+  const { copiedCode, copyCode } = useCopyCode(rec.brand, 'results_partner_pick');
+  if (!href) return null;
+  const rel = outboundRel(isAffiliateLink(rec.slug));
+
+  return (
+    <section aria-labelledby="results-partner" className="mt-10">
+      <h2 id="results-partner" className="text-xl font-bold tracking-tight text-black">
+        Also worth a look
+      </h2>
+      <p className="mt-1 text-sm text-black/60">A partner product that nearly made your top 3.</p>
+
+      {/* Same image size and layout as the result cards above. */}
+      <article
+        className="mt-4 overflow-hidden rounded-3xl border border-black/[0.08] bg-white"
+        style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}
+      >
+        <div className="flex flex-col sm:flex-row">
+          <div className="relative flex h-44 flex-shrink-0 items-center justify-center bg-white sm:h-auto sm:w-52">
+            <a
+              href={href}
+              target="_blank"
+              rel={rel}
+              data-track-location="results_partner_pick_image"
+              data-track-label={`${rec.brand} ${rec.displayName} image`}
+              aria-label={`View ${rec.brand} ${rec.displayName} on ${retailerName}`}
+              className="absolute inset-0"
+            >
+              <ModelImage
+                brand={rec.brand}
+                model={compareMatchers[rec.slug]?.model ?? rec.displayName}
+                className="object-contain p-5"
+                sizes="(max-width: 640px) 100vw, 256px"
+              />
+            </a>
+          </div>
+
+          <div className="flex min-w-0 flex-1 flex-col p-4 sm:p-5">
+            <span className="inline-block self-start rounded-full border border-black/15 px-2.5 py-0.5 text-xs font-medium text-black/60">
+              Partner product
+            </span>
+            <h3 className="mt-2 text-lg font-bold leading-tight text-black sm:text-xl">
+              <a
+                href={href}
+                target="_blank"
+                rel={rel}
+                data-track-location="results_partner_pick_title"
+                className="transition-colors hover:text-[#38b1ab]"
+              >
+                {rec.brand} {rec.displayName}
+              </a>
+            </h3>
+            <p className="mt-1 text-xs text-black/40">
+              {rec.springType === 'springless' ? 'Springless' : 'Traditional spring'} ·{' '}
+              {rec.recommendedSizeDisplay} · From ${rec.priceFrom.toLocaleString()} AUD
+            </p>
+
+            <p className="mt-3 rounded-xl bg-black/[0.035] px-3 py-2 text-sm leading-snug text-black/60">
+              <span className="font-semibold text-black/80">Why it&rsquo;s not in your top 3:</span> {pick.whyNotTop3}
+            </p>
+
+            {pick.reasons.length > 0 && (
+              <ul className="mt-3 space-y-1.5">
+                {pick.reasons.map((reason) => (
+                  <li key={reason} className="flex items-start gap-2 text-sm leading-snug text-black/60">
+                    <span className="mt-0.5 flex-shrink-0 text-[#38b1ab]">✓</span>
+                    <span>{reason}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <div className="mt-4">
+              <a
+                href={href}
+                target="_blank"
+                rel={rel}
+                data-track-location="results_partner_pick"
+                className="flex w-full items-center justify-center gap-2 rounded-xl border-[1.5px] border-[#38b1ab] px-5 py-2.5 text-sm font-semibold text-[#278984] transition-colors hover:bg-[#38b1ab]/[0.06] active:scale-95 sm:inline-flex sm:w-auto"
+              >
+                View on {retailerName} →
+              </a>
+              {promoCode && (
+                <PromoCoupon
+                  brand={rec.brand}
+                  code={promoCode}
+                  copied={copiedCode === promoCode}
+                  onCopy={() => copyCode(promoCode)}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+  );
+}
+
 // ─── Main results component ───────────────────────────────────────────────────
 
 function ResultsContent({ linkIndex }: { linkIndex: ResultsLinkIndex }) {
@@ -266,7 +376,12 @@ function ResultsContent({ linkIndex }: { linkIndex: ResultsLinkIndex }) {
     () => (answers ? selectResultLinks(linkIndex, recommendations) : []),
     [answers, linkIndex, recommendations],
   );
-  const hasAffiliateRecommendations = recommendations.some(
+  const partnerPick = useMemo(
+    () => (answers ? getPartnerPick(answers, recommendations) : null),
+    [answers, recommendations],
+  );
+  const shownModels = partnerPick ? [...recommendations, partnerPick.entry] : recommendations;
+  const hasAffiliateRecommendations = shownModels.some(
     (rec) => isAffiliateLink(rec.slug) && getLink(rec.slug, resolvedCountry),
   );
 
@@ -375,6 +490,8 @@ function ResultsContent({ linkIndex }: { linkIndex: ResultsLinkIndex }) {
             ))}
           </div>
         )}
+
+        {partnerPick && <PartnerCard pick={partnerPick} country={resolvedCountry} />}
 
         {/* ── Related pages ── */}
         {recommendations.length > 0 && linkGroups.length > 0 && (

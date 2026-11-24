@@ -685,7 +685,7 @@ const baseTrampolines: QuizTrampolineSeed[] = [
     metricScores: { bounce: 8, durability: 9, value: 6, warranty: 8 },
     matchReasons: {
       traditional: 'Traditional piano-wire spring system',
-      shapeRectangle: 'Square 14ft mat: the straight-edged jump area you asked for, with more usable corners than a round',
+      shapeRectangle: 'Square 14ft mat: a straight-edged jump area, with more usable corners than a round',
       safetyEssential: 'Jumpflex enclosure and heavy-duty frame',
       safetyNiceToHave: 'Frame and enclosure rated for larger users',
       largeYard: '14ft square format, which needs a large open yard',
@@ -714,7 +714,7 @@ const baseTrampolines: QuizTrampolineSeed[] = [
     metricScores: { bounce: 8, durability: 9, value: 6, warranty: 8 },
     matchReasons: {
       traditional: 'Traditional spring system on a 17ft rectangle',
-      shapeRectangle: 'True 17ft rectangle: the long, straight jump lane you asked for',
+      shapeRectangle: '17ft rectangle: a long, straight jump lane',
       safetyEssential: 'Enclosure and heavy-duty frame rated for larger users',
       safetyNiceToHave: 'Enclosure net on a competition-style rectangle layout',
       largeYard: '17ft rectangle, which suits very large backyards',
@@ -826,7 +826,7 @@ const baseTrampolines: QuizTrampolineSeed[] = [
     metricScores: { bounce: 8, durability: 6, value: 7, warranty: 5 },
     matchReasons: {
       traditional: 'Rectangle spring layout offers a more directional bounce',
-      shapeRectangle: '7×10ft rectangle: the shape you asked for in a compact footprint',
+      shapeRectangle: '7×10ft rectangle: a straight-edged mat in a compact size',
       mediumYard: '7×10ft rectangle fits many medium backyards with better length use',
       largeYard: 'Rectangle footprint opens up more jumping length in a bigger yard',
       longNarrowYard: 'Rectangle format is a natural fit for long, narrow yard shapes',

@@ -1,5 +1,6 @@
 import type { Country } from '@/lib/geolocation';
 import { resolveQuizCountry } from '@/lib/geolocation';
+import { getLink } from '@/lib/links';
 import {
   compareMatchers,
   getEligibleTrampolines,
@@ -511,17 +512,18 @@ export function getRecommendations(answers: QuizAnswers): ScoredTrampoline[] {
   );
 }
 
-function getRankedMatches(answers: QuizAnswers): ScoredTrampoline[] {
+function compareFit(answers: QuizAnswers) {
+  return (a: ScoredTrampoline, b: ScoredTrampoline) =>
+    b.rawScore - a.rawScore ||
+    sizeGap(a, answers) - sizeGap(b, answers) ||
+    baseMeritScore(b) - baseMeritScore(a) ||
+    a.priceFrom - b.priceFrom;
+}
 
+function getRankedMatches(answers: QuizAnswers): ScoredTrampoline[] {
   const passing = scoreAll(answers)
     .filter((t) => t.rawScore > 0)
-    .sort(
-      (a, b) =>
-        b.rawScore - a.rawScore ||
-        sizeGap(a, answers) - sizeGap(b, answers) ||
-        baseMeritScore(b) - baseMeritScore(a) ||
-        a.priceFrom - b.priceFrom,
-    );
+    .sort(compareFit(answers));
 
   return pickWithBrandSpread(applyVulyBias(passing));
 }
@@ -612,6 +614,140 @@ function getCloseMatches(
     }));
 }
 
+// ─── Partner pick ──────────────────────────────────────────────────────────────
+
+/** A partner model is shown below the top 3 only when it scores within this of #3. */
+export const PARTNER_PICK_MARGIN = 25;
+
+export interface PartnerPick {
+  entry: ScoredTrampoline;
+  reasons: string[];
+  /** Why it ranked below the third match, as a plain sentence. */
+  whyNotTop3: string;
+}
+
+/** The order partner brands are tried in. */
+export const PARTNER_BRANDS = ['Vuly', 'GeeTramp'] as const;
+
+/**
+ * The best-fitting model from a partner brand that meets every answer and scored
+ * close to the third match. Brands that aren't in the top 3 are tried first,
+ * Vuly then GeeTramp. If neither has one, a different model from a brand already
+ * in the top 3 can take the slot, in the same order. It never changes the top 3.
+ * Australia only.
+ */
+export function getPartnerPick(answers: QuizAnswers, recs: ScoredTrampoline[]): PartnerPick | null {
+  const country = resolveQuizCountry(answers.country);
+  if (country !== 'AU' || recs.length < 3 || countSignals(answers) <= 1) return null;
+  const third = recs[2];
+  const shownBrands = new Set(recs.map((rec) => rec.brand));
+  const shownModels = new Set(recs.map(modelKey));
+
+  const eligible = scoreAll(answers)
+    .filter((trampoline) => trampoline.rawScore > 0 && scoreBudget(trampoline, answers.budget) >= 0)
+    .filter((trampoline) => third.rawScore - trampoline.rawScore <= PARTNER_PICK_MARGIN)
+    .filter((trampoline) => !shownModels.has(modelKey(trampoline)) && getLink(trampoline.slug, country))
+    .sort(compareFit(answers));
+
+  const brandOrder = [
+    ...PARTNER_BRANDS.filter((brand) => !shownBrands.has(brand)),
+    ...PARTNER_BRANDS.filter((brand) => shownBrands.has(brand)),
+  ];
+  for (const brand of brandOrder) {
+    const entry = eligible.find((trampoline) => trampoline.brand === brand);
+    if (!entry) continue;
+    // A model ranked above the third match only misses out because the top 3
+    // makes room for another brand when scores are close.
+    const heldBackByBrand = shownBrands.has(brand) && compareFit(answers)(entry, third) < 0;
+    const gap = heldBackByBrand
+      ? {
+          part: null,
+          sentence: `It scored ${entry.rawScore > third.rawScore ? 'higher than' : 'the same as'} your third match, but your top 3 already has a ${brand} and we include other brands when scores are close.`,
+        }
+      : partnerGapReason(entry, third, answers);
+    return {
+      entry,
+      // A size reason would contradict a "why" that says the size is off.
+      reasons: selectMatchReasons(entry, answers, country, { omitSize: gap.part === 'size' }),
+      whyNotTop3: gap.sentence,
+    };
+  }
+  return null;
+}
+
+/** Names the answer that cost the partner model the most points against the third match. */
+function partnerGapReason(
+  partner: ScoredTrampoline,
+  third: ScoredTrampoline,
+  answers: QuizAnswers,
+): { part: 'size' | 'users' | 'budget' | null; sentence: string } {
+  const partScores = (trampoline: Trampoline) => ({
+    size: scoreSize(trampoline, answers.backyardSize, answers.jumpers),
+    users: scoreUsers(trampoline, answers.ages),
+    shape: scoreShape(trampoline, answers.shape),
+    budget: scoreBudget(trampoline, answers.budget),
+  });
+  const ours = partScores(partner);
+  const theirs = partScores(third);
+  const biggest = (['size', 'users', 'shape', 'budget'] as const)
+    .map((part) => ({ part, gap: theirs[part] - ours[part] }))
+    .filter((item) => item.gap > 0)
+    .sort((a, b) => b.gap - a.gap)[0]?.part;
+  // With the same score on every answer, the closer size ranks first.
+  const part = biggest ?? (sizeGap(partner, answers) > sizeGap(third, answers) ? 'size' : null);
+
+  if (part === 'size') {
+    const target = targetFeet(answers.backyardSize, answers.jumpers);
+    const ft = partner.sizes.reduce((best, size) =>
+      Math.abs(size - target) < Math.abs(best - target) ? size : best,
+    );
+    const elongated = partner.shape === 'rectangle' || partner.shape === 'oval';
+    if (answers.backyardSize === 'long-narrow') {
+      if (!elongated) {
+        return {
+          part,
+          sentence: `It is ${partner.shape}, and rectangles and ovals score higher for a long, narrow backyard.`,
+        };
+      }
+      if (ft !== target) {
+        return {
+          part,
+          sentence: `It is about ${ft}ft long, and lengths closer to ${target}ft rank higher for a long, narrow backyard.`,
+        };
+      }
+    } else if (ft !== target) {
+      const size = partner.sizes.length > 1 ? `Its closest size is about ${ft}ft` : `It is about ${ft}ft${elongated ? ' long' : ''}`;
+      const basis =
+        answers.backyardSize === 'not-sure'
+          ? 'when the backyard size is not set'
+          : answers.jumpers === 'not-sure'
+            ? `for a ${yardLabel[answers.backyardSize]} backyard`
+            : `for ${answers.jumpers === '1-2' ? '1 or 2' : '3 or more'} jumpers in a ${yardLabel[answers.backyardSize]} backyard`;
+      return { part, sentence: `${size}, and sizes closer to ${target}ft rank higher ${basis}.` };
+    }
+  }
+  if (part === 'users') {
+    const who = { 'under-8': 'kids under 8', '8-12': 'kids aged 8 to 12', teens: 'teens and adults', mixed: 'a mix of ages', 'not-sure': null }[answers.ages];
+    if (answers.ages === 'under-8' && third.springType === 'springless' && partner.springType === 'traditional') {
+      return { part, sentence: 'Springless models score higher for kids under 8, and this one has traditional springs.' };
+    }
+    if (answers.ages === 'teens' && partner.shape === 'round' && (third.shape === 'rectangle' || third.shape === 'square')) {
+      return { part, sentence: 'Rectangles and squares score higher for teens and adults, and this one is round.' };
+    }
+    if (who) return { part, sentence: `It scored a little lower than your third match for ${who}.` };
+  }
+  if (part === 'budget') {
+    return { part, sentence: 'Its prices start below your budget range, and models that start within it score higher.' };
+  }
+  return {
+    part: null,
+    sentence:
+      partner.rawScore >= third.rawScore
+        ? 'It scored the same as your third match on your answers.'
+        : 'It scored a little lower than your third match on your answers.',
+  };
+}
+
 // ─── Match reason selection ────────────────────────────────────────────────────
 
 const yardLabel: Record<'small' | 'medium' | 'large', string> = {
@@ -624,6 +760,7 @@ export function selectMatchReasons(
   rec: ScoredTrampoline,
   answers: QuizAnswers,
   country: 'AU' | 'US',
+  { omitSize = false }: { omitSize?: boolean } = {},
 ): string[] {
   const reasons: string[] = [];
   const mr: MatchReasonBank = rec.matchReasons;
@@ -646,16 +783,16 @@ export function selectMatchReasons(
   if (answers.shape === 'round' && rec.shape === 'round') add(mr.shapeRound);
   else if (answers.shape === 'rectangle' && isRectangular) add(mr.shapeRectangle);
 
-  // 4. Backyard size fit (always include)
+  // 4. Backyard size fit (left out only where a partner pick says its size is off)
   const yard = answers.backyardSize;
   const hasSizeChoice = Boolean(rec.sizeOptions?.length) || rec.sizes.length > 1;
-  if (hasSizeChoice && (yard === 'small' || yard === 'medium' || yard === 'large')) {
+  if (!omitSize && hasSizeChoice && (yard === 'small' || yard === 'medium' || yard === 'large')) {
     add(
       answers.jumpers === 'not-sure'
         ? `Recommended size: ${rec.recommendedSizeDisplay} for a ${yardLabel[yard]} yard`
         : `Recommended size: ${rec.recommendedSizeDisplay} for ${answers.jumpers === '1-2' ? '1 or 2' : '3 or more'} jumpers in a ${yardLabel[yard]} yard`,
     );
-  } else {
+  } else if (!omitSize) {
     const bankReason =
       yard === 'small'
         ? mr.smallYard

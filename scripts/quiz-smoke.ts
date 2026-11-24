@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { TRAMPOLINES as COMPARE_ROWS } from '@/data/trampolines';
-import { getLink } from '@/lib/links';
+import { getLink, isAffiliateLink } from '@/lib/links';
 import { buildQuestions } from '@/lib/quiz';
 import {
   ageGroups,
@@ -10,9 +10,12 @@ import {
   buildSummaryText,
   encodeAnswers,
   getRecommendedSizeDisplay,
+  getPartnerPick,
   getRecommendations,
   jumperCounts,
   parseAnswers,
+  PARTNER_BRANDS,
+  PARTNER_PICK_MARGIN,
   resolveTrampolineForAnswers,
   scoreSize,
   scoreUsers,
@@ -281,6 +284,13 @@ assert.ok(
 );
 assert.equal(new Set(thunderReasons).size, thunderReasons.length, 'Reasons must not repeat');
 
+// Teens see the rectangle reason without choosing a shape, so it can't say they asked for one.
+for (const trampoline of trampolines) {
+  for (const reason of Object.values(trampoline.matchReasons)) {
+    assert.doesNotMatch(reason, /you asked for/i, `${trampoline.slug}: reason claims an answer the reader may not have given`);
+  }
+}
+
 // ─── URLs ─────────────────────────────────────────────────────────────────────
 
 const roundTrip: QuizAnswers = { ...baseAnswers, ages: 'teens', jumpers: '3-plus', shape: 'rectangle', budget: ['1500-2500'], springType: 'springless', standards: 'yes' };
@@ -301,6 +311,9 @@ assert.equal(parseAnswers(new URLSearchParams('country=AU&backyardSize=medium&ag
 // ─── Every answer combination ─────────────────────────────────────────────────
 
 let combinations = 0;
+const partnerCounts = new Map<string, number>();
+const partnerReasons = new Set<string>();
+let partnerRepeats = 0;
 const empty: string[] = [];
 for (const country of ['AU', 'US'] as const) {
   const pool = new Set(getEligibleTrampolines(country).map((trampoline) => trampoline.id));
@@ -357,6 +370,37 @@ for (const country of ['AU', 'US'] as const) {
               assert.ok(results[index - 1].rawScore >= results[index].rawScore, `${label}: results must be in score order`);
             }
 
+            // The partner pick sits below the top 3 and never repeats a model from it.
+            const partner = getPartnerPick(answers, results);
+            if (partner) {
+              const { entry, reasons, whyNotTop3 } = partner;
+              const shownBrands = results.map((result) => result.brand);
+              assert.ok(PARTNER_BRANDS.some((brand) => brand === entry.brand), `${label}: ${entry.brand} is not a partner`);
+              assert.equal(country, 'AU', `${label}: the partner slot is Australia only`);
+              assert.ok(!results.some((result) => modelKey(result) === modelKey(entry)), `${label}: partner model already in the top 3`);
+              if (shownBrands.includes(entry.brand)) {
+                partnerRepeats += 1;
+              } else {
+                assert.ok(entry.rawScore <= results[2].rawScore, `${label}: new-brand partner outscores the third match`);
+              }
+              assert.equal(
+                /already has a/.test(whyNotTop3),
+                shownBrands.includes(entry.brand) && (entry.rawScore > results[2].rawScore || /the same as your third match, but/.test(whyNotTop3)),
+                `${label}: brand reason only when the brand held it back`,
+              );
+              assert.ok(results[2].rawScore - entry.rawScore <= PARTNER_PICK_MARGIN, `${label}: partner is not a near miss`);
+              assert.ok(isAffiliateLink(entry.slug) && getLink(entry.slug, country), `${label}: ${entry.slug} needs a partner link`);
+              assert.ok(reasons.length > 0 && whyNotTop3, `${label}: ${entry.slug} partner copy`);
+              if (shape === 'rectangle') assert.ok(['rectangle', 'square'].includes(entry.shape), `${label}: partner shape`);
+              if (shape === 'round') assert.ok(['round', 'oval'].includes(entry.shape), `${label}: partner shape`);
+              if (springType !== 'not-sure') assert.equal(entry.springType, springType, `${label}: partner spring type`);
+              if (standards === 'yes') assert.ok(entry.meetsAUStandards, `${label}: partner standard`);
+              if (budgetId !== 'flexible') assert.ok(entry.priceFrom <= budgetRanges[budgetId][1], `${label}: partner budget`);
+              if (backyardSize === 'small') assert.ok(entry.fitsYard.small, `${label}: partner too big`);
+              partnerReasons.add(whyNotTop3);
+              const key = `${country} ${entry.brand} ${entry.displayName}`;
+              partnerCounts.set(key, (partnerCounts.get(key) ?? 0) + 1);
+            }
             if (results.length === 0) empty.push(label);
           }
           }
@@ -370,5 +414,13 @@ for (const country of ['AU', 'US'] as const) {
 const auEmpty = empty.filter((label) => label.startsWith('AU'));
 console.log(`\nChecked ${combinations} answer combinations. Empty results: ${empty.length} (AU ${auEmpty.length}).`);
 assert.equal(auEmpty.length, 0, 'Every AU answer set must return results');
+
+console.log(`\nPartner picks from a brand already in the top 3: ${partnerRepeats}`);
+console.log('Partner picks:', Object.fromEntries([...partnerCounts].sort((a, b) => b[1] - a[1])));
+console.log([...partnerReasons].sort().join('\n'));
+assert.ok(
+  PARTNER_BRANDS.every((brand) => [...partnerCounts.keys()].some((key) => key.startsWith(`AU ${brand} `))),
+  'Each partner brand must be able to fill the partner slot',
+);
 
 console.log('\nQuiz accuracy assertions passed.');
