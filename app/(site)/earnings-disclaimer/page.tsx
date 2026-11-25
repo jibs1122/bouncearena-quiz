@@ -27,9 +27,8 @@ export default function EarningsDisclaimerPage() {
           verified with the manufacturer, provider or party in question.
         </p>
         <p>
-          Bounce Arena is independently owned and the opinions expressed here are our own. All
-          editorial content is written without prejudice or bias, regardless of sponsor or affiliate
-          associations.
+          Bounce Arena is independently owned and the opinions expressed here are our own. We earn
+          commission from some of the brands we write about and not from others.
         </p>
       </div>
     </div>
